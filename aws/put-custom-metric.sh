@@ -2,6 +2,8 @@
 # Auther: electronicalias@gmail.com
 # Purpose: Put a single metric into an AWS CloudWatch Metric that can then be used for 
 #          alarms, auto-scaling or general monitoring.
+# Version: 1.0
+
 
 
 
