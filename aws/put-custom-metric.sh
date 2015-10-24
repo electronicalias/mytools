@@ -1,11 +1,8 @@
 #!/bin/bash
-# Auther: electronicalias@gmail.com
-# Purpose: Put a single metric into an AWS CloudWatch Metric that can then be used for 
-#          alarms, auto-scaling or general monitoring.
-# Version: 1.0
-
-
-
+# Author: 	electronicalias@gmail.com
+# Purpose: 	Put a single metric into an AWS CloudWatch Metric that can then be used for 
+#          	alarms, auto-scaling or general monitoring.
+# Version: 	1.0
 
 # Collect the metric that will be used in the CloudWatch Metric
 function get_metric() {
