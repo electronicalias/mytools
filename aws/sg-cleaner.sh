@@ -2,10 +2,8 @@
 # Author:       philip.smith@nordcloud.com
 # Version:      1.0
 # Script can be used to remove any instance of a security group from the source of other groups
-# Useful notation of --query command:
-# aws ec2 describe-security-groups --region eu-west-1 --query 'SecurityGroups[?IpPermissions[?UserIdGroupPairs[?GroupId=='${sg}']]].[IpPermissions[?UserIdGroupPairs[?GroupId=='${sg}']].ToPort, IpPermissions[?UserIdGroupPairs[?GroupId=='${sg}']].UserIdGroupPairs[].GroupId]' --output text
-#
-# Script expects the following variables:
+
+# Script expects the following variables, for example from string paramters in Jenkins:
 # $Region - specify the region to run the command against
 # $SecurityGroupId - value taken from the console/system/aws for a security group that you wish to remove from the source of other groups
 SgId=$(echo "\`${SecurityGroupId}\`")
