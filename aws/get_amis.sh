@@ -5,7 +5,7 @@ function get_amis() {
   aws ec2 describe-images \
     --filters \
       Name=owner-alias,Values=amazon \
-      Name=name,Values="Windows_Server-2008-SP2-English-64Bit-Base-*" \
+      Name=name,Values="Windows_Server-2008-R2_SP1-English-64Bit-Base-*" \
       Name=architecture,Values=x86_64 \
       Name=virtualization-type,Values=hvm \
       Name=root-device-type,Values=ebs \
@@ -17,6 +17,19 @@ function get_amis() {
     | head -1
 }
 
-for region in $(aws ec2 describe-regions --region eu-west-1 --query "sort(Regions[].RegionName)" --output text); do
-  echo  -e "${region} $(get_amis ${region})"
-done
+if [ -z "$1" ]; then
+  for region_name in $(aws ec2 describe-regions --region eu-west-1 --query "sort(Regions[].RegionName)" --output text); do
+    get_amis ${region_name}
+  done
+else
+  case "$1" in
+    -r|--region)
+      shift
+      region_name="$1"
+      ;;
+    *)
+      echo "usage: get_amis [-r | --region]" 1>&2
+      exit 1
+  esac
+  get_amis ${region_name}
+fi
