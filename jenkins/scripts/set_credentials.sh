@@ -1,10 +1,12 @@
 #!/bin/bash
 unset AWS_DEFAULT_REGION AWS_ACCESS_KEY_ID AWS_SECRET_KEY_ID
 source creds
-source query_function.sh
+
+ACCNUM=$(query "$params" Parameters.Account)
+ACCROLE=$(query "$params" Parameters.CrossRole)
 
 CREDS=$(aws sts assume-role \
-  --role-arn "arn:aws:iam::859009504863:role/NordcloudRole" \
+  --role-arn "arn:aws:iam::${ACCNUM}:role/${ACCROLE}" \
   --role-session-name "test" \
   --output json)
 

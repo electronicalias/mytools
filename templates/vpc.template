@@ -1,6 +1,7 @@
 {
-  "AWSTemplateFormatVersion" : "2010-09-09",
+  "AWSTemplateFormatVersion": "2010-09-09",  
   "Description" : "VPC Stack - This stack contains a VPC, Subnets, Routing Tables, Routes and an Internet Gateway. This will also create the management VPC and will peer all the VPCs together so you can manage other hosts from the MGMT Area Only.",
+  
   "Parameters" : {
     
     "Project" : {

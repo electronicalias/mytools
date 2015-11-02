@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "Company": "electronicalias",
+    "User": "Phil",
+    "BucketName": "electronicalias",
+    "Folder": "cfn",
+    "Account": "859009504863",
+    "CrossRole": "NordcloudRole"
+  },
+  "CloudFormation": {
+    "KeyName": "test-key",
+    "Project": "cru-test"
+  } 
+}

@@ -117,7 +117,7 @@
     "test" : {
         "Fn::Equals" : [ "test", { "Ref" : "StackType" } ]
     },
-    
+
     "CreateEnvs" : {
       "Fn::Or" : [
         { "Fn::Equals" : [ "qa", { "Ref" : "StackType" }]},
@@ -152,6 +152,7 @@
     },
     
     "VpcStack" : {
+      "Condition" : "test",
       "Type" : "AWS::CloudFormation::Stack",
       "Description" : "The VPC Stack.",
       "Properties" : {
