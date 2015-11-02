@@ -1,0 +1,1506 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "VPC Stack - This stack contains a VPC, Subnets, Routing Tables, Routes and an Internet Gateway. This will also create the management VPC and will peer all the VPCs together so you can manage other hosts from the MGMT Area Only.",
+  "Parameters" : {
+    
+    "Project" : {
+      "Description" : "A name/single word that is applied to all of the tags 'Name' values. Test",
+      "Type" : "String"
+    }, 
+    
+    "StackType" : {
+      "Description": "Allowed values are 'test', 'mgmt', 'dev', 'qa' or 'prd'. You must specify the stack type.",
+      "Type": "String"
+    }
+
+  },
+  
+  "Mappings" : {
+    
+    "DevCidrNet": {
+      "eu-west-1"      : { "CIDR" : "172.16.0.0/20" }   
+    },
+    
+    "QaCidrNet": {
+      "eu-west-1"      : { "CIDR" : "172.16.16.0/20" }   
+    },
+    
+    "ProdCidrNet": {
+      "eu-west-1"      : { "CIDR" : "172.16.32.0/19" }  
+    },
+    
+    "MgmtCidrNet": {
+      "eu-west-1"      : { "CIDR" : "172.16.128.0/20" }    
+    },
+    
+    "DevSubnetCidrBlock": {
+      "eu-west-1"      : { 
+        "PubNet01" 		: "172.16.0.0/24" ,
+        "PubNet02" 		: "172.16.1.0/24",
+        "PubNet03" 		: "172.16.2.0/24",
+        "PrivNet01" 	: "172.16.3.0/24",
+        "PrivNet02" 	: "172.16.4.0/24",
+        "PrivNet03" 	: "172.16.5.0/24",
+        "DmzNet01" 		: "172.16.6.0/24",
+        "DmzNet02" 		: "172.16.7.0/24",
+        "DmzNet03" 		: "172.16.8.0/24",
+        "DbNet01" 		: "172.16.9.0/24",
+        "DbNet02" 		: "172.16.10.0/24",
+        "DbNet03" 		: "172.16.11.0/24"
+      }
+    },
+      
+    "QaSubnetCidrBlock": {
+      "eu-west-1"      : {
+        "PubNet01" 		: "172.16.16.0/24" ,
+        "PubNet02" 		: "172.16.17.64/24",
+        "PubNet03" 		: "172.16.18.128/24",
+        "PrivNet01" 	: "172.16.19.0/24",
+        "PrivNet02" 	: "172.16.20.64/24",
+        "PrivNet03" 	: "172.16.21.128/24",
+        "DmzNet01" 		: "172.16.22.0/24",
+        "DmzNet02" 		: "172.16.23.64/24",
+        "DmzNet03" 		: "172.16.24.128/24",
+        "DbNet01" 		: "172.16.25.0/24",
+        "DbNet02" 		: "172.16.26.64/24",
+        "DbNet03" 		: "172.16.27.128/24"
+      }
+    },      
+      
+    "ProdSubnetCidrBlock": {
+      "eu-west-1"      : {
+        "PubNet01" 		: "172.16.32.0/23" ,
+        "PubNet02" 		: "172.16.34.0/23",
+        "PubNet03" 		: "172.16.36.0/23",
+        "PrivNet01" 	: "172.16.38.0/23",
+        "PrivNet02" 	: "172.16.40.0/23",
+        "PrivNet03" 	: "172.16.42.0/23",
+        "DmzNet01" 		: "172.16.44.0/23",
+        "DmzNet02" 		: "172.16.46.0/23",
+        "DmzNet03" 		: "172.16.48.0/23",
+        "DbNet01" 		: "172.16.50.0/23",
+        "DbNet02" 		: "172.16.52.0/23",
+        "DbNet03" 		: "172.16.54.0/23"
+      }
+    },      
+      
+    "MgmtSubnetCidrBlock": {
+      "eu-west-1"      : {
+        "PubNet01" 		: "172.16.128.0/24" ,
+        "PubNet02" 		: "172.16.129.0/24",
+        "PubNet03" 		: "172.16.130.0/24",
+        "PrivNet01" 	: "172.16.131.0/24",
+        "PrivNet02" 	: "172.16.132.0/24",
+        "PrivNet03" 	: "172.16.133.0/24",
+        "DmzNet01" 		: "172.16.134.0/24",
+        "DmzNet02" 		: "172.16.135.0/24",
+        "DmzNet03" 		: "172.16.136.0/24",
+        "DbNet01" 		: "172.16.137.0/24",
+        "DbNet02" 		: "172.16.138.0/24",
+        "DbNet03" 		: "172.16.139.0/24"
+      }
+    },
+    
+    "AvailabiltyZone": {
+      
+      "eu-west-1" : { 
+        "AZ1" : "eu-west-1a",
+        "AZ2" : "eu-west-1b",
+        "AZ3" : "eu-west-1c"
+      },
+      
+      "us-east-1" : { 
+        "AZ1" : "us-east-1a",
+        "AZ2" : "us-east-1b",
+        "AZ3" : "us-east-1c"
+      } 
+    }
+    
+  },
+  
+  "Conditions" : {
+    
+    "CreateNet3" : {
+      "Fn::Or" : [
+        { "Fn::Equals" : [ "us-east-1", { "Ref" : "AWS::Region" } ]},
+        { "Fn::Equals" : [ "us-west-2", { "Ref" : "AWS::Region" }]},
+        { "Fn::Equals" : [ "eu-west-1", { "Ref" : "AWS::Region" }]}
+      ]
+    },
+    
+    "DoNotCreateNet3" : {
+      "Fn::Not" : [ {
+        "Fn::Or" : [
+          { "Fn::Equals" : [ "us-east-1", { "Ref" : "AWS::Region" } ]},
+          { "Fn::Equals" : [ "us-west-2", { "Ref" : "AWS::Region" }]},
+          { "Fn::Equals" : [ "eu-west-1", { "Ref" : "AWS::Region" }]}
+        ]  
+      }]
+    },
+    
+    "Us" : {
+      "Fn::Equals" : [ "us-east-1", { "Ref" : "AWS::Region" } ]
+    },
+    
+    "Eu" : {
+      "Fn::Equals" : [ "eu-west-1", { "Ref" : "AWS::Region" } ]
+    },
+    
+    "dev" : {
+        "Fn::Equals" : [ "dev", { "Ref" : "StackType" } ]
+    },
+    
+    "qa" : {
+        "Fn::Equals" : [ "qa", { "Ref" : "StackType" } ]
+    },
+    
+    "prod" : {
+        "Fn::Equals" : [ "prod", { "Ref" : "StackType" } ]
+    },
+    
+    "mgmt" : {
+        "Fn::Equals" : [ "mgmt", { "Ref" : "StackType" } ]
+    },
+    
+    "CreateEnvs" : {
+      "Fn::Or" : [
+        { "Fn::Equals" : [ "prod", { "Ref" : "StackType" } ]},
+        { "Fn::Equals" : [ "qa", { "Ref" : "StackType" }]},
+        { "Fn::Equals" : [ "dev", { "Ref" : "StackType" }]}
+      ]
+    },
+    
+    "CreateMgmt" : {
+      "Fn::Or" : [
+        { "Fn::Equals" : [ "prod", { "Ref" : "StackType" } ]},
+        { "Fn::Equals" : [ "qa", { "Ref" : "StackType" }]},
+        { "Fn::Equals" : [ "dev", { "Ref" : "StackType" }]},
+        { "Fn::Equals" : [ "mgmt", { "Ref" : "StackType" }]}
+      ]
+    }
+    
+  },
+  
+  "Resources" : {
+    
+    "Vpc" : {
+      "Type" : "AWS::EC2::VPC",
+      "Properties" : {
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+                 { "Fn::FindInMap" : [ "ProdCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "EnableDnsSupport" : "true",
+        "EnableDnsHostnames" : "true",
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" },"-", { "Ref" : "StackType" }, "-vpc" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "vpc"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          }
+        ]
+      }
+    },
+    
+    "DhcpOptionSet" : {
+      "Type" : "AWS::EC2::DHCPOptions",
+      "Properties" : {
+        "DomainName" : { "Fn::Join" : ["", [ { "Ref" : "AWS::Region" }, ".compute.internal"]]},
+        "DomainNameServers" :  [ "AmazonProvidedDNS" ],
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-dhcp-options" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "dhcp-options"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          }
+        ]
+      }
+    },
+    
+    "DhcpOptionAssocation" : {
+      "Type" : "AWS::EC2::VPCDHCPOptionsAssociation",
+      "Properties" : {
+        "DhcpOptionsId" : { "Ref" : "DhcpOptionSet" },
+        "VpcId" : { "Ref" : "Vpc" }
+      }
+    },
+    
+    "InternetGateway" : {
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-internet-gateway" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "igw"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          }
+        ]
+      }
+    },
+    
+    "InternetGatewayAttachment" : {
+      "Type" : "AWS::EC2::VPCGatewayAttachment",
+      "Properties" : {
+        "VpcId" : {  "Ref" : "Vpc" },
+        "InternetGatewayId" : {  "Ref" : "InternetGateway" }
+      }
+    },
+    
+    "PublicSubnet01" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ1" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet01" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet01" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet01" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet01" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-public-net01-az01" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "public"
+          }
+        ]
+      }
+    },
+    
+    "PublicSubnet02" : { 
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ2" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet02" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet02" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet02" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet02" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-public-net02-az02" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "public"
+          }
+        ]
+      }
+    },
+    
+    "PublicSubnet03" : {
+      "Condition" : "CreateNet3",        
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ3" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet03" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet03" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet03" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PubNet03" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-public-net03-az03" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "public"
+          }
+        ]
+      }
+    },
+    
+    "PrivateSubnet01" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ1" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet01" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet01" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet01" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet01" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-private-net01-az01" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          }
+        ]
+      }
+    },
+    
+    "PrivateSubnet02" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ2" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet02" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet02" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet02" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet02" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-private-net02-az02" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          }
+        ]
+      }
+    },
+    
+    "PrivateSubnet03" : {
+      "Condition" : "CreateNet3",        
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ3" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet03" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet03" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet03" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "PrivNet03" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-private-net03-az03" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          }
+        ]
+      }
+    },
+    
+    "DmzSubnet01" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ1" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet01" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet01" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet01" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet01" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-dmz-net01-az01" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "dmz"
+          }
+        ]
+      }
+    },
+    
+    "DmzSubnet02" : {
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ2" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet02" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet02" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet02" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet02" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-dmz-net02-az02" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "dmz"
+          }
+        ]
+      }
+    },
+    
+    "DmzSubnet03" : {
+      "Condition" : "CreateNet3",      
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ3" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet03" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet03" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet03" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DmzNet03" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-dmz-net03-az03" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "dmz"
+          }
+        ]
+      }
+    },
+    
+    "DbSubnet01" : {     
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ1" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet01" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet01" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet01" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet01" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-db-net01-az01" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          }
+        ]
+      }
+    },    
+    
+    "DbSubnet02" : {     
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ2" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet02" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet02" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet02" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet02" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-db-net02-az02" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          }
+        ]
+      }
+    },
+    
+    "DbSubnet03" : {
+      "Condition" : "CreateNet3",      
+      "Type" : "AWS::EC2::Subnet",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "AvailabilityZone" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ3" ]},
+        "CidrBlock" : {
+          "Fn::If" : [
+            "dev",
+            { "Fn::FindInMap" : [ "DevSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet03" ]},
+            { "Fn::If" : [
+              "qa",
+              { "Fn::FindInMap" : [ "QaSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet03" ]},
+              { "Fn::If" : [
+                "mgmt",
+                 { "Fn::FindInMap" : [ "MgmtSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet03" ]},
+                 { "Fn::FindInMap" : [ "ProdSubnetCidrBlock", { "Ref" : "AWS::Region" }, "DbNet03" ]}
+               ]}
+            ]} 
+          ]
+        },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-db-net03-az03" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "subnet"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          }
+        ]
+      }
+    },
+    
+    "PublicRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["", 
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-public-route-table" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "route-table"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },          
+          {
+            "Key" : "NetType",
+            "Value" : "public"
+          }
+        ]
+      }
+    },
+    
+    "PrivateRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["", 
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-private-route-table" ]
+            ] }
+          },
+          {
+            "Key" : "VpnRoute",
+            "Value" : "yes"
+          },            
+          {
+            "Key" : "ResourceType",
+            "Value" : "route-table"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },            
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          }
+        ]
+      }
+    },
+    
+    "DmzRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["", 
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-dmz-route-table" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "route-table"
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "public"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },            
+          {
+            "Key" : "VpnRoute",
+            "Value" : "yes"
+          }
+        ]
+      }
+    },
+    
+    "DbRouteTable" : {
+      "Type" : "AWS::EC2::RouteTable",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["", 
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-db-route-table" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "route-table"
+          },
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },            
+          {
+            "Key" : "VpnRoute",
+            "Value" : "yes"
+          }
+        ]
+      }
+    },
+    
+    "PublicEnvVpcPeerRoute" : {
+      "Condition" : "CreateEnvs",
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PublicRouteTable" },
+        "DestinationCidrBlock" : { "Fn::FindInMap" : [ "MgmtCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+        "VpcPeeringConnectionId" : { "Ref" : "VpcPeering" }
+      }
+    },
+    
+    "PrivateEnvVpcPeerRoute" : {
+      "Condition" : "CreateEnvs",
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PrivateRouteTable" },
+        "DestinationCidrBlock" : { "Fn::FindInMap" : [ "MgmtCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+        "VpcPeeringConnectionId" : { "Ref" : "VpcPeering" }
+      }
+    },   
+    
+    "DmzEnvVpcPeerRoute" : {
+      "Condition" : "CreateEnvs",
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "DmzRouteTable" },
+        "DestinationCidrBlock" : { "Fn::FindInMap" : [ "MgmtCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+        "VpcPeeringConnectionId" : { "Ref" : "VpcPeering" }
+      }
+    },    
+    
+    "DbEnvVpcPeerRoute" : {
+      "Condition" : "CreateEnvs",
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "DbRouteTable" },
+        "DestinationCidrBlock" : { "Fn::FindInMap" : [ "MgmtCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+        "VpcPeeringConnectionId" : { "Ref" : "VpcPeering" }
+      }
+    },     
+    
+    "DmzMgmtVpcPeeringToDev" : {
+      "Condition" : "mgmt",
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "DmzRouteTable" },
+        "DestinationCidrBlock" : { "Fn::FindInMap" : [ "DevCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+        "VpcPeeringConnectionId" : "pcx-3d76b054"
+      }
+    },         
+    
+    "DmzMgmtVpcPeeringToQa" : {
+      "Condition" : "mgmt",
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "DmzRouteTable" },
+        "DestinationCidrBlock" : { "Fn::FindInMap" : [ "QaCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+        "VpcPeeringConnectionId" : "pcx-0876b061"
+      }
+    },            
+    
+    "DmzMgmtVpcPeeringToProd" : {
+      "Condition" : "mgmt",
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "DmzRouteTable" },
+        "DestinationCidrBlock" : { "Fn::FindInMap" : [ "ProdCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+        "VpcPeeringConnectionId" : "pcx-0776b06e"
+      }
+    }, 
+    
+    "PublicRoute" : {
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "PublicRouteTable" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "InternetGateway" }
+      }
+    },       
+    
+    "DmzRoute" : {
+      "Type" : "AWS::EC2::Route",
+      "Properties" : {
+        "RouteTableId" : { "Ref" : "DmzRouteTable" },
+        "DestinationCidrBlock" : "0.0.0.0/0",
+        "GatewayId" : { "Ref" : "InternetGateway" }
+      }
+    },
+    
+    "PublicSubnet01RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PublicSubnet01" },
+        "RouteTableId" : { "Ref" : "PublicRouteTable" }
+      }
+    },
+    
+    "PublicSubnet02RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PublicSubnet02" },
+        "RouteTableId" : { "Ref" : "PublicRouteTable" }
+      }
+    },
+    
+    "PublicSubnet03RouteTableAssociation" : {
+      "Condition" : "CreateNet3",
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PublicSubnet03" },
+        "RouteTableId" : { "Ref" : "PublicRouteTable" }
+      }
+    },       
+    
+    "PrivateSubnet01RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PrivateSubnet01" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTable" }
+      }
+    },
+    
+    "PrivateSubnet02RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PrivateSubnet02" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTable" }
+      }
+    },
+    
+    "PrivateSubnet03RouteTableAssociation" : {
+      "Condition" : "CreateNet3",      
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "PrivateSubnet03" },
+        "RouteTableId" : { "Ref" : "PrivateRouteTable" }
+      }
+    },          
+    
+    "DmzSubnet01RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "DmzSubnet01" },
+        "RouteTableId" : { "Ref" : "DmzRouteTable" }
+      }
+    },          
+    
+    "DmzSubnet02RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "DmzSubnet02" },
+        "RouteTableId" : { "Ref" : "DmzRouteTable" }
+      }
+    },          
+    
+    "DmzSubnet03RouteTableAssociation" : {
+      "Condition" : "CreateNet3",
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "DmzSubnet03" },
+        "RouteTableId" : { "Ref" : "DmzRouteTable" }
+      }
+    },
+    
+    "DbSubnet01RouteTableAssociation" : {
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "DbSubnet01" },
+        "RouteTableId" : { "Ref" : "DbRouteTable" }
+      }
+    },  
+    
+    "DbSubnet02RouteTableAssociation" : {   
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "DbSubnet02" },
+        "RouteTableId" : { "Ref" : "DbRouteTable" }
+      }
+    },
+    
+    "DbSubnet03RouteTableAssociation" : {
+      "Condition" : "CreateNet3",
+      "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties" : {
+        "SubnetId" : { "Ref" : "DbSubnet03" },
+        "RouteTableId" : { "Ref" : "DbRouteTable" }
+      }
+    },      
+    
+    "PublicNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["", 
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-public-nacl" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "network-acl"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },           
+          {
+            "Key" : "NetType",
+            "Value" : "public"
+          }
+        ]
+      }
+    },
+    
+    "PrivateNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["", 
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-private-nacl" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "network-acl"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },           
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          }
+        ]
+      }
+    },
+    
+    "DmzNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["", 
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-dmz-nacl" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "network-acl"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },           
+          {
+            "Key" : "NetType",
+            "Value" : "dmz"
+          }
+        ]
+      }
+    },
+    
+    "DbNetworkAcl" : {
+      "Type" : "AWS::EC2::NetworkAcl",
+      "Properties" : {
+        "VpcId" : { "Ref" : "Vpc" },
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["", 
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-db-nacl" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "network-acl"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },           
+          {
+            "Key" : "NetType",
+            "Value" : "db"
+          }
+        ]
+      }
+    },      
+    
+    "PublicSubnet01ToPublicNaclAssoc" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "PublicSubnet01" },
+   		"NetworkAclId" : { "Ref" : "PublicNetworkAcl" }
+	  }
+    },      
+    
+    "PublicSubnet02ToPublicNaclAssoc" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "PublicSubnet02" },
+   		"NetworkAclId" : { "Ref" : "PublicNetworkAcl" }
+	  }
+    },      
+    
+    "PublicSubnet03ToPublicNaclAssoc" : {
+      "Condition" : "CreateNet3",      
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "PublicSubnet03" },
+   		"NetworkAclId" : { "Ref" : "PublicNetworkAcl" }
+	  }
+    },
+    
+    "PrivateSubnet01ToPrivateNaclAssoc" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "PrivateSubnet01" },
+   		"NetworkAclId" : { "Ref" : "PrivateNetworkAcl" }
+	  }
+    },
+    
+    "PrivateSubnet02ToPrivateNaclAssoc" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "PrivateSubnet02" },
+   		"NetworkAclId" : { "Ref" : "PrivateNetworkAcl" }
+	  }
+    },
+    
+    "PrivateSubnet03ToPrivateNaclAssoc" : {
+      "Condition" : "CreateNet3",            
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "PrivateSubnet03" },
+   		"NetworkAclId" : { "Ref" : "PrivateNetworkAcl" }
+	  }
+    },        
+    
+    "DmzSubnet01ToDmzNaclAssoc" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "DmzSubnet01" },
+   		"NetworkAclId" : { "Ref" : "DmzNetworkAcl" }
+	  }
+    },        
+    
+    "DmzSubnet02ToDmzNaclAssoc" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "DmzSubnet02" },
+   		"NetworkAclId" : { "Ref" : "DmzNetworkAcl" }
+	  }
+    },        
+    
+    "DmzSubnet03ToDmzNaclAssoc" : {
+      "Condition" : "CreateNet3",
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "DmzSubnet03" },
+   		"NetworkAclId" : { "Ref" : "DmzNetworkAcl" }
+	  }
+    },
+    
+    "DbSubnet01ToDmzNaclAssoc" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "DbSubnet01" },
+   		"NetworkAclId" : { "Ref" : "DbNetworkAcl" }
+	  }
+    },
+    
+    "DbSubnet02ToDmzNaclAssoc" : {
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "DbSubnet02" },
+   		"NetworkAclId" : { "Ref" : "DbNetworkAcl" }
+	  }
+    },
+    
+    "DbSubnet03ToDmzNaclAssoc" : {
+      "Condition" : "CreateNet3",
+      "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+	  "Properties" : {
+   		"SubnetId" : { "Ref" : "DbSubnet03" },
+   		"NetworkAclId" : { "Ref" : "DbNetworkAcl" }
+	  }
+    },
+    
+    "VpcPeering" : {
+      "Condition" : "CreateEnvs",
+      "Type" : "AWS::EC2::VPCPeeringConnection",
+      "Properties" : {
+        "PeerVpcId" : "vpc-0c7aec69",
+        "Tags" : [ 
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["", 
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "vpc-peer-to-mgmt" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "network-acl"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },           
+          {
+            "Key" : "NetType",
+            "Value" : "private"
+          }
+        ],
+        "VpcId" : { "Ref" : "Vpc" }
+      }
+    } 
+       
+  },
+  
+  "Outputs" : {
+    
+    "VpcId" : {
+      "Description" : "The ID of the VPC Created by Philip Smith.",
+      "Value" : { "Ref" : "Vpc"}
+    },
+    
+    "VpcCidr" : {
+      "Description" : "The Cidr Block of the VPC in use.",
+      "Value" : {
+        "Fn::If" : [
+          "dev",
+          { "Fn::FindInMap" : [ "DevCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+          { "Fn::If" : [
+            "qa",
+            { "Fn::FindInMap" : [ "QaCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+            { "Fn::If" : [
+              "mgmt",
+               { "Fn::FindInMap" : [ "MgmtCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]},
+               { "Fn::FindInMap" : [ "ProdCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]}
+             ]}
+          ]} 
+        ]
+      }
+    },
+    
+    "MgmtCidr" : {
+      "Condition" : "CreateEnvs",
+      "Description" : "The Cidr Block of the VPC in use.",
+      "Value" : { "Fn::FindInMap" : [ "MgmtCidrNet", { "Ref" : "AWS::Region" }, "CIDR" ]}
+    },    
+    
+    "InternetGateway" : {
+      "Description" : "The Internet Gateway of the VPC Created .",
+      "Value" : { "Ref" : "InternetGateway" }
+    },
+    
+    "AvailabilityZone01" : {
+      "Description" : "The name of availability zone 1.",
+      "Value" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ1" ]}
+    },
+    
+    "AvailabilityZone02" : {
+      "Description" : "The name of availability zone 2.",
+      "Value" : { "Fn::FindInMap" : [ "AvailabiltyZone", { "Ref" : "AWS::Region" }, "AZ2" ]}
+    },     
+    
+    "PublicSubnet01" : {
+      "Description" : "The Id of the Public Subnet .",
+      "Value" : { "Ref" : "PublicSubnet01" }
+    },     
+    
+    "PublicSubnet02" : {
+      "Description" : "The Id of the Public Subnet .",
+      "Value" : { "Ref" : "PublicSubnet02" }
+    },     
+    
+    "PublicSubnet03" : {
+      "Description" : "The Id of the Public Subnet .",
+      "Value" : {
+        "Fn::If" : [
+          "DoNotCreateNet3",
+          "NONE",
+          {"Ref" : "PublicSubnet03"}
+        ]
+      }
+    },
+    
+    "PrivateSubnet01" : {
+      "Description" : "The Id of the Private Subnet .",
+      "Value" : { "Ref" : "PrivateSubnet01" }
+    },
+    
+    "PrivateSubnet02" : {
+      "Description" : "The Id of the Private Subnet .",
+      "Value" : { "Ref" : "PrivateSubnet02" }
+    },
+    
+    "PrivateSubnet03" : {
+      "Description" : "The Id of the Private Subnet .",
+      "Value" : {
+        "Fn::If" : [
+          "DoNotCreateNet3",
+          "NONE",
+          {"Ref" : "PrivateSubnet03"}
+        ]
+      }
+    },   
+    
+    "DmzSubnet01" : {     
+      "Description" : "The Id of the Dmz Subnet .",
+      "Value" : { "Ref" : "DmzSubnet01" }
+    },   
+    
+    "DmzSubnet02" : {     
+      "Description" : "The Id of the Dmz Subnet .",
+      "Value" : { "Ref" : "DmzSubnet02" }
+    },   
+    
+    "DmzSubnet03" : {     
+      "Description" : "The Id of the Dmz Subnet .",
+      "Value" : {
+        "Fn::If" : [
+          "DoNotCreateNet3",
+          "NONE",
+          {"Ref" : "DmzSubnet03"}
+        ]
+      }
+    }, 
+    
+    "DbSubnet01" : {     
+      "Description" : "The Id of the Db Subnet .",
+      "Value" : { "Ref" : "DbSubnet01" }
+    },
+    
+    "DbSubnet02" : {     
+      "Description" : "The Id of the Db Subnet .",
+      "Value" : { "Ref" : "DbSubnet02" }
+    },
+    
+    "DbSubnet03" : {     
+      "Description" : "The Id of the Db Subnet .",
+      "Value" : {
+        "Fn::If" : [
+          "DoNotCreateNet3",
+          "NONE",
+          {"Ref" : "DbSubnet03"}
+        ]
+      }
+    },        
+    
+    "PublicNetworkAcl" : {
+      "Description" : "The Id of the Public Subnet Network Acl .",
+      "Value" : { "Ref" : "PublicNetworkAcl" }
+    },
+    
+    "PrivateNetworkAcl" : {
+      "Description" : "The Id of the Private Subnet Network Acl .",
+      "Value" : { "Ref" : "PrivateNetworkAcl" }
+    },
+    
+    "DmzNetworkAcl" : {
+      "Description" : "The Id of the Dmz Subnet Network Acl .",
+      "Value" : { "Ref" : "DmzNetworkAcl" }
+    },
+    
+    "DbNetworkAcl" : {
+      "Description" : "The Id of the Private Subnet Network Acl .",
+      "Value" : { "Ref" : "DbNetworkAcl" }
+    }
+    
+  }
+}
