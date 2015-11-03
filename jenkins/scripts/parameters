@@ -13,6 +13,7 @@
     "StackType": "mgmt",
     "Peering": "false",
     "Bucket": "electronicalias",
-    "Folder": "cfn"
+    "Folder": "cfn",
+    "PublicIp": "1.1.1.1/32",
   } 
 }
