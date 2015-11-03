@@ -1,0 +1,569 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "Provision the Jenkins Instance for a customer",
+
+  "Parameters": {
+
+    "KeyName" : {
+      "Description" : "EC2 Key Pair for Jenkins Access",
+      "Type" : "String"
+    },
+
+    "Name" : {
+      "Description" : "This is the name of the Jenkins that will be deployed.",
+      "Default" : "jenkins",
+      "Type" : "String"
+    },
+
+    "PublicIp" : {
+      "Description" : "Add your public IP that you wish to connect from.",
+      "Type" : "String"
+    },
+
+    "VpcId" : {
+      "Description": "The ID of the VPC to deploy to.",
+      "Type": "String"
+    },
+
+    "StackType" : {
+      "Description": "This will always be mgmt.",
+      "Type": "String"
+    },
+
+    "Project" : {
+      "Description" : "A name/single word that is applied to all of the tags 'Name' values.",
+      "Type" : "String"
+    },
+
+    "AwsDnsPublicName01" : {
+      "Description": "This must be a route53 based domain - if you don't have one, remove this paramater",
+      "Type": "String"
+    },
+
+    "JenkinsInstanceType" : {
+      "Description" : "Instance type for Jenkins nodes.",
+      "Type" : "String",
+      "AllowedValues" : [
+        "m4.xlarge",
+        "m4.large",
+        "m4.2xlarge",
+        "t2.micro",
+        "t2.medium"
+      ],
+      "Default" : "t2.medium"
+    },
+
+    "DmzSubnet01" : {
+      "Description" : "A Dmz VPC subnet ID.",
+      "Type": "String"
+    },
+
+    "DmzSubnet02" : {
+      "Description" : "A Dmz VPC subnet ID.",
+      "Type": "String"
+    },
+
+    "PrivateSubnet01" : {
+      "Description" : "A private VPC subnet ID.",
+      "Type": "String"
+    },
+
+    "PrivateSubnet02" : {
+      "Description" : "A private VPC subnet ID.",
+      "Type": "String"
+    },
+
+    "PublicSubnet01" : {
+      "Description" : "A private VPC subnet ID.",
+      "Type": "String"
+    },
+
+    "PublicSubnet02" : {
+      "Description" : "A private VPC subnet ID.",
+      "Type": "String"
+    },
+
+    "AvailabilityZone01" : {
+      "Description" : "An availability zone in the region this is being installed in.",
+      "Type": "String"
+    },
+
+    "AvailabilityZone02" : {
+      "Description" : "An availability zone in the region this is being installed in.",
+      "Type": "String"
+    },
+
+    "PublicNetworkAcl" : {
+      "Description" : "The Id of the public network ACL.",
+      "Type" : "String"
+    },
+
+    "PrivateNetworkAcl" : {
+      "Description" : "The Id of the private network ACL.",
+      "Type" : "String"
+    },
+
+    "DmzNetworkAcl" : {
+      "Description" : "The Id of the private network ACL.",
+      "Type" : "String"
+    },
+
+    "DbNetworkAcl" : {
+      "Description" : "The Id of the private network ACL.",
+      "Type" : "String"
+    }
+
+  },
+
+  "Resources": {
+
+    "JenkinsRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [ {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [ "ec2.amazonaws.com" ]
+            },
+            "Action": [ "sts:AssumeRole" ]
+          } ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "S3GetConfig",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:*"
+                  ],
+                  "Resource": [ { "Fn::Join" : [ "", [ "arn:aws:s3:::", "bwkz-config" ] ]},
+                                { "Fn::Join" : [ "", [ "arn:aws:s3:::", "bwkz-config/*" ] ]} ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "UpdateDns",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [ {
+                "Effect": "Allow",
+                "Action": [
+                  "ec2:DescribeTags",
+                  "ec2:DescribeInstances",
+                  "route53:Get*",
+                  "route53:List*",
+                  "route53:ChangeResource*"
+                ],
+                "Resource": "*"
+              } ]
+            }
+          },
+          {
+            "PolicyName": "JenkinsManageHosts",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [ {
+                "Effect": "Allow",
+                "Action": [
+                  "ec2:*",
+                  "cloudformation:*",
+                  "autoscaling:*",
+                  "rds:*",
+                  "iam:*",
+                  "elasticloadbalancing:*"
+                ],
+                "Resource": "*"
+              } ]
+            }
+          }
+        ]
+      }
+    },
+
+    "JenkinsRoleProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [ {
+          "Ref": "JenkinsRole"
+        } ]
+      }
+    },
+
+    "DefaultPublicInboundNaclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "NetworkAclId" : { "Ref" : "PublicNetworkAcl" },
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "999"
+      }
+    },
+
+    "DefaultPublicOutboundNaclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "Egress" : "true",
+        "NetworkAclId" : { "Ref" : "PublicNetworkAcl" },
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "999"
+      }
+    },
+
+    "DefaultPrivateInboundNaclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "NetworkAclId" : { "Ref" : "PrivateNetworkAcl" },
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "999"
+      }
+    },
+
+    "DefaultPrivateOutboundNaclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "Egress" : "true",
+        "NetworkAclId" : { "Ref" : "PrivateNetworkAcl" },
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "999"
+      }
+    },
+
+    "DefaultDmzInboundNaclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "NetworkAclId" : { "Ref" : "DmzNetworkAcl" },
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "999"
+      }
+    },    
+
+    "DefaultDmzOutboundNaclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "Egress" : "true",
+        "NetworkAclId" : { "Ref" : "DmzNetworkAcl" },
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "999"
+      }
+    },
+
+    "DefaultDbInboundNaclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "NetworkAclId" : { "Ref" : "DbNetworkAcl" },
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "999"
+      }
+    },
+
+    "DefaultDbOutboundNaclEntry" : {
+      "Type" : "AWS::EC2::NetworkAclEntry",
+      "Properties" : {
+        "CidrBlock" : "0.0.0.0/0",
+        "Egress" : "true",
+        "NetworkAclId" : { "Ref" : "DbNetworkAcl" },
+        "Protocol" : "-1",
+        "RuleAction" : "allow",
+        "RuleNumber" : "999"
+      }
+    },
+
+    "JenkinsElbSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "SG that public Jenkins launch into.",
+        "VpcId": { "Ref": "VpcId" },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-jenkins-sg" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "security-group"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "GroupType",
+            "Value" : "public"
+          }
+        ]
+      }
+    },
+
+    "AccessToJenkins8080" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Properties" : {
+        "GroupId" : { "Ref" : "JenkinsElbSecurityGroup" },
+        "IpProtocol" : "tcp",
+        "FromPort" : "80",
+        "ToPort" : "80",
+        "CidrIp" : { "Ref" : "PublicIp" }
+      }
+    },
+
+    "Bitbucket01ToJenkins80" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Properties" : {
+        "GroupId" : { "Ref" : "JenkinsElbSecurityGroup" },
+        "IpProtocol" : "tcp",
+        "FromPort" : "80",
+        "ToPort" : "80",
+        "CidrIp" : "131.103.20.160/27"
+      }
+    },
+
+    "Bitbucket02ToJenkins80" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Properties" : {
+        "GroupId" : { "Ref" : "JenkinsElbSecurityGroup" },
+        "IpProtocol" : "tcp",
+        "FromPort" : "80",
+        "ToPort" : "80",
+        "CidrIp" : "165.254.145.0/26"
+      }
+    },
+
+    "Bitbucket03ToJenkins80" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Properties" : {
+        "GroupId" : { "Ref" : "JenkinsElbSecurityGroup" },
+        "IpProtocol" : "tcp",
+        "FromPort" : "80",
+        "ToPort" : "80",
+        "CidrIp" : "104.192.143.0/24"
+      }
+    },      
+
+    "JenkinsSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "SG that public Jenkins launch into.",
+        "VpcId": { "Ref": "VpcId" },
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" }, "-jenkins-sg" ]
+            ] }
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "security-group"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" }
+          },
+          {
+            "Key" : "GroupType",
+            "Value" : "public"
+          }
+        ]
+      }
+    },
+
+  "JenkinsElbToJenkins" : {
+      "Type" : "AWS::EC2::SecurityGroupIngress",
+      "Properties" : {
+        "GroupId" : { "Ref" : "JenkinsSecurityGroup" },
+        "IpProtocol" : "tcp",
+        "FromPort" : "8080",
+        "ToPort" : "8080",
+        "SourceSecurityGroupId" : { "Ref" : "JenkinsElbSecurityGroup" }
+      }
+    },
+
+    "JenkinsServerGroup" : {
+      "Type" : "AWS::AutoScaling::AutoScalingGroup",
+      "Properties" : {
+        "AvailabilityZones" : [ { "Ref" : "AvailabilityZone01" }, { "Ref" : "AvailabilityZone02" } ],
+        "LaunchConfigurationName" : { "Ref" : "JenkinsServerLaunchConfig" },
+        "LoadBalancerNames" : [ { "Ref" : "JenkinsElb" } ],
+        "MinSize" : "0",
+        "MaxSize" : "0",
+        "VPCZoneIdentifier" : [ { "Ref" : "DmzSubnet01" }, { "Ref" : "DmzSubnet02" } ],
+        "Tags" : [
+          {
+            "Key" : "Name",
+            "Value" : { "Fn::Join" : ["",
+              [ { "Ref" : "Name" } ]
+            ] },
+            "PropagateAtLaunch" : "true"
+          },
+          {
+            "Key" : "ResourceType",
+            "Value" : "ec2",
+            "PropagateAtLaunch" : "true"
+          },
+          {
+            "Key" : "HostType",
+            "Value" : "public",
+            "PropagateAtLaunch" : "true"
+          },
+          {
+            "Key" : "DnsName",
+            "Value" : "jenkins",
+            "PropagateAtLaunch" : "true"
+          },
+          {
+            "Key" : "StackType",
+            "Value" : { "Ref" : "StackType" },
+            "PropagateAtLaunch" : "true"
+          }
+        ]
+      }
+    },
+
+    "JenkinsServerLaunchConfig" : {
+      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+      "Metadata" : {
+        "AWS::CloudFormation::Init" : {
+          "comment" : "Deploy the servers.",
+          "configSets" : {
+            "ascending" : [ "InstallPackages" , "SetConfig", "ConfigureServer", "CfnHup" ],
+            "descending" : [ "CfnHup" , "ConfigureServer", "SetConfig", "InstallPackages" ]
+          },
+          "InstallPackages" : {
+            "commands" : {
+              "00-UpdatePackages" : {
+                "command" : { "Fn::Join" : ["", [
+                  "yum update -y\n"
+                ]] }
+              }
+            },
+            "packages" : {
+              "yum" : {
+                "jq" : [],
+                "puppet3" : [],
+                "git" : [],
+                "tcpdump" : []
+              }
+            }
+          },
+          "SetConfig" : {
+            "files" : {
+              "/etc/sysconfig/aws.properties" : {
+                "content" : { "Fn::Join" : ["", [
+                  "roles=jenkins\n",
+                  "hostdnsname=jenkins\n",
+                  "publicdnsname=\n",
+                  "localdnsname=n",
+                  "publicdns=no\n",
+                  "privatedns=no\n",
+                  "env=", { "Ref" : "StackType" }, "\n",
+                  "region=", { "Ref" : "AWS::Region" }, "\n",
+                  "project=", { "Ref" : "Project" }, "\n"
+                  ]]},
+                "mode"    : "000755",
+                "owner"   : "root",
+                "group"   : "root"
+              }
+            }
+          },
+          "ConfigureServer" : {
+            "commands" : {
+              "00-InstallDnsModule" : {
+                "command" : { "Fn::Join" : ["", [
+                  "\n"
+                ]] }
+              },
+              "01-SetDnsName" : {
+                "command" : { "Fn::Join" : ["", [
+                  "\n"
+                ]] }
+              }
+            }
+          },
+          "CfnHup" : {
+            "files" : {
+              "/etc/cfn/cfn-hup.conf" : {
+                "content" : { "Fn::Join" : ["", [
+                  "[main]\n",
+                  "stack=", { "Ref" : "AWS::StackName" }, "\n",
+                  "region=", { "Ref" : "AWS::Region" }, "\n",
+                  "interval=1\n"
+                ]]},
+                "mode"    : "000400",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+              "/etc/cfn/hooks.d/cfn-auto-reloader.conf" : {
+                "content": { "Fn::Join" : ["", [
+                  "[cfn-auto-reloader-hook]\n",
+                  "triggers=post.update\n",
+                  "path=Resources.JenkinsServerLaunchConfig.Metadata.AWS::CloudFormation::Init\n",
+                  "action=/opt/aws/bin/cfn-init -c ascending -v -s ",
+                    { "Ref" : "AWS::StackId" }, " -r JenkinsServerLaunchConfig ",
+                    " --region ", { "Ref" : "AWS::Region" }, "\n",
+                  "runas=root\n"
+                ]]}
+              }
+            },
+            "services" : {
+              "sysvinit" : {
+                "cfn-hup" : {
+                  "enabled" : "true",
+                  "ensureRunning" : "true",
+                  "files" : [ "/etc/cfn/cfn-hup.conf", "/etc/cfn/hooks.d/cfn-auto-reloader.conf" ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Properties" : {
+        "KeyName" : { "Ref" : "KeyName" },
+        "InstanceType" : { "Ref" : "JenkinsInstanceType" },
+        "IamInstanceProfile" : { "Ref" : "JenkinsRoleProfile" },
+        "ImageId" : "ami-4b3d1d3c",
+        "SecurityGroups" : [{ "Ref" : "JenkinsSecurityGroup" } ],
+        "AssociatePublicIpAddress" : "true",
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash -v\n",
+          "# Log Everything for debugging.",
+          "exec > >(logger -t user-data -s) 2>&1\n",
+
+          "# Run cfn-init.\n",
+          "/opt/aws/bin/cfn-init -c ascending -v -s ", { "Ref" : "AWS::StackId" }, " -r JenkinsServerLaunchConfig ",
+          "    --region ", { "Ref" : "AWS::Region" },"\n",
+
+          "# Log the last command to ensure the end of the script was reached\n",
+          "logger -t cfn-init \"The UserData script has finished!\"\n"
+        ] ] } }
+      }
+    }
+
+  },
+
+
+  "Outputs" : {
+
+  }
+}

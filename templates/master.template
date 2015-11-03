@@ -199,7 +199,7 @@
     },      
     
     "ManagementStack" : {
-      "Condition" : "CreateEnvs",      
+      "Condition" : "mgmt",      
       "Type" : "AWS::CloudFormation::Stack",
       "Description" : "Create management components like Jenkins.",
       "Properties" : {
