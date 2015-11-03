@@ -216,7 +216,7 @@
           "StackType"              	: { "Ref" : "StackType" },
           "KeyName"              		: { "Ref" : "KeyName" },
           "AwsDnsPublicName01"      : { "Ref" : "AwsDnsPublicName01" }, 
-          "PublicIp"                : { "Ref" : "publicIp" },                            
+          "PublicIp"                : { "Ref" : "PublicIp" },                            
           "VpcId"       				    : { "Fn::GetAtt" : [ "VpcStack", "Outputs.VpcId" ] },   
           "AvailabilityZone01"      : { "Fn::GetAtt" : [ "VpcStack", "Outputs.AvailabilityZone01" ] }, 
           "AvailabilityZone02"      : { "Fn::GetAtt" : [ "VpcStack", "Outputs.AvailabilityZone02" ] },                  
