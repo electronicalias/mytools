@@ -329,9 +329,7 @@
         "Parameters" : {
           "Project"              		  : { "Ref" : "Project" },
           "KeyName"              		  : { "Ref" : "KeyName" },
-          "StackType"              		: { "Ref" : "StackType" },
-          "WebInstanceType"       		: { "Ref" : "WebInstanceType" },
-          "WebserverVolumeSize"       : { "Ref" : "WebserverVolumeSize" },          
+          "StackType"              		: { "Ref" : "StackType" },        
           "AwsDnsPublicName01"        : { "Ref" : "AwsDnsPublicName01" },        
           "AwsDnsInternalName"        : { "Ref" : "AwsDnsInternalName" },                
           "EmailNotifications"    		: { "Ref" : "EmailNotifications" },           
