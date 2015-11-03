@@ -180,7 +180,7 @@
       "Description" : "Stack to create the security requirements for Brandworkz.",
       "Properties" : {
         "TemplateURL" : { "Fn::Join" : ["",
-          [ "http://s3-eu-west-1.amazonaws.com/", { "Ref" : "Bucket" } ,"/", { "Ref" : "Bucket" } ,"/security.template"]
+          [ "http://s3-eu-west-1.amazonaws.com/nordcloud-", { "Ref" : "Bucket" } ,"/", { "Ref" : "Bucket" } ,"/security.template"]
         ]},
         "Parameters" : {
           "Project"              		: { "Ref" : "Project" },
@@ -204,7 +204,7 @@
       "Description" : "Create management components like Jenkins.",
       "Properties" : {
         "TemplateURL" : { "Fn::Join" : ["",
-          [ "http://s3-eu-west-1.amazonaws.com/", { "Ref" : "Bucket" } ,"/", { "Ref" : "Bucket" } ,"/management.template"]
+          [ "http://s3-eu-west-1.amazonaws.com/nordcloud-", { "Ref" : "Bucket" } ,"/", { "Ref" : "Bucket" } ,"/management.template"]
         ]},
         "Parameters" : {
           "Project"              		: { "Ref" : "Project" },
@@ -235,7 +235,7 @@
       "Description" : "Stack to create the Services (such as NAT) needed to support the Brandworkz environment.",
       "Properties" : {
         "TemplateURL" : { "Fn::Join" : ["",
-          [ "http://s3-eu-west-1.amazonaws.com/", { "Ref" : "Bucket" } ,"/", { "Ref" : "Bucket" } ,"/services.template"]
+          [ "http://s3-eu-west-1.amazonaws.com/nordcloud-", { "Ref" : "Bucket" } ,"/", { "Ref" : "Bucket" } ,"/services.template"]
         ]},
         "Parameters" : {
           "Project"              		: { "Ref" : "Project" },
