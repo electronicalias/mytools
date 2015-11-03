@@ -11,6 +11,8 @@
     "KeyName": "test-key",
     "Project": "cru-poc",
     "StackType": "mgmt",
-    "Peering": "false"
+    "Peering": "false",
+    "Bucket": "electronicalias",
+    "Folder": "cfn"
   } 
 }
