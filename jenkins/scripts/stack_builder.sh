@@ -9,7 +9,7 @@ Peering=$(query "$params" CloudFormation.Peering)
 
 aws cloudformation create-stack \
   --stack-name ${Project} \
-  --template-url https://s3-eu-west-1.amazonaws.com/nordcloud-${bucket}/${folder}/vpc.template \
+  --template-url https://s3-eu-west-1.amazonaws.com/nordcloud-${bucket}/${folder}/master.template \
   --region eu-west-1 \
   --capabilities CAPABILITY_IAM \
   --parameters \
