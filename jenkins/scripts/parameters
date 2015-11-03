@@ -14,6 +14,6 @@
     "Peering": "false",
     "Bucket": "electronicalias",
     "Folder": "cfn",
-    "PublicIp": "1.1.1.1/32",
+    "PublicIp": "1.1.1.1/32"
   } 
 }
