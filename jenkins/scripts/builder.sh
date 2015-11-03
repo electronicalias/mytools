@@ -13,4 +13,5 @@ source get_vpc.sh
 source subnet_fetcher.sh
 
 echo -e "Creating CloudFormation Stacks..."
+source key_creator.sh $(query "${params}" CloudFormation.KeyName)
 source stack_builder.sh
