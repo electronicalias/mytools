@@ -405,7 +405,6 @@
       "Properties" : {
         "AvailabilityZones" : [ { "Ref" : "AvailabilityZone01" }, { "Ref" : "AvailabilityZone02" } ],
         "LaunchConfigurationName" : { "Ref" : "JenkinsServerLaunchConfig" },
-        "LoadBalancerNames" : [ { "Ref" : "JenkinsElb" } ],
         "MinSize" : "0",
         "MaxSize" : "0",
         "VPCZoneIdentifier" : [ { "Ref" : "DmzSubnet01" }, { "Ref" : "DmzSubnet02" } ],
