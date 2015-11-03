@@ -9,6 +9,8 @@
   },
   "CloudFormation": {
     "KeyName": "test-key",
-    "Project": "cru-test"
+    "Project": "cru-poc",
+    "StackType": "mgmt",
+    "Peering": "false"
   } 
 }

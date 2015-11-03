@@ -12,6 +12,15 @@
     "StackType" : {
       "Description": "Allowed values are 'test', 'mgmt', 'dev', 'qa' or 'prd'. You must specify the stack type.",
       "Type": "String"
+    },
+
+    "Peering" : {
+      "Description": "If this is in the intial phase of setup, then peering would fail and shouldn't be attempted.",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
     }
 
   },
@@ -120,6 +129,13 @@
   },
   
   "Conditions" : {
+
+    "Peering" : {
+      "Fn::And" : [
+        { "Fn::Equals" : [ "true", { "Ref" : "Peering" } ]},
+        { "Fn::Equals" : [ "mgmt", { "Ref" : "Peering" } ]}
+      ]
+    },
     
     "CreateNet3" : {
       "Fn::Or" : [
@@ -966,7 +982,7 @@
     },     
     
     "DmzMgmtVpcPeeringToDev" : {
-      "Condition" : "mgmt",
+      "Condition" : "Peering",
       "Type" : "AWS::EC2::Route",
       "Properties" : {
         "RouteTableId" : { "Ref" : "DmzRouteTable" },
@@ -976,7 +992,7 @@
     },         
     
     "DmzMgmtVpcPeeringToQa" : {
-      "Condition" : "mgmt",
+      "Condition" : "Peering",
       "Type" : "AWS::EC2::Route",
       "Properties" : {
         "RouteTableId" : { "Ref" : "DmzRouteTable" },
@@ -986,7 +1002,7 @@
     },            
     
     "DmzMgmtVpcPeeringToProd" : {
-      "Condition" : "mgmt",
+      "Condition" : "Peering",
       "Type" : "AWS::EC2::Route",
       "Properties" : {
         "RouteTableId" : { "Ref" : "DmzRouteTable" },
