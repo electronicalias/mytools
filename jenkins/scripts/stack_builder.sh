@@ -5,6 +5,7 @@ KeyName=$(query "$params" CloudFormation.KeyName)
 StackType=$(query "$params" CloudFormation.StackType)
 Project=$(query "$params" CloudFormation.Project)
 Peering=$(query "$params" CloudFormation.Peering)
+PublicIp=$(query "$params" CloudFormation.PublicIp)
 
 
 aws cloudformation create-stack \
@@ -18,4 +19,5 @@ aws cloudformation create-stack \
   ParameterKey=KeyName,ParameterValue=${KeyName} \
   ParameterKey=StackType,ParameterValue=${StackType} \
   ParameterKey=Project,ParameterValue=${Project} \
-  ParameterKey=Peering,ParameterValue=${Peering}
+  ParameterKey=Peering,ParameterValue=${Peering} \
+  ParameterKey=PuplicIp,ParameterValue=${PublicIp} \
