@@ -21,6 +21,11 @@
       "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
     },
     
+    "PublicIp" : {
+      "Description" : "A single IP Address from www.whatismyipaddress.com.",
+      "Type" : "String"
+    },
+    
     "Project" : {
       "Description" : "A name/single word that is applied to all of the tags 'Name' values.",
       "Type" : "String"
@@ -210,7 +215,8 @@
           "Project"              		: { "Ref" : "Project" },
           "StackType"              	: { "Ref" : "StackType" },
           "KeyName"              		: { "Ref" : "KeyName" },
-          "AwsDnsPublicName01"      : { "Ref" : "AwsDnsPublicName01" },                            
+          "AwsDnsPublicName01"      : { "Ref" : "AwsDnsPublicName01" }, 
+          "PublicIp"                : { "Ref" : "publicIp" },                            
           "VpcId"       				    : { "Fn::GetAtt" : [ "VpcStack", "Outputs.VpcId" ] },   
           "AvailabilityZone01"      : { "Fn::GetAtt" : [ "VpcStack", "Outputs.AvailabilityZone01" ] }, 
           "AvailabilityZone02"      : { "Fn::GetAtt" : [ "VpcStack", "Outputs.AvailabilityZone02" ] },                  
