@@ -20,6 +20,11 @@
       "Description" : "Add your public IP that you wish to connect from.",
       "Type" : "String"
     },
+    
+    "AmiId" : {
+      "Description" : "The Id of the latest Amazon Linux AMI for Jenkins.",
+      "Type" : "String"
+    },
 
     "VpcId" : {
       "Description": "The ID of the VPC to deploy to.",
@@ -541,7 +546,7 @@
         "KeyName" : { "Ref" : "KeyName" },
         "InstanceType" : { "Ref" : "JenkinsInstanceType" },
         "IamInstanceProfile" : { "Ref" : "JenkinsRoleProfile" },
-        "ImageId" : "ami-4b3d1d3c",
+        "ImageId" : { "Ref" : "AmiId"},
         "SecurityGroups" : [{ "Ref" : "JenkinsSecurityGroup" } ],
         "AssociatePublicIpAddress" : "true",
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
