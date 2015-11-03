@@ -164,7 +164,7 @@
       "Description" : "The VPC Stack for any StackType.",
       "Properties" : {
         "TemplateURL" : { "Fn::Join" : ["",
-          [ "http://s3-eu-west-1.amazonaws.com/", { "Ref" : "Bucket" } ,"/", { "Ref" : "Folder" } ,"/vpc.template"]
+          [ "http://s3-eu-west-1.amazonaws.com/nordcloud-", { "Ref" : "Bucket" } ,"/", { "Ref" : "Folder" } ,"/vpc.template"]
         ]},
         "Parameters" : {
           "Project"              		: { "Ref" : "Project" },
