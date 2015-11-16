@@ -55,7 +55,7 @@
         "Tags" : [ 
           {
             "Key" : "Name",
-            "Value" : { "Ref" : "Project" },
+            "Value" : { "Ref" : "Project" }
           }
         ] 
       }
