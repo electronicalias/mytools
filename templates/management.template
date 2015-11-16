@@ -15,6 +15,16 @@
       "Default" : "jenkins",
       "Type" : "String"
     },
+    
+    "Bucket" : {
+      "Description" : "The name of the bucket where templates are stored.",
+      "Type" : "String"
+    },
+    
+    "Folder" : {
+      "Description" : "The name of where the folders of the templates are.",
+      "Type" : "String"
+    },
 
     "PublicIp" : {
       "Description" : "Add your public IP that you wish to connect from.",
@@ -147,8 +157,8 @@
                   "Action": [
                     "s3:*"
                   ],
-                  "Resource": [ { "Fn::Join" : [ "", [ "arn:aws:s3:::", "bwkz-config" ] ]},
-                                { "Fn::Join" : [ "", [ "arn:aws:s3:::", "bwkz-config/*" ] ]} ]
+                  "Resource": [ { "Fn::Join" : [ "", [ "arn:aws:s3:::", { "Ref" : "Bucket" }, "" ] ]},
+                                { "Fn::Join" : [ "", [ "arn:aws:s3:::", { "Ref" : "Bucket" }, "/*" ] ]} ]
                 }
               ]
             }

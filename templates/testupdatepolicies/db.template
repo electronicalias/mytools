@@ -5,386 +5,93 @@
 
   "Parameters": {
     
-    "StackType" : {
-      "Description": "Allowed values are 'dev', 'qa' or 'prd'. You must specify the stack type.",
-      "Type": "String"
-    },
-    
     "Project" : {
       "Description" : "A name/single word that is applied to all of the tags 'Name' values.",
       "Type" : "String"
     },    
-    
-    "AwsDnsPublicName01" : {
-      "Description": "This must be a route53 based domain - if you don't have one, remove this paramater",
-      "Type": "String"
-    },
-    
-    "AwsDnsInternalName" : {
-      "Description": "This must be a route53 based domain - if you don't have one, remove this paramater",
-      "Type": "String"
-    },
-    
-    "AvailabilityZone01" : {
-      "Description" : "An availability zone in the region this is being installed in.",
-      "Type": "String"
-    }, 
-    
-    "AvailabilityZone02" : {
-      "Description" : "An availability zone in the region this is being installed in.",
-      "Type": "String"
-    },     
 
-    "DbSubnet01" : {
-      "Description" : "A private VPC subnet ID.",
+    "SubnetId01" : {
+      "Description" : "A subnet ID.",
       "Type": "String"
-    },
+    },    
 
-    "DbSubnet02" : {
-      "Description" : "A private VPC subnet ID.",
+    "SubnetId02" : {
+      "Description" : "A subnet ID.",
       "Type": "String"
-    },     
+    },    
 
-    "PublicSubnet01" : {
-      "Description" : "A Public VPC subnet ID.",
+    "VpcId" : {
+      "Description" : "ID of the VpcId",
       "Type": "String"
-    },
-
-    "PublicSubnet02" : {
-      "Description" : "A Public VPC subnet ID.",
-      "Type": "String"
-    },  
-
-    "MsSqlSecurityGroup" : {
-      "Description" : "MS SQL Security Rules.",
-      "Type" : "String"
-    },  
-
-    "MySqlSecurityGroup" : {
-      "Description" : "MySQL Security Rules.",
-      "Type" : "String"
-    },
-    
-    "MsSqlDbInstanceClass" : {
-      "Description" : "Instance type for the MsSql Database.",
-      "Type" : "String"
-    },
-
-    "MsSqlUsername" : {
-      "NoEcho": "true",
-      "Description" : "The database admin account username",
-      "Type": "String"
-    },
-
-    "MsSqlPassword" : {
-      "NoEcho": "true",
-      "Description" : "The database admin account password.",
-      "Type": "String"
-    },
-
-    "MySqlUsername" : {
-      "NoEcho": "true",
-      "Description" : "The database admin account username",
-      "Type": "String",
-      "Default": "gearman"
-    },
-
-    "MySqlPassword" : {
-      "NoEcho": "true",
-      "Description" : "The database admin account password.",
-      "Type": "String",
-      "Default": "Going2theChapel"
     }
 
   },
   
   "Conditions" : {
-    
-	"MsSqlRegion" : {
-      "Fn::Equals" : [ "eu-west-1", { "Ref" : "AWS::Region" } ]
-    },
-    
-    "CreateNet3" : {
-      "Fn::Or" : [
-        { "Fn::Equals" : [ "us-east-1", { "Ref" : "AWS::Region" } ] },
-        { "Fn::Equals" : [ "eu-west-1", { "Ref" : "AWS::Region" } ] }
-      ]
-    },
-    
-    "Eu" : {
-      "Fn::Equals" : [ "eu-west-1", { "Ref" : "AWS::Region" } ]
-    },
-    
-    "Us" : {
-      "Fn::Equals" : [ "us-east-1", { "Ref" : "AWS::Region" } ]
-    },
-    
-    "PublicRdsInstance" : {
-      "Fn::Equals" : [ "dev", { "Ref" : "StackType" } ]
-    },
-    
-    "CreateDev" : {
-      "Fn::Equals" : [ "dev", { "Ref" : "StackType" } ]
-    },
-    
-    "CreateQa" : {
-      "Fn::Equals" : [ "qa", { "Ref" : "StackType" } ]
-    },
-    
-    "CreateProd" : {
-      "Fn::Equals" : [ "prod", { "Ref" : "StackType" } ]
-    }
   
   }, 
   
   "Resources": {
-    
-    "MsSqlSubnetGroup" : {
-      "Condition" : "MsSqlRegion",
-      "Type" : "AWS::RDS::DBSubnetGroup",
-      "Properties" : {
-        "DBSubnetGroupDescription" : "Subnets available for the RDS DB Instance",
-        "SubnetIds" : [ 
-          { "Fn::If" : [
-            "PublicRdsInstance",
-            { "Ref" : "PublicSubnet01"  },
-            { "Ref" : "DbSubnet01"  }
-          ]},
-          { "Fn::If" : [
-            "PublicRdsInstance",
-            { "Ref" : "PublicSubnet02"  },
-            { "Ref" : "DbSubnet02"  }
-          ]}
-        ],
-        "Tags" : [ 
-          {
-            "Key" : "Name",
-            "Value" : { "Fn::Join" : ["", 
-              [ { "Ref" : "Project" }, "-", { "Ref" : "StackType" } ,"rds-subnet-group" ]
-            ] }
-          },
-          {
-            "Key" : "ResourceType",
-            "Value" : "rds-subnet-group"
-          },
-          {
-            "Key" : "NetType",
-            "Value" : "Test"
-          }
-        ] 
-      }
-    },
-    
-    "MySqlSubnetGroup" : {
-      "Type" : "AWS::RDS::DBSubnetGroup",
-      "Properties" : {
-        "DBSubnetGroupDescription" : "Subnets available for the RDS DB Instance",
-        "SubnetIds" : [ { "Ref" : "DbSubnet01"  }, { "Ref" : "DbSubnet02" } ],
-        "Tags" : [ 
-          {
-            "Key" : "Name",
-            "Value" : { "Fn::Join" : ["", 
-              [ { "Ref" : "Project" }, "-rds-subnet-group" ]
-            ] }
-          },
-          {
-            "Key" : "ResourceType",
-            "Value" : "rds-subnet-group"
-          },
-          {
-            "Key" : "NetType",
-            "Value" : "private"
-          }
-        ] 
-      }
-    },
-    
-    "MsSqlDbInstance" : {
-      "Condition" : "MsSqlRegion",      
-      "Type": "AWS::RDS::DBInstance",
+
+    "DbSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "DBInstanceIdentifier" : { "Fn::Join" : ["", 
-          [ { "Ref" : "StackType" }, "-rds" ]
-        ] },
-        "Engine" : {
-          "Fn::If" : [
-            "CreateProd",
-            "sqlserver-se",
-            "sqlserver-ex"
-          ]
-        },
-        "PubliclyAccessible" : { "Fn::If" : [
-          "PublicRdsInstance",
-          "true",
-          "false"
-        ]},
-        "OptionGroupName" : {
-          "Fn::If" : [
-            "CreateProd",
-            "bwkz-sql-options",
-            {"Ref" : "AWS::NoValue"}
-          ]
-        },
-        "StorageType" : {
-          "Fn::If" : [
-            "CreateProd",
-            "gp2",
-            "standard"
-          ]
-        },
-        "MasterUsername" : { "Ref" : "MsSqlUsername" },
-        "MasterUserPassword" : { "Ref" : "MsSqlPassword" },
-        "LicenseModel" : {
-          "Fn::If" : [
-            "CreateProd",
-            "license-included",
-            {"Ref" : "AWS::NoValue"}
-          ]
-        },
-        "DBInstanceClass" : {
-          "Fn::If" : [
-            "CreateProd",
-            "db.m3.large",
-            { "Ref" : "MsSqlDbInstanceClass" }
-          ]
-        },
-        "AllocatedStorage"           : {
-          "Fn::If" : [
-            "CreateProd",
-            "200",
-            "20"
-          ]
-        },
-        "EngineVersion"              : "11.00.2100.60.v1",
-        "AutoMinorVersionUpgrade"    : "true",
-        "Port"                       : "1433",
-        "BackupRetentionPeriod"      : {
-          "Fn::If" : [
-            "CreateProd",
-            "10",
-            "0"
-          ]
-        },
-        "PreferredBackupWindow"      : "02:00-02:30",
-        "PreferredMaintenanceWindow" : "sun:04:00-sun:04:30",        
-        "DBSubnetGroupName"          : { "Ref" : "MsSqlSubnetGroup" },
-        "VPCSecurityGroups"          : [ { "Ref" : "MsSqlSecurityGroup" } ],
+        "GroupDescription": "SG that DB instances launch into.",
+        "VpcId": { "Ref": "VpcId" },
         "Tags" : [ 
           {
             "Key" : "Name",
-            "Value" : { "Fn::Join" : ["", 
-              [ { "Ref" : "Project" }, "-rds-mssql" ]
-            ] }
-          },         
+            "Value" : { "Ref" : "Project" }
+          }
+        ]       
+      }
+    },
+    
+    "DbSubnetGroup" : {
+      "Type" : "AWS::RDS::DBSubnetGroup",
+      "Properties" : {
+        "DBSubnetGroupDescription" : "Subnets available for the RDS DB Instance",
+        "SubnetIds" : [{ "Ref" : "SubnetId01"  }, { "Ref" : "SubnetId02" }],
+        "Tags" : [ 
           {
-            "Key" : "ResourceType",
-            "Value" : "rds-MsSql"
-          },
-          {
-            "Key" : "DbType",
-            "Value" : "test"
+            "Key" : "Name",
+            "Value" : { "Ref" : "Project" },
           }
         ] 
-      },
-      "DeletionPolicy" : "Snapshot"          
+      }
     },
     
     "MySqlDbInstance" : {    
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
         "Engine"                     : "MySQL",
-        "MasterUsername"             : { "Ref" : "MySqlUsername" },
-        "MasterUserPassword"         : { "Ref" : "MySqlPassword" },
+        "MasterUsername"             : "MyDbUser",
+        "MasterUserPassword"         : "MyDbP4sS",
         "DBInstanceClass"            : "db.t2.micro",
-        "DBSnapshotIdentifier"		 : "gearmandb-fordev",
+        "DBSnapshotIdentifier"		   : "cfn-policy-test",
         "AllocatedStorage"           : "5",
         "EngineVersion"              : "5.6.23",
         "AutoMinorVersionUpgrade"    : "true",
         "Port"                       : "3306",
         "MultiAZ"                    : "false",
-        "StorageType"				 : "gp2",
+        "StorageType"				         : "gp2",
         "BackupRetentionPeriod"      : "0",      
-        "DBSubnetGroupName"          : { "Ref" : "MySqlSubnetGroup" },
+        "DBSubnetGroupName"          : { "Ref" : "DbSubnetGroup" },
         "VPCSecurityGroups"          : [ { "Ref" : "MySqlSecurityGroup" } ],
         "Tags" : [ 
           {
             "Key" : "Name",
-            "Value" : { "Fn::Join" : ["", 
-              [ { "Ref" : "StackType" }, "-mysql-gearmandb" ]
-            ] }
-          }, 
-          {
-            "Key" : "ResourceType",
-            "Value" : "rds-mysql"
-          },
-          {
-            "Key" : "DbType",
-            "Value" : "private"
+            "Value" : { "Ref" : "Project" }
           }
         ] 
       },
       "DeletionPolicy" : "Delete"          
-    },    
-    
-    "MsSqlDns" : {
-      "Condition" : "MsSqlRegion",       
-      "Type" : "AWS::Route53::RecordSet",
-      "Properties" : {
-         "HostedZoneName" : { "Fn::Join" : [ "", 
-           [ { "Ref" : "AwsDnsInternalName" }, "."  ]
-         ]},
-         "Comment" : "DNS name for the Brandworkz RDS instance.",
-         "Name" : { "Fn::Join" : [ "", 
-           [ "rds.", { "Ref" : "StackType" }, ".", { "Ref" : "AwsDnsInternalName" }, "."  ]
-         ]},
-         "Type" : "CNAME",
-         "TTL" : "60",
-         "ResourceRecords" : [
-            { "Fn::GetAtt" : [ "MsSqlDbInstance", "Endpoint.Address" ] }
-         ]
-      }
-    },    
-    
-    "MySqlDns" : {           
-      "Type" : "AWS::Route53::RecordSet",
-      "Properties" : {
-         "HostedZoneName" : { "Fn::Join" : [ "", 
-           [ { "Ref" : "AwsDnsInternalName" }, "."  ]
-         ]},
-         "Comment" : "DNS name for the Brandworkz RDS instance.",
-         "Name" : { "Fn::Join" : [ "", 
-           [ "gearmandb.", { "Ref" : "StackType" }, ".", { "Ref" : "AwsDnsInternalName" }, "."  ]
-         ]},
-         "Type" : "CNAME",
-         "TTL" : "60",
-         "ResourceRecords" : [
-            { "Fn::GetAtt" : [ "MySqlDbInstance", "Endpoint.Address" ] }
-         ]
-      }
-    }    
+    }   
     
   },
 
 
   "Outputs" : {
-
-    "MsSqlDbInstance" : {
-      "Condition" : "MsSqlRegion",      
-      "Value" : { "Ref" : "MsSqlDbInstance" },
-      "Description" : "MsSql RDS Instance Identifier"
-    },
-            
-    "MsSqlEndpointAddress" : {
-      "Condition" : "MsSqlRegion",      
-      "Value" : { "Fn::GetAtt" : [ "MsSqlDbInstance", "Endpoint.Address" ]},
-      "Description" : "MsSql RDS Instance Address"
-    },
-
-    "MsSqlEndpointPort" : {
-      "Condition" : "MsSqlRegion",      
-      "Value" : { "Fn::GetAtt" : [ "MsSqlDbInstance", "Endpoint.Port" ]},
-      "Description" : "MsSql RDS Instance Port"
-    }
 
   }
 }
