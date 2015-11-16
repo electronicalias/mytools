@@ -1,0 +1,6 @@
+#!/bin/bash 
+unset AWS_DEFAULT_REGION AWS_ACCESS_KEY_ID AWS_SECRET_KEY_ID
+
+export AWS_ACCESS_KEY_ID=$(echo ${AKI})
+export AWS_SECRET_ACCESS_KEY=$(echo ${SAK})
+export AWS_DEFAULT_REGION=$(echo ${REGION})
