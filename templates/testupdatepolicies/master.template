@@ -1,0 +1,283 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "Generic Template for Project Kick Off.",
+  
+  "Metadata" : {
+    "LastUpdated" : "2015-Nov-02",
+    "Author" : "Philip Smith",
+    "Company" : "Nordcloud"
+  },
+
+
+  "Parameters" : {
+    
+    "KeyName" : {
+      "Description" : "EC2 Keya Pair for operations usage.",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "64",
+      "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "ConstraintDescription" : "can contain only alphanumeric characters, spaces, dashes and underscores."
+    },
+    
+    "PublicIp" : {
+      "Description" : "A single IP Address from www.whatismyipaddress.com.",
+      "Type" : "String"
+    },
+    
+    "AmiId" : {
+      "Description" : "The Id of the latest Amazon Linux AMI for Jenkins.",
+      "Type" : "String"
+    },
+    
+    "Project" : {
+      "Description" : "A name/single word that is applied to all of the tags 'Name' values.",
+      "Type" : "String"
+    },
+    
+    "Bucket" : {
+      "Description" : "The name of the bucket where templates are stored.",
+      "Type" : "String"
+    },
+    
+    "Folder" : {
+      "Description" : "The name of where the folders of the templates are.",
+      "Type" : "String"
+    },
+
+    "Peering" : {
+      "Description": "If this is in the intial phase of setup, then peering would fail and shouldn't be attempted.",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    
+    "NotificationEmail" : {
+      "Description" : "The email address notifications should be sent to.",
+      "Type" : "String",
+      "Default": "electronicalias@gmail.com"
+    },
+    
+    "StackType" : {
+      "Description": "Allowed values are 'mgmt', 'dev', 'qa' or 'prd'. You must specify the stack type.",
+      "Type": "String",
+      "AllowedValues" : [
+        "dev",
+        "qa",
+        "prod",
+        "mgmt",
+        "test"
+      ]
+    },
+    
+    "UkOfficeIp" : {
+      "Description": "This must be a valid CIDR Notation for the Uk office.",
+      "Type": "String",
+      "Default": "NONE"
+    },    
+    
+    "AwsDnsPublicName01" : {
+      "Description": "This must be a route53 based domain - if you don't have one, remove this paramater or for now specify NONE",
+      "Type": "String",
+      "Default": "NONE"
+    },    
+    
+    "AwsDnsPublicName02" : {
+      "Description": "This must be a route53 based domain - if you don't have one, remove this paramater or for now specify NONE",
+      "Type": "String",
+      "Default" : "NONE"
+    },
+    
+    "AwsDnsInternalName" : {
+      "Description": "This must be a route53 based domain - if you don't have one, remove this paramater or for now specify NONE",
+      "Type": "String",
+      "Default": "NONE"
+    },
+    
+    "NatNodeType" : {
+      "Description" : "Instance type for NAT nodes.",
+      "Type" : "String",
+      "Default" : "t2.micro",
+      "AllowedValues" : [ 
+        "t2.micro",
+        "t2.small",
+        "t2.medium",
+        "m4.medium",
+        "m4.large",
+        "m4.xlarge"
+      ],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    }
+     
+  },
+  
+  "Conditions" : {
+    
+    "dev" : {
+        "Fn::Equals" : [ "dev", { "Ref" : "StackType" } ]
+    },
+    
+    "qa" : {
+        "Fn::Equals" : [ "qa", { "Ref" : "StackType" } ]
+    },
+    
+    "prod" : {
+        "Fn::Equals" : [ "prod", { "Ref" : "StackType" } ]
+    },
+    
+    "mgmt" : {
+        "Fn::Equals" : [ "mgmt", { "Ref" : "StackType" } ]
+    },
+    
+    "test" : {
+        "Fn::Equals" : [ "test", { "Ref" : "StackType" } ]
+    },
+
+    "CreateEnvs" : {
+      "Fn::Or" : [
+        { "Fn::Equals" : [ "qa", { "Ref" : "StackType" }]},
+        { "Fn::Equals" : [ "dev", { "Ref" : "StackType" }]},
+        { "Fn::Equals" : [ "test", { "Ref" : "StackType" }]}
+      ]
+    },
+    
+    "CreateDevQaTest" : {
+      "Fn::Or" : [
+        { "Fn::Equals" : [ "qa", { "Ref" : "StackType" }]},
+        { "Fn::Equals" : [ "dev", { "Ref" : "StackType" }]}
+      ]
+    },    
+    
+    "CreateMgmt" : {
+        "Fn::Equals" : [ "mgmt", { "Ref" : "StackType" } ]
+    } 
+  
+  }, 
+  
+  "Resources" : {
+    
+    "EmailNotifications" : {
+      "Type" : "AWS::SNS::Topic",
+      "Properties" : {
+        "Subscription" : [ {
+            "Endpoint" : { "Ref" : "NotificationEmail"},
+            "Protocol" : "email"
+        } ]
+      }
+    },
+    
+    "VpcStack" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "Description" : "The VPC Stack for any StackType.",
+      "Properties" : {
+        "TemplateURL" : { "Fn::Join" : ["",
+          [ "http://s3-eu-west-1.amazonaws.com/nordcloud-", { "Ref" : "Bucket" } ,"/", { "Ref" : "Folder" } ,"/vpc.template"]
+        ]},
+        "Parameters" : {
+          "Project"              		: { "Ref" : "Project" },
+          "StackType"              	: { "Ref" : "StackType" },
+          "Peering"                 : { "Ref" : "Peering" }
+        }
+      }
+    },
+    
+    "SecurityStack" : {
+      "Condition" : "CreateEnvs",
+      "Type" : "AWS::CloudFormation::Stack",
+      "Description" : "Stack to create the security requirements for Brandworkz.",
+      "Properties" : {
+        "TemplateURL" : { "Fn::Join" : ["",
+          [ "http://s3-eu-west-1.amazonaws.com/nordcloud-", { "Ref" : "Bucket" } ,"/", { "Ref" : "Folder" } ,"/security.template"]
+        ]},
+        "Parameters" : {
+          "Project"              		: { "Ref" : "Project" },
+          "StackType"              	: { "Ref" : "StackType" },          
+          "VpcCidr"              		: { "Fn::GetAtt" : [ "VpcStack", "Outputs.VpcCidr" ]},
+          "UkOfficeIp"              : { "Ref" : "UkOfficeIp" },                            
+          "VpcId"       				    : { "Fn::GetAtt" : [ "VpcStack", "Outputs.VpcId" ] },                              
+          "MgmtCidr"       				  : { "Fn::GetAtt" : [ "VpcStack", "Outputs.MgmtCidr" ] },     
+          "PublicNetworkAcl"       	: { "Fn::GetAtt" : [ "VpcStack", "Outputs.PublicNetworkAcl" ] },
+          "PrivateNetworkAcl"       : { "Fn::GetAtt" : [ "VpcStack", "Outputs.PrivateNetworkAcl" ] },      
+          "DmzNetworkAcl"       		: { "Fn::GetAtt" : [ "VpcStack", "Outputs.DmzNetworkAcl" ] },
+          "DbNetworkAcl"       			: { "Fn::GetAtt" : [ "VpcStack", "Outputs.DbNetworkAcl" ] }   
+        }
+      },
+      "DependsOn" : "VpcStack"
+    },      
+    
+    "ManagementStack" : {
+      "Condition" : "mgmt",      
+      "Type" : "AWS::CloudFormation::Stack",
+      "Description" : "Create management components like Jenkins.",
+      "Properties" : {
+        "TemplateURL" : { "Fn::Join" : ["",
+          [ "http://s3-eu-west-1.amazonaws.com/nordcloud-", { "Ref" : "Bucket" } ,"/", { "Ref" : "Folder" } ,"/management.template"]
+        ]},
+        "Parameters" : {
+          "Project"              		: { "Ref" : "Project" },
+          "StackType"              	: { "Ref" : "StackType" },
+          "KeyName"              		: { "Ref" : "KeyName" },
+          "AwsDnsPublicName01"      : { "Ref" : "AwsDnsPublicName01" },
+          "PublicIp"                : { "Ref" : "PublicIp" },
+          "AmiId"                   : { "Ref" : "AmiId" },
+          "Bucket"                  : { "Ref" : "Bucket" },
+          "Folder"                  : { "Ref" : "Folder" },
+          "VpcId"       				    : { "Fn::GetAtt" : [ "VpcStack", "Outputs.VpcId" ] },   
+          "AvailabilityZone01"      : { "Fn::GetAtt" : [ "VpcStack", "Outputs.AvailabilityZone01" ] }, 
+          "AvailabilityZone02"      : { "Fn::GetAtt" : [ "VpcStack", "Outputs.AvailabilityZone02" ] },                  
+          "DmzSubnet01"       			: { "Fn::GetAtt" : [ "VpcStack", "Outputs.DmzSubnet01" ] },                 
+          "DmzSubnet02"       			: { "Fn::GetAtt" : [ "VpcStack", "Outputs.DmzSubnet02" ] },  
+          "PublicSubnet01"       		: { "Fn::GetAtt" : [ "VpcStack", "Outputs.PublicSubnet01" ] },
+          "PublicSubnet02"       		: { "Fn::GetAtt" : [ "VpcStack", "Outputs.PublicSubnet02" ] }, 
+          "PrivateSubnet01"       	: { "Fn::GetAtt" : [ "VpcStack", "Outputs.PrivateSubnet01" ] },
+          "PrivateSubnet02"       	: { "Fn::GetAtt" : [ "VpcStack", "Outputs.PrivateSubnet02" ] },                       
+          "PublicNetworkAcl"       	: { "Fn::GetAtt" : [ "VpcStack", "Outputs.PublicNetworkAcl" ] },
+          "PrivateNetworkAcl"       : { "Fn::GetAtt" : [ "VpcStack", "Outputs.PrivateNetworkAcl" ] },      
+          "DmzNetworkAcl"       		: { "Fn::GetAtt" : [ "VpcStack", "Outputs.DmzNetworkAcl" ] },
+          "DbNetworkAcl"       			: { "Fn::GetAtt" : [ "VpcStack", "Outputs.DbNetworkAcl" ] }   
+        }
+      },
+      "DependsOn" : "VpcStack"
+    },    
+    
+    "ServicesStack" : {
+      "Condition" : "CreateEnvs",      
+      "Type" : "AWS::CloudFormation::Stack",
+      "Description" : "Stack to create the Services (such as NAT) needed to support the Brandworkz environment.",
+      "Properties" : {
+        "TemplateURL" : { "Fn::Join" : ["",
+          [ "http://s3-eu-west-1.amazonaws.com/nordcloud-", { "Ref" : "Bucket" } ,"/", { "Ref" : "Bucket" } ,"/services.template"]
+        ]},
+        "Parameters" : {
+          "Project"              		: { "Ref" : "Project" },
+          "StackType"              	: { "Ref" : "StackType" },
+          "KeyName"              		: { "Ref" : "KeyName" },
+          "AwsDnsPublicName01"      : { "Ref" : "AwsDnsPublicName01" },       
+          "AwsDnsInternalName"      : { "Ref" : "AwsDnsInternalName" },
+          "NatNodeType"           	: { "Ref" : "NatNodeType" },              
+          "EmailNotifications"    	: { "Ref" : "EmailNotifications" },
+          "AvailabilityZone01"      : { "Fn::GetAtt" : [ "VpcStack", "Outputs.AvailabilityZone01" ] }, 
+          "AvailabilityZone02"      : { "Fn::GetAtt" : [ "VpcStack", "Outputs.AvailabilityZone02" ] },                  
+          "DmzSubnet01"       			: { "Fn::GetAtt" : [ "VpcStack", "Outputs.DmzSubnet01" ] },                 
+          "DmzSubnet02"       			: { "Fn::GetAtt" : [ "VpcStack", "Outputs.DmzSubnet02" ] },
+          "NatSecurityGroup"       	: { "Fn::GetAtt" : [ "SecurityStack", "Outputs.NatSecurityGroup" ] },         
+          "NatRoleProfile"       		: { "Fn::GetAtt" : [ "SecurityStack", "Outputs.NatRoleProfile" ] }
+        }
+      },
+      "DependsOn" : "SecurityStack"
+    }
+    
+  },
+
+  "Outputs" : {
+    
+    "VpcStackId" : {
+      "Description" : "VPC Info.",
+      "Value" : { "Ref" : "VpcStack" }
+    } 
+          
+  }
+}
