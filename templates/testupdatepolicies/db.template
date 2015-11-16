@@ -77,7 +77,7 @@
         "StorageType"				         : "gp2",
         "BackupRetentionPeriod"      : "0",      
         "DBSubnetGroupName"          : { "Ref" : "DbSubnetGroup" },
-        "VPCSecurityGroups"          : [ { "Ref" : "MySqlSecurityGroup" } ],
+        "VPCSecurityGroups"          : [ { "Ref" : "DbSecurityGroup" } ],
         "Tags" : [ 
           {
             "Key" : "Name",
