@@ -7,6 +7,11 @@ profile=sys.argv[0]
 region=sys.argv[1]
 stackName=sys.argv[2]
 
+print ("checking args")
+print profile
+print region
+print stackName
+
 cf_conn = boto.cloudformation.connect_to_region(region, profile_name=profile)
 
 
