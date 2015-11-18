@@ -25,3 +25,4 @@ def getStackResource(stackName):
 
 # Here, we query the master stack for the ID of the database stack. We pass this value into the Jenkins job to carry to the next job.
 dbstack = getStackResource(stackName)
+print ("DBStack Name is: {}".format(dbstack))
