@@ -71,7 +71,7 @@
         "AllocatedStorage"           : "5",
         "EngineVersion"              : "5.6.23",
         "AutoMinorVersionUpgrade"    : "true",
-        "Port"                       : "3306",
+        "Port"                       : "3308",
         "MultiAZ"                    : "false",
         "StorageType"				         : "gp2",
         "BackupRetentionPeriod"      : "0",      
