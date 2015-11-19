@@ -12,7 +12,7 @@ dest.server = sys.argv[6]
 
 conn = pymssql.connect(server, user, password, "InteractiveTool")
 cursor = conn.cursor()
-cursor.execute("""SELECT TABLE_NAME FROM InteractiveTool.INFORMATION_SCHEMA.Tables """)
+cursor.execute("""SELECT TABLE_NAME FROM InteractiveTool.INFORMATION_SCHEMA.Tables WHERE TABLE_TYPE='BASE TABLE'""")
 
 for row in cursor:
     filename = ("%s" % (row))
