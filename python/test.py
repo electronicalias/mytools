@@ -1,10 +1,11 @@
 import pymssql
 import os
 import subprocess
+import sys
 
-user = 'crumasterdba'
-password = '6*(HF3!um:+H'
-server = 'cru-poc-rds-db.cpqrib8hpigb.eu-west-1.rds.amazonaws.com'
+user = sys.argv[1]
+password = sys.arv[2]
+server = sys.argv[3]
 
 conn = pymssql.connect(server, user, password, "InteractiveTool")
 cursor = conn.cursor()
