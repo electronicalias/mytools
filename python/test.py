@@ -3,7 +3,7 @@ import os
 import subprocess
 
 dir = subprocess.call("bcp InteractiveTool.dbo.commodity out C:\\blah.txt -n -S WIN-AMNJ64HBK41\SQLEXPRESS -U test -P blah", shell=True)
-
+dir = subprocess.call("bcp InteractiveTool.dbo.commodity in C:\\blah.txt -n -S cru-poc-rds-db.cpqrib8hpigb.eu-west-1.rds.amazonaws.com -U crumasterdba -P 6*(HF3!um:+H", shell=True)
 user = 'crumasterdba'
 password = '6*(HF3!um:+H'
 server = 'cru-poc-rds-db.cpqrib8hpigb.eu-west-1.rds.amazonaws.com'
