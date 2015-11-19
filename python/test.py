@@ -1,4 +1,8 @@
 import pymssql
+import os
+import subprocess
+
+dir = subprocess.call("bcp InteractiveTool.dbo.commodity out C:\\blah.txt -n -S WIN-AMNJ64HBK41\SQLEXPRESS -U test -P blah", shell=True)
 
 user = 'crumasterdba'
 password = '6*(HF3!um:+H'
