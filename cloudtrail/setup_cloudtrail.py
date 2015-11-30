@@ -14,7 +14,7 @@ args = parser.parse_args()
 
 iamRoleName = 'CloudwatchLogsRole'
 snsTopicName = 'CloudtrailAlerts'
-stackName = 'cloudtrail-alarms'
+stackName = 'cloudtrail-stack'
 templateUrl = 'https://some-bucket'
 
 
@@ -60,13 +60,8 @@ def getIamRoles(iamRoleName):
 
 def getStacks(stackName):
     try:
-        stacks = cf_conn.describe_stacks(stackName)
-        if len(stacks) == 1:
-            stack = stacks[0]
-        else:
-            return False
+        stacks = cf_conn.describe_stack_resources(stackName)
     except Exception as error:
-        print("Error with getting the Stack List: ****StackTrace: {} ***".format(error))
         return (1)
 
 regions = getRegions()
@@ -74,19 +69,31 @@ topics = getSnsTopics(snsTopicName)
 roles = getIamRoles(iamRoleName)
 stacks = getStacks(stackName)
 
-print stacks
+def isStackAvailable(stacks):
+    try:
+        if stacks != 0:
+            return False
+        else:
+            return True
+    except Exception as error:
+        print("Error with getting IAM Role: ****StackTrace: {} ***".format(error))
+        return (1)
 
-for region in regions:
-    print ("Printing details for: {}".format(region.name))
-#    print topics
-#    print stacks
-
-
-
-def getstackstatus(stackname):
-    stacks = cf_conn.describe_stacks(stackname)
-    if len(stacks) == 1:
-        stack = stacks[0]
+if isStackAvailable(stacks) != False:
+    print("The stack exists, please manually delete the stack before preceding: {}".format(isStackAvailable(stacks)))
+else:
+    print("Current cloudtrail-stack status: {}".format(isStackAvailable(stacks)))
+    if getIamRoles(iamRoleName) != False:
+        print("Should be true: {}".format(getIamRoles(iamRoleName)))
     else:
-        print ("No stacks found")
-    return stack.stack_status
+        print("Current status of the IAM Role for cloudtrail cloudwatch logs: {}".format(getIamRoles(iamRoleName)))
+        if getSnsTopics(snsTopicName) != False:
+            print("SNS Topic already exists")
+        else:
+            print("Current status of the SNS Topic for cloudtrail alerts: {}".format(getSnsTopics(snsTopicName))) 
+            print "Creating cloudtrail-logs stack"
+            def createCtStack():
+                try:
+                    test
+
+
