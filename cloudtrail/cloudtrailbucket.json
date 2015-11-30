@@ -3,22 +3,32 @@
   "Description": "S3 bucket for Cloudtrail logs",
 
   "Parameters" : {
-    "BucketName" : {
-      "Description" : "Bucket name for storing Cloudtrail logs",
-      "Type" : "String"
-    },
-    
-    "TimeToExpire" : {
-      "Description" : "Expire bucket content after X days",
-      "Type" : "Number",
-      "Default" : "366"
+
+    "IamRoleInstalled" : {
+      "Description" : "Requires a true or false to identify whether an IAM role is required",
+      "Type" : "string",
+      "AllowedValues" : [
+        "True",
+        "False"]
     }
+
+    
+
+  },
+  
+  "Conditions" : {
+ 
+    "CreateIamRole" : {
+      "Fn::Equals" : [ "False", { "Ref" : "IamRoleInstalled" } ]
+    }
+
 
   },
 
   "Resources" : {
 
     "CloudwatchLogsRole" : {
+      "Condition" : "CreateIamRole",
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -34,6 +44,7 @@
     },
 
     "CloudwatchPolicy" : {
+      "Condition" : "CreateIamRole",
       "Type" : "AWS::IAM::Policy",
       "Properties" : {
         "PolicyName" : "Cloudtrail2CloudwatchLogs",
@@ -55,82 +66,6 @@
           ]
         }
       }
-    },
-
-    "S3Bucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName" : { "Ref" : "BucketName" },
-        "AccessControl" : "Private",
-        "VersioningConfiguration" : {
-          "Status" : "Enabled"
-        },
-        "LifecycleConfiguration" : {
-          "Rules" : [
-            {
-              "Id" : "expire-old-logs",
-              "ExpirationInDays" : { "Ref" : "TimeToExpire" },
-              "NoncurrentVersionExpirationInDays" : { "Ref" : "TimeToExpire" },
-              "Status" : "Enabled"
-            }
-          ]
-        }
-      }
-    },
-
-    "BucketPolicy" : {
-      "Type" : "AWS::S3::BucketPolicy",
-      "Properties" : {
-        "Bucket" : { "Ref" : "S3Bucket" },
-        "PolicyDocument" : {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Sid": "AWSCloudTrailAclCheck",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": [
-                  "arn:aws:iam::216624486486:root",
-                  "arn:aws:iam::903692715234:root",
-                  "arn:aws:iam::284668455005:root",
-                  "arn:aws:iam::035351147821:root",
-                  "arn:aws:iam::859597730677:root",
-                  "arn:aws:iam::814480443879:root",
-                  "arn:aws:iam::086441151436:root",
-                  "arn:aws:iam::388731089494:root",
-                  "arn:aws:iam::113285607260:root"
-                ]
-              },
-              "Action": "s3:GetBucketAcl",
-              "Resource": { "Fn::Join" : [ "", [ "arn:aws:s3:::", { "Ref":"S3Bucket" } ] ] }
-            },
-            {
-              "Sid": "AWSCloudTrailWrite",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": [
-                  "arn:aws:iam::216624486486:root",
-                  "arn:aws:iam::903692715234:root",
-                  "arn:aws:iam::284668455005:root",
-                  "arn:aws:iam::035351147821:root",
-                  "arn:aws:iam::859597730677:root",
-                  "arn:aws:iam::814480443879:root",
-                  "arn:aws:iam::086441151436:root",
-                  "arn:aws:iam::388731089494:root",
-                  "arn:aws:iam::113285607260:root"
-                ]
-              },
-              "Action": "s3:PutObject",
-              "Resource": { "Fn::Join" : [ "", [ "arn:aws:s3:::", { "Ref":"S3Bucket" }, "/*" ] ] },
-              "Condition": {
-                "StringEquals": {
-                  "s3:x-amz-acl": "bucket-owner-full-control"
-                }
-              }
-            }
-          ]
-        }
-      }
     }
 
   },
@@ -138,6 +73,7 @@
   "Outputs" : {
 
     "IamRole" : {
+      "Condition" : "CreateIamRole",
       "Description" : "IAM role for sending logs to Cloudwatch Logs",
       "Value" : { "Fn::GetAtt" : ["CloudwatchLogsRole", "Arn"] }
     }
