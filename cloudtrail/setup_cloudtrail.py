@@ -14,6 +14,8 @@ args = parser.parse_args()
 
 iamRoleName = 'CloudwatchLogsRole'
 snsTopicName = 'CloudtrailAlerts'
+stackName = 'CloudtrailStack'
+templateUrl = 'https://some-bucket'
 
 
 ct_conn = boto.cloudtrail.connect_to_region(args.region, profile_name=args.profile)
@@ -56,33 +58,72 @@ def getIamRoles(iamRoleName):
         print("Error with getting IAM Role: ****StackTrace: {} ***".format(error))
         return (1)
 
-regions = getRegions()
-topics = getSnsTopics(snsTopicName)
-roles = getIamRoles(iamRoleName)
+def getStacks(stackName):
+    try:
+        stacks = cf_conn.list_stacks(stack_status_filters=Active)
+    except Exception as error:
+        print("Error with getting the Stack List: ****StackTrace: {} ***".format(error))
+        return (1)
 
-print roles
+def createStack(stack_name, templateUrl, roles, topics):
+    try:
+        cf_conn.create_stack(
+               stack_name, 
+               template_url=templateUrl
+               parameters=[
+                          ('CreateRole',roles),
+                          ('CreateSNSTopic',topics)
+                          ],
+                capabilities=['CAPABILITY_IAM'],
+                tags=None
+                )
+    except Exception as error:
+        print("Couldn't create the {}: ****StackTrace: {} ****".format(stack_name,error))
+        return (1)
 
-for region in regions:
-    print ("Printing details for: {}".format(region.name))
-    print topics
-
-def updatestack(stack_name, environment, bastian_host_ami, code_base_a, code_base_a_ami, code_base_a_change, code_base_b, code_base_b_ami, code_base_b_change):
-  print("Updateing Stack")
-  cf_conn.update_stack(
+def updateStack(stack_name, roles, topics):
+    try:
+        cf_conn.update_stack(
                        stack_name,
                        use_previous_template=True,
                        parameters=[
-                                   ('Environment',environment,True),
-                                   ('AEnvWebAppAMI',code_base_a_ami,code_base_a_change),
-                                   ('BastianHostAMI',bastian_host_ami,True),
-                                   ('BEnvWebAppAMI',code_base_b_ami,code_base_b_change),
-                                   ('AEnvCodeVersion',code_base_a,code_base_a_change),
-                                   ('BEnvCodeVersion',code_base_b,code_base_b_change),
-                                   ('DatabasePassword','null',True)
+                                   ('CreateRole',roles),
+                                   ('CreateSNSTopic',topics)
                                    ],
                        capabilities=['CAPABILITY_IAM'],
                        tags=None
                        )
+    except Exception as error:
+        print("Couldn't update the {}: ****StackTrace: {} ***".format(stack_name,error))
+        return (1)
+
+def deleteStack():
+    try:
+        cf_conn.update_stack(
+                       stack_name,
+                       use_previous_template=True,
+                       parameters=[
+                                   ('CreateRole',roles),
+                                   ('CreateSNSTopic',topics)
+                                   ],
+                       capabilities=['CAPABILITY_IAM'],
+                       tags=None
+                       )
+    except Exception as error:
+        print("Couldn't delete the {}: ****StackTrace: {} ***".format(stack_name,error))
+        return (1)
+
+regions = getRegions()
+topics = getSnsTopics(snsTopicName)
+roles = getIamRoles(iamRoleName)
+stacks = getStacks(stackName)
+
+for region in regions:
+    print ("Printing details for: {}".format(region.name))
+    print topics
+    print stacks
+
+
 
 def getstackstatus(stackname):
     stacks = cf_conn.describe_stacks(stackname)
