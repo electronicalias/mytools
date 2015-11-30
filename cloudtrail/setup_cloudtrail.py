@@ -65,54 +65,6 @@ def getStacks(stackName):
         print("Error with getting the Stack List: ****StackTrace: {} ***".format(error))
         return (1)
 
-def createStack(stack_name, templateUrl, roles, topics):
-    try:
-        cf_conn.create_stack(
-               stack_name, 
-               template_url=templateUrl
-               parameters=[
-                          ('CreateRole',roles),
-                          ('CreateSNSTopic',topics)
-                          ],
-                capabilities=['CAPABILITY_IAM'],
-                tags=None
-                )
-    except Exception as error:
-        print("Couldn't create the {}: ****StackTrace: {} ****".format(stack_name,error))
-        return (1)
-
-def updateStack(stack_name, roles, topics):
-    try:
-        cf_conn.update_stack(
-                       stack_name,
-                       use_previous_template=True,
-                       parameters=[
-                                   ('CreateRole',roles),
-                                   ('CreateSNSTopic',topics)
-                                   ],
-                       capabilities=['CAPABILITY_IAM'],
-                       tags=None
-                       )
-    except Exception as error:
-        print("Couldn't update the {}: ****StackTrace: {} ***".format(stack_name,error))
-        return (1)
-
-def deleteStack():
-    try:
-        cf_conn.update_stack(
-                       stack_name,
-                       use_previous_template=True,
-                       parameters=[
-                                   ('CreateRole',roles),
-                                   ('CreateSNSTopic',topics)
-                                   ],
-                       capabilities=['CAPABILITY_IAM'],
-                       tags=None
-                       )
-    except Exception as error:
-        print("Couldn't delete the {}: ****StackTrace: {} ***".format(stack_name,error))
-        return (1)
-
 regions = getRegions()
 topics = getSnsTopics(snsTopicName)
 roles = getIamRoles(iamRoleName)
