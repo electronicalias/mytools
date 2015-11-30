@@ -14,7 +14,7 @@ args = parser.parse_args()
 
 iamRoleName = 'CloudwatchLogsRole'
 snsTopicName = 'CloudtrailAlerts'
-stackName = 'CloudtrailStack'
+stackName = 'cloudtrail-alarms'
 templateUrl = 'https://some-bucket'
 
 
@@ -23,7 +23,7 @@ logs_conn = boto.logs.connect_to_region(args.region, profile_name=args.profile)
 sns_conn = boto.sns.connect_to_region(args.region, profile_name=args.profile)
 iam_conn = boto.iam.connect_to_region(args.region, profile_name=args.profile)
 s3_conn = boto.s3.connect_to_region(args.region, profile_name=args.profile)
-cf_conn = boto.cloudformation.connect_to_region(args.region, profile_name=profile)
+cf_conn = boto.cloudformation.connect_to_region(args.region, profile_name=args.profile)
 
 def getRegions():
     try:
@@ -60,7 +60,11 @@ def getIamRoles(iamRoleName):
 
 def getStacks(stackName):
     try:
-        stacks = cf_conn.list_stacks(stack_status_filters=Active)
+        stacks = cf_conn.describe_stacks(stackName)
+        if len(stacks) == 1:
+            stack = stacks[0]
+        else:
+            return False
     except Exception as error:
         print("Error with getting the Stack List: ****StackTrace: {} ***".format(error))
         return (1)
@@ -70,10 +74,12 @@ topics = getSnsTopics(snsTopicName)
 roles = getIamRoles(iamRoleName)
 stacks = getStacks(stackName)
 
+print stacks
+
 for region in regions:
     print ("Printing details for: {}".format(region.name))
-    print topics
-    print stacks
+#    print topics
+#    print stacks
 
 
 
