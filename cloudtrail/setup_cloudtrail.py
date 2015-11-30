@@ -98,5 +98,6 @@ else:
                 except Exception as error:
                     print("Error with getting IAM Role: ****StackTrace: {} ***".format(error))
                     return (1)
+            createCtStack()
 
 
