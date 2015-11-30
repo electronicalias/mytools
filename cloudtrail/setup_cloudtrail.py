@@ -21,7 +21,7 @@ logs_conn = boto.logs.connect_to_region(args.region, profile_name=args.profile)
 sns_conn = boto.sns.connect_to_region(args.region, profile_name=args.profile)
 iam_conn = boto.iam.connect_to_region(args.region, profile_name=args.profile)
 s3_conn = boto.s3.connect_to_region(args.region, profile_name=args.profile)
-cf_conn = boto.cloudformation.connect_to_region(region, profile_name=profile)
+cf_conn = boto.cloudformation.connect_to_region(args.region, profile_name=profile)
 
 def getRegions():
     try:
