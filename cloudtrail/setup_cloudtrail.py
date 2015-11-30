@@ -94,6 +94,9 @@ else:
             print "Creating cloudtrail-logs stack"
             def createCtStack():
                 try:
-                    test
+                    print "I WOULD LOVE TO INSTALL A STACK PLEASE!"
+                except Exception as error:
+                    print("Error with getting IAM Role: ****StackTrace: {} ***".format(error))
+                    return (1)
 
 
