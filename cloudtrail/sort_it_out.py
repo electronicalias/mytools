@@ -82,7 +82,7 @@ def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_
 def getSnsTopics():
     try:
         topics = sns_conn.get_all_topics()['ListTopicsResponse']['ListTopicsResult']['Topics']
-        print topics
+        return topics.TopicArn
     except Exception as error:
         print("Error with getting SNS Topics: ****StackTrace: {} ***".format(error))
         return (1)
@@ -106,6 +106,7 @@ if args.stackAction == 'create':
         print("Waiting for the {} stack to finish creating...".format(args.alarmStackName))
         while get_stack_status(args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
+        print("{} has been successfully created.".format(args.alarmStackName))
     else:
         print "NoooooooOOOOOooOOOoOOOOo!"
 elif args.stackAction =='delete':
