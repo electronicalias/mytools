@@ -38,30 +38,53 @@
         "PolicyDocument" :  {
           "Id" : "__default_policy_ID",
           "Version" : "2012-10-17",
-          "Statement" : [ {
-            "Sid": "__default_statement_ID",
-            "Effect": "Allow",
-            "Principal": {
-              "AWS": "*"
-            },
-            "Action": [
-              "SNS:ListSubscriptionsByTopic",
-              "SNS:Subscribe",
-              "SNS:DeleteTopic",
-              "SNS:GetTopicAttributes",
-              "SNS:Publish",
-              "SNS:RemovePermission",
-              "SNS:AddPermission",
-              "SNS:Receive",
-              "SNS:SetTopicAttributes"
-            ],
-            "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts",
-            "Condition": {
-              "StringEquals": {
-                "AWS:SourceOwner": "707983519786"
+          "Statement" : [ 
+            {
+              "Sid": "__default_statement_ID",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": [
+                "SNS:ListSubscriptionsByTopic",
+                "SNS:Subscribe",
+                "SNS:DeleteTopic",
+                "SNS:GetTopicAttributes",
+                "SNS:Publish",
+                "SNS:RemovePermission",
+                "SNS:AddPermission",
+                "SNS:Receive",
+                "SNS:SetTopicAttributes"
+              ],
+              "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts",
+              "Condition": {
+                "StringEquals": {
+                  "AWS:SourceOwner": "707983519786"
+                }
               }
-            }
-          } ]
+            },
+            {
+              "Sid": "__console_pub_0",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "arn:aws:iam::707983519786:root"
+              },
+              "Action": "SNS:Publish",
+              "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts"
+            },
+            {
+              "Sid": "__console_sub_0",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "arn:aws:iam::707983519786:root"
+              },
+              "Action": [
+                "SNS:Subscribe",
+                "SNS:Receive"
+              ],
+              "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts"
+            } 
+          ]
         },
         "Topics" : [ { "Ref" : "alertSNStopic" } ]
       }
