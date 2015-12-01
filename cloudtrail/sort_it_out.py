@@ -108,12 +108,16 @@ def get_loggroup_arn(logArn):
             return logGroup['arn']
 
 def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
-    ct_conn.update_cloudtrail(
-        name,
-        sns_topic_name,
-        cloud_watch_logs_log_group_arn,
-        cloud_watch_logs_role_arn
-        )
+    try:
+        ct_conn.update_cloudtrail(
+            name,
+            sns_topic_name,
+            cloud_watch_logs_log_group_arn,
+            cloud_watch_logs_role_arn
+            )
+    except Exception as error:
+        print("Error with configuring CloudTrail: ****StackTrace: {} ***".format(error))
+        return (1)
 
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
