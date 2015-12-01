@@ -1,4 +1,5 @@
 import boto.cloudformation
+import boto.ec2
 import argparse
 import time
 import boto.cloudtrail
@@ -21,6 +22,14 @@ alarm_file.close()
 
 cf_conn = boto.cloudformation.connect_to_region(args.iamregion)
 ct_conn = boto.cloudtrail.connect_to_region(args.iamregion)
+
+def getRegions():
+    try:
+        regions = boto.ec2.regions()
+        return regions
+    except Exception as error:
+        print("Error with getting Regions: ****StackTrace: {} ***".format(error))
+        return (1)
 
 def create_iam_stack(stack_name, template_body):
     print("Creating IAM Stack")
@@ -62,6 +71,13 @@ def get_stack_status(stack_name):
         print ("No stacks found")
     return stack.stack_status
 
+def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
+	print name
+	print sns_topic_name
+	print cloud_watch_logs_log_group_arn
+	print cloud_watch_logs_role_arn
+
+
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
     print "Waiting for the stack to finish creating..."
@@ -73,9 +89,7 @@ if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
 elif args.stackAction == 'delete':
     delete_iam_stack(args.stackName)
 
-''' some multilineer 
-that doesn't do this
-ever '''
+
 if args.stackAction == 'create':
     if len(iam_role) > 0:
         alarm_stack = create_alarm_stack(args.alarmStackName, alarms_cfn_body)
@@ -84,6 +98,6 @@ if args.stackAction == 'create':
 elif args.stackAction =='delete':
     delete_iam_stack(args.alarmStackName)
 
-trails = ct_conn.describe_trails()['trialList']
+trails = ct_conn.describe_trails()['trailList']
 print trails
 
