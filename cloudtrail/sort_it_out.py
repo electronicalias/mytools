@@ -77,6 +77,14 @@ def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_
 	print cloud_watch_logs_log_group_arn
 	print cloud_watch_logs_role_arn
 
+def getSnsTopics():
+    try:
+        topics = sns_conn.get_all_topics()['ListTopicsResponse']['ListTopicsResult']['Topics']
+        print topics
+    except Exception as error:
+        print("Error with getting SNS Topics: ****StackTrace: {} ***".format(error))
+        return (1)
+
 
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
@@ -100,4 +108,7 @@ elif args.stackAction =='delete':
 
 trails = ct_conn.describe_trails()['trailList']
 print trails
+
+sns_topics =  getSnsTopics()
+print sns_topics
 
