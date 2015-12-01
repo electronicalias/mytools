@@ -107,15 +107,15 @@ def get_loggroup_arn(logArn):
         if logArn in logGroup['arn']:
             return logGroup['arn']
 
-def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
+def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn, s3_bucket_name=None, s3_key_prefix=None):
     try:
         ct_conn.update_trail(
             name,
             sns_topic_name,
             cloud_watch_logs_log_group_arn,
             cloud_watch_logs_role_arn,
-            s3_bucket_name=None,
-            s3_key_prefix=None
+            s3_bucket_name,
+            s3_key_prefix
             )
     except Exception as error:
         print("Error with configuring CloudTrail: ****StackTrace: {} ***".format(error))
