@@ -91,11 +91,11 @@ def get_cloudtrail_trail():
     trail_list = ct_conn.describe_trails()
     return trail_list['trailList'][0]['TrailARN']
 
-def get_iam_role(iamRoleName):
+def get_iam_role(iam_role_name):
     try:
         roles = iam_conn.list_roles()['list_roles_response']['list_roles_result']['roles']
         for role in roles:
-            if iamRoleName in role:
+            if iam_role_name in role:
                 return role['arn']
     except Exception as error:
         print("Error with getting IAM Role: ****StackTrace: {} ***".format(error))
@@ -134,8 +134,8 @@ elif args.stackAction =='delete':
 
 trails = get_cloudtrail_trail()
 sns_topic =  get_sns_topic()
-cloudwatch_iam_role = get_iam_role('CloudwatchLogsRole')
-ct_loggroup_arn = get_loggroup_arn('CloudTrailLogGroup')
+cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
+ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
 
 configure_trail('Default', sns_topic, ct_loggroup_arn, cloudwatch_iam_role)
 
