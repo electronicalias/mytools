@@ -4,6 +4,7 @@ import argparse
 import time
 import boto.cloudtrail
 import boto.sns
+import boto.iam
 
 parser = argparse.ArgumentParser(prog='Attributes Collection')
 parser.add_argument('--iamregion')
@@ -24,6 +25,7 @@ alarm_file.close()
 cf_conn = boto.cloudformation.connect_to_region(args.iamregion)
 ct_conn = boto.cloudtrail.connect_to_region(args.iamregion)
 sns_conn = boto.sns.connect_to_region(args.iamregion)
+iam_conn = boto.iam.connect_to_region(args.iamregion)
 
 def getRegions():
     try:
