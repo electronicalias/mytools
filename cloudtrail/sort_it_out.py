@@ -73,12 +73,6 @@ def get_stack_status(stack_name):
         print ("No stacks found")
     return stack.stack_status
 
-def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
-	print name
-	print sns_topic_name
-	print cloud_watch_logs_log_group_arn
-	print cloud_watch_logs_role_arn
-
 def getSnsTopics():
     try:
         topics = sns_conn.get_all_topics()['ListTopicsResponse']['ListTopicsResult']['Topics']
@@ -93,14 +87,22 @@ def get_cloudtrail_trail():
     trail_list = ct_conn.describe_trails()
     return trail_list['trailList'][0]['TrailARN']
 
+def get_iam_role(stack_name, 'CloudwatchLogsRole'):
+  iam_role = cf_conn.describe_stack_resource(args.stackName, 'CloudwatchLogsRole')['DescribeStackResourceResponse']['DescribeStackResourceResult']['StackResourceDetail']['LogicalResourceId']
+  return iam_role
+
+def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
+  print name
+  print sns_topic_name
+  print cloud_watch_logs_log_group_arn
+  print cloud_watch_logs_role_arn
+
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
     print "Waiting for the stack to finish creating..."
     while get_stack_status(args.stackName) != 'CREATE_COMPLETE':
         time.sleep(10) 
     print "Stack Created, getting the values for the IAM Role"
-    iam_role = cf_conn.describe_stack_resource(args.stackName, 'CloudwatchLogsRole')['DescribeStackResourceResponse']['DescribeStackResourceResult']['StackResourceDetail']['LogicalResourceId']
-    print iam_role
 elif args.stackAction == 'delete':
     delete_iam_stack(args.stackName)
 
@@ -123,5 +125,6 @@ print trails
 sns_topics =  getSnsTopics()
 print sns_topics
 
+cloudwatch_iam_role = get_iam_role(stackName)
 print iam_role
 
