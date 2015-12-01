@@ -122,6 +122,6 @@ print trails
 sns_topics =  getSnsTopics()
 print sns_topics
 
-cloudwatch_iam_role = get_iam_role(args.alarmStackName)
+cloudwatch_iam_role = get_iam_role(args.StackName)
 print cloudwatch_iam_role
 
