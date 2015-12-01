@@ -111,11 +111,11 @@ def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_
     try:
         ct_conn.update_trail(
             name,
-            s3_bucket_name=None,
-            s3_key_prefix=None,
             sns_topic_name,
             cloud_watch_logs_log_group_arn,
-            cloud_watch_logs_role_arn
+            cloud_watch_logs_role_arn,
+            s3_bucket_name=None,
+            s3_key_prefix=None
             )
     except Exception as error:
         print("Error with configuring CloudTrail: ****StackTrace: {} ***".format(error))
