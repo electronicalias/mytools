@@ -96,3 +96,6 @@ if args.stackAction == 'create':
 elif args.stackAction =='delete':
     delete_iam_stack(args.alarmStackName)
 
+trails = ct_conn.describe_trails()['trailList']
+print trails
+
