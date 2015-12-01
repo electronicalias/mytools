@@ -82,14 +82,16 @@ def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_
 def getSnsTopics():
     try:
         topics = sns_conn.get_all_topics()['ListTopicsResponse']['ListTopicsResult']['Topics']
-        return topics.TopicArn
-        for topicname in topics.TopicArn:
-            if 'CloudtrailAlerts' in topics.TopicArn:
-                print("This is the name of the Topic: {}".format(topics))
+        for topicname in topics:
+            if 'CloudtrailAlerts' in topicname['TopicArn']:
+                return topicname['TopicArn']
     except Exception as error:
         print("Error with getting SNS Topics: ****StackTrace: {} ***".format(error))
         return (1)
 
+def get_cloudtrail_trail():
+    trail_list = ct_conn.describe_trails()
+    return trail_list['trailList'][0]['TrailARN']
 
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
@@ -115,7 +117,7 @@ if args.stackAction == 'create':
 elif args.stackAction =='delete':
     delete_iam_stack(args.alarmStackName)
 
-trails = ct_conn.describe_trails()['trailList']
+trails = get_cloudtrail_trail()
 print trails
 
 sns_topics =  getSnsTopics()
