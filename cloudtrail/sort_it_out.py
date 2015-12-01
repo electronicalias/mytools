@@ -103,6 +103,9 @@ elif args.stackAction == 'delete':
 if args.stackAction == 'create':
     if len(iam_role) > 0:
         alarm_stack = create_alarm_stack(args.alarmStackName, alarms_cfn_body)
+        print("Waiting for the {} stack to finish creating...".format(args.alarmStackName))
+        while get_stack_status(args.alarmStackName) != 'CREATE_COMPLETE':
+            time.sleep(10)
     else:
         print "NoooooooOOOOOooOOOoOOOOo!"
 elif args.stackAction =='delete':
