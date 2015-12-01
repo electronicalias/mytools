@@ -95,7 +95,8 @@ def get_iam_role(iamRoleName):
     try:
         roles = iam_conn.list_roles()['list_roles_response']['list_roles_result']['roles']
         for role in roles:
-            return role['arn']
+            if 'CloudTrail' in role:
+                return role['arn']
     except Exception as error:
         print("Error with getting IAM Role: ****StackTrace: {} ***".format(error))
         return (1)
