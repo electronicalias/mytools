@@ -32,6 +32,41 @@
       }
     },
 
+    "alertSNSpolicy" : {
+      "Type" : "AWS::SNS::TopicPolicy",
+      "Properties" : {
+        "PolicyDocument" :  {
+          "Id" : "__default_policy_ID",
+          "Version" : "2012-10-17",
+          "Statement" : [ {
+            "Sid": "__default_statement_ID",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "*"
+            },
+            "Action": [
+              "SNS:ListSubscriptionsByTopic",
+              "SNS:Subscribe",
+              "SNS:DeleteTopic",
+              "SNS:GetTopicAttributes",
+              "SNS:Publish",
+              "SNS:RemovePermission",
+              "SNS:AddPermission",
+              "SNS:Receive",
+              "SNS:SetTopicAttributes"
+            ],
+            "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts",
+            "Condition": {
+              "StringEquals": {
+                "AWS:SourceOwner": "707983519786"
+              }
+            }
+          } ]
+        },
+        "Topics" : [ { "Ref" : "alertSNStopic" } ]
+      }
+    },
+
     "SecurityGroupChangesMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
