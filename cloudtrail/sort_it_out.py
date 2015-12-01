@@ -126,5 +126,5 @@ sns_topics =  getSnsTopics()
 print sns_topics
 
 cloudwatch_iam_role = get_iam_role(stackName)
-print iam_role
+print cloudwatch_iam_role
 
