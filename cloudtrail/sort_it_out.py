@@ -95,7 +95,7 @@ def get_iam_role(iam_role_name):
     try:
         roles = iam_conn.list_roles()['list_roles_response']['list_roles_result']['roles']
         for role in roles:
-            if iam_role_name in role:
+            if iam_role_name in role['arn']:
                 return role['arn']
     except Exception as error:
         print("Error with getting IAM Role: ****StackTrace: {} ***".format(error))
