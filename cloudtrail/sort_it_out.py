@@ -123,3 +123,5 @@ print trails
 sns_topics =  getSnsTopics()
 print sns_topics
 
+print iam_role
+
