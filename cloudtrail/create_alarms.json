@@ -43,7 +43,7 @@
               "Sid": "__default_statement_ID",
               "Effect": "Allow",
               "Principal": {
-                "AWS": "arn:aws:iam::707983519786:root"
+                "AWS": { "Ref" : "AWS::AccountId" }
               },
               "Action": [
                 "SNS:ListSubscriptionsByTopic",
