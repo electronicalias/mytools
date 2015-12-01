@@ -83,6 +83,9 @@ def getSnsTopics():
     try:
         topics = sns_conn.get_all_topics()['ListTopicsResponse']['ListTopicsResult']['Topics']
         return topics.TopicArn
+        for topicname in topics.TopicArn:
+            if 'CloudtrailAlerts' in topics.TopicArn
+                print("This is the name of the Topic: {}".format(topics))
     except Exception as error:
         print("Error with getting SNS Topics: ****StackTrace: {} ***".format(error))
         return (1)
