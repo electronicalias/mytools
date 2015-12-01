@@ -6,16 +6,18 @@
     "AlarmEmail" : {
       "Description" : "Email for Cloudwatch alerts",
       "Type" : "String"
-    },
-
-    "LogGroupName" : {
-      "Description" : "Name of Cloudwatch Logs log-group to monitor",
-      "Type" : "String"
     }
 
   },
 
   "Resources" : {
+    
+    "CloudTrailLogGroup" : {
+      "Type" : "AWS::Logs::LogGroup",
+      "Properties" : {
+        "RetentionInDays" : "1"
+      }
+    },
 
     "alertSNStopic": {
       "Type": "AWS::SNS::Topic",
@@ -33,7 +35,7 @@
     "SecurityGroupChangesMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{ ($.eventName = AuthorizeSecurityGroupIngress) || ($.eventName = AuthorizeSecurityGroupEgress) || ($.eventName = RevokeSecurityGroupIngress) || ($.eventName = RevokeSecurityGroupEgress) || ($.eventName = CreateSecurityGroup) || ($.eventName = DeleteSecurityGroup) }",
         "MetricTransformations": [
           {
@@ -64,7 +66,7 @@
     "NetworkAclChangesMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{ ($.eventName = CreateNetworkAcl) || ($.eventName = CreateNetworkAclEntry) || ($.eventName = DeleteNetworkAcl) || ($.eventName = DeleteNetworkAclEntry) || ($.eventName = ReplaceNetworkAclEntry) || ($.eventName = ReplaceNetworkAclAssociation) }",
         "MetricTransformations": [
           {
@@ -95,7 +97,7 @@
     "GatewayChangesMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{ ($.eventName = CreateCustomerGateway) || ($.eventName = DeleteCustomerGateway) || ($.eventName = AttachInternetGateway) || ($.eventName = CreateInternetGateway) || ($.eventName = DeleteInternetGateway) || ($.eventName = DetachInternetGateway) }",
         "MetricTransformations": [
           {
@@ -126,7 +128,7 @@
     "VpcChangesMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{ ($.eventName = CreateVpc) || ($.eventName = DeleteVpc) || ($.eventName = ModifyVpcAttribute) || ($.eventName = AcceptVpcPeeringConnection) || ($.eventName = CreateVpcPeeringConnection) || ($.eventName = DeleteVpcPeeringConnection) || ($.eventName = RejectVpcPeeringConnection) || ($.eventName = AttachClassicLinkVpc) || ($.eventName = DetachClassicLinkVpc) || ($.eventName = DisableVpcClassicLink) || ($.eventName = EnableVpcClassicLink) }",
         "MetricTransformations": [
           {
@@ -157,7 +159,7 @@
     "EC2InstanceChangesMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{ ($.eventName = RunInstances) || ($.eventName = RebootInstances) || ($.eventName = StartInstances) || ($.eventName = StopInstances) || ($.eventName = TerminateInstances) }",
         "MetricTransformations": [
           {
@@ -188,7 +190,7 @@
     "EC2LargeInstanceChangesMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{ (($.eventName = RunInstances) || ($.eventName = RebootInstances) || ($.eventName = StartInstances) || ($.eventName = StopInstances) || ($.eventName = TerminateInstances)) && (($.requestParameters.instanceType = *.8xlarge) || ($.requestParameters.instanceType = *.4xlarge)) }",
         "MetricTransformations": [
           {
@@ -219,7 +221,7 @@
     "CloudTrailChangesMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{ ($.eventName = CreateTrail) || ($.eventName = UpdateTrail) || ($.eventName = DeleteTrail) || ($.eventName = StartLogging) || ($.eventName = StopLogging) }",
         "MetricTransformations": [
           {
@@ -250,7 +252,7 @@
     "ConsoleSignInFailuresMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{ ($.eventName = ConsoleLogin) && ($.errorMessage = \"Failed authentication\") }",
         "MetricTransformations": [
           {
@@ -281,7 +283,7 @@
     "AuthorizationFailuresMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") }",
         "MetricTransformations": [
           {
@@ -312,7 +314,7 @@
     "IAMPolicyChangesMetricFilter": {
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
-        "LogGroupName": { "Ref" : "LogGroupName" },
+        "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
         "FilterPattern": "{($.eventName=DeleteGroupPolicy)||($.eventName=DeleteRolePolicy)||($.eventName=DeleteUserPolicy)||($.eventName=PutGroupPolicy)||($.eventName=PutRolePolicy)||($.eventName=PutUserPolicy)||($.eventName=CreatePolicy)||($.eventName=DeletePolicy)||($.eventName=CreatePolicyVersion)||($.eventName=DeletePolicyVersion)||($.eventName=AttachRolePolicy)||($.eventName=DetachRolePolicy)||($.eventName=AttachUserPolicy)||($.eventName=DetachUserPolicy)||($.eventName=AttachGroupPolicy)||($.eventName=DetachGroupPolicy)}",
         "MetricTransformations": [
           {
@@ -346,7 +348,7 @@
 
     "LogGroup" : {
       "Description" : "Configure Cloudtrail send logs to this group",
-      "Value" : { "Fn::Join" : [ ":", [ "arn:aws:logs", { "Ref" : "AWS::Region" }, { "Ref" : "AWS::AccountId" }, "log-group", { "Ref" : "LogGroupName" }, "*" ] ] }
+      "Value" : { "Fn::Join" : [ ":", [ "arn:aws:logs", { "Ref" : "AWS::Region" }, { "Ref" : "AWS::AccountId" }, "log-group", { "Ref" : "CloudTrailLogGroup" }, "*" ] ] }
     }
 
   }

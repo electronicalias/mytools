@@ -6,7 +6,7 @@
 
     "IamRoleInstalled" : {
       "Description" : "Requires a true or false to identify whether an IAM role is required",
-      "Type" : "string",
+      "Type" : "String",
       "AllowedValues" : [
         "True",
         "False"]
