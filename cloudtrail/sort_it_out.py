@@ -147,5 +147,5 @@ cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
 ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
 
 if args.stackAction == 'create':
-    configure_trail('Default', 'mmc-innovation-centre-logs', 'CloudTrail', sns_topic, 'True', ct_loggroup_arn, cloudwatch_iam_role)
+    configure_trail('Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
 
