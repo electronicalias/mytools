@@ -27,7 +27,7 @@ ct_conn = boto.cloudtrail.connect_to_region(args.iamregion)
 sns_conn = boto.sns.connect_to_region(args.iamregion)
 iam_conn = boto.iam.connect_to_region(args.iamregion)
 
-def getRegions():
+def get_regions():
     try:
         regions = boto.ec2.regions()
         return regions
@@ -75,7 +75,7 @@ def get_stack_status(stack_name):
         print ("No stacks found")
     return stack.stack_status
 
-def getSnsTopics():
+def get_sns_topics():
     try:
         topics = sns_conn.get_all_topics()['ListTopicsResponse']['ListTopicsResult']['Topics']
         for topicname in topics:
@@ -99,10 +99,10 @@ def get_iam_role(iamRoleName):
         return (1)
 
 def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
-  print name
-  print sns_topic_name
-  print cloud_watch_logs_log_group_arn
-  print cloud_watch_logs_role_arn
+    print name
+    print sns_topic_name
+    print cloud_watch_logs_log_group_arn
+    print cloud_watch_logs_role_arn
 
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
@@ -124,13 +124,8 @@ elif args.stackAction =='delete':
     delete_iam_stack(args.alarmStackName)
 
 trails = get_cloudtrail_trail()
-print trails
-
-sns_topics =  getSnsTopics()
-print sns_topics
-
+sns_topic =  get_sns_topic()
 cloudwatch_iam_role = get_iam_role('CloudtrailIamRole')
-print cloudwatch_iam_role
 
-configure_trail('Default', sns_topics, 'something', cloudwatch_iam_role)
+configure_trail('Default', sns_topic, 'something', cloudwatch_iam_role)
 
