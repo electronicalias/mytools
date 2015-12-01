@@ -58,7 +58,7 @@
               ],
               "Condition":{
                 "StringEquals":{
-                  "AWS:SourceOwner" : { "Ref" : "AWS:AccountId" }
+                  "AWS:SourceOwner" : { "Ref" : "AWS::AccountId" }
                 }
               },
               "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts"
