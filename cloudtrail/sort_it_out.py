@@ -1,5 +1,6 @@
 import boto.cloudformation
 import boto.ec2
+import boto.logs
 import argparse
 import time
 import boto.cloudtrail
@@ -26,6 +27,7 @@ cf_conn = boto.cloudformation.connect_to_region(args.iamregion)
 ct_conn = boto.cloudtrail.connect_to_region(args.iamregion)
 sns_conn = boto.sns.connect_to_region(args.iamregion)
 iam_conn = boto.iam.connect_to_region(args.iamregion)
+logs_conn = boto.logs.connect_to_region(args.region, profile_name=args.profile)
 
 def get_regions():
     try:
