@@ -1,6 +1,7 @@
 import boto.cloudformation
 import argparse
 import time
+import boto.cloudtrail
 
 parser = argparse.ArgumentParser(prog='Attributes Collection')
 parser.add_argument('--iamregion')
@@ -19,6 +20,7 @@ alarms_cfn_body = alarm_file.read()
 alarm_file.close()
 
 cf_conn = boto.cloudformation.connect_to_region(args.iamregion)
+ct_conn = boto.cloudtrail.connect_to_region(args.iamregion)
 
 def create_iam_stack(stack_name, template_body):
     print("Creating IAM Stack")
@@ -66,7 +68,7 @@ if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     while get_stack_status(args.stackName) != 'CREATE_COMPLETE':
         time.sleep(10) 
     print "Stack Created, getting the values for the IAM Role"
-    iam_role = cf_conn.describe_stack_resource(args.stackName, 'CloudwatchLogsRole')['DescribeStackResourceResponse']['DescribeStackResourceResult']['StackResourceDetail']['PhysicalResourceId']
+    iam_role = cf_conn.describe_stack_resource(args.stackName, 'CloudwatchLogsRole')['DescribeStackResourceResponse']['DescribeStackResourceResult']['StackResourceDetail']['LogicalResourceId']
     print iam_role
 elif args.stackAction == 'delete':
     delete_iam_stack(args.stackName)
@@ -81,4 +83,7 @@ if args.stackAction == 'create':
         print "NoooooooOOOOOooOOOoOOOOo!"
 elif args.stackAction =='delete':
     delete_iam_stack(args.alarmStackName)
+
+trails = ct_conn.describe_trails()['trialList']
+print trails
 
