@@ -64,7 +64,7 @@
               }
             },
             {
-              "Sid": "__console_pub_0",
+              "Sid": "__limit_scopeID",
               "Effect": "Allow",
               "Principal": {
                 "AWS": "arn:aws:iam::707983519786:root"
