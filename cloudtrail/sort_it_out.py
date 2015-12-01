@@ -107,14 +107,14 @@ def get_loggroup_arn(logArn):
         if logArn in logGroup['arn']:
             return logGroup['arn']
 
-def configure_trail(name, s3_bucket_name, s3_key_prefix, include_global_service_events, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
+def configure_trail(name, s3_bucket_name, s3_key_prefix, sns_topic_name, include_global_service_events, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
     try:
         ct_conn.update_trail(
             name,
             s3_bucket_name,
             s3_key_prefix,
-            include_global_service_events,
             sns_topic_name,
+            include_global_service_events,
             cloud_watch_logs_log_group_arn,
             cloud_watch_logs_role_arn
             )
@@ -147,5 +147,5 @@ cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
 ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
 
 if args.stackAction == 'create':
-    configure_trail('Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'True', sns_topic, ct_loggroup_arn, cloudwatch_iam_role)
+    configure_trail('Default', 'mmc-innovation-centre-logs', 'CloudTrail', sns_topic, 'True', ct_loggroup_arn, cloudwatch_iam_role)
 
