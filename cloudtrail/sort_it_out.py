@@ -98,6 +98,12 @@ def get_iam_role(iamRoleName):
         print("Error with getting IAM Role: ****StackTrace: {} ***".format(error))
         return (1)
 
+def get_loggroup_arn(logArn):
+    cloudtrail_log_arn = logs_conn.describe_log_groups()['logGroups']
+    for logGroup in cloudtrail_log_arn:
+        if logArn in logGroup['arn']:
+            return logGroup['arn']
+
 def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
     print name
     print sns_topic_name
@@ -126,6 +132,7 @@ elif args.stackAction =='delete':
 trails = get_cloudtrail_trail()
 sns_topic =  get_sns_topic()
 cloudwatch_iam_role = get_iam_role('CloudtrailIamRole')
+ct_loggroup_arn = get_loggroup_arn('CloudTrail')
 
-configure_trail('Default', sns_topic, 'something', cloudwatch_iam_role)
+configure_trail('Default', sns_topic, ct_loggroup_arn, cloudwatch_iam_role)
 
