@@ -88,7 +88,7 @@ def get_cloudtrail_trail():
     return trail_list['trailList'][0]['TrailARN']
 
 def get_iam_role(stack_name):
-  iam_role = cf_conn.describe_stack_resource(stack_name, 'CloudwatchLogsRole')['DescribeStackResourceResponse']['DescribeStackResourceResult']['StackResourceDetail']['LogicalResourceId']
+  iam_role = cf_conn.describe_stack_resource(stack_name, 'CloudwatchLogsRole')['DescribeStackResourceResponse']['DescribeStackResourceResult']['StackResourceDetail']['PhysicalResourceId']
   return iam_role
 
 def configure_trail(name, sns_topic_name, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
