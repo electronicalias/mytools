@@ -132,3 +132,5 @@ print sns_topics
 cloudwatch_iam_role = get_iam_role('CloudtrailIamRole')
 print cloudwatch_iam_role
 
+configure_trail('Default', sns_topics, 'something', cloudwatch_iam_role)
+
