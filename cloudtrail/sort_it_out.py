@@ -75,7 +75,7 @@ def get_stack_status(stack_name):
         print ("No stacks found")
     return stack.stack_status
 
-def get_sns_topics():
+def get_sns_topic():
     try:
         topics = sns_conn.get_all_topics()['ListTopicsResponse']['ListTopicsResult']['Topics']
         for topicname in topics:
