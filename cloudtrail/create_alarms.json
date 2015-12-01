@@ -43,7 +43,7 @@
               "Sid": "__default_statement_ID",
               "Effect": "Allow",
               "Principal": {
-                "AWS": "*"
+                "AWS": "707983519786"
               },
               "Action": [
                 "SNS:ListSubscriptionsByTopic",
@@ -56,86 +56,8 @@
                 "SNS:Receive",
                 "SNS:SetTopicAttributes"
               ],
-              "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts",
-              "Condition": {
-                "StringEquals": {
-                  "AWS:SourceOwner": "707983519786"
-                }
-              }
-            },
-            {
-              "Sid": "__limit_scopeID",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "arn:aws:iam::707983519786:root"
-              },
-              "Action": "SNS:Publish",
               "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts"
-            },
-            {
-              "Sid": "__console_sub_0",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "arn:aws:iam::707983519786:root"
-              },
-              "Action": [
-                "SNS:Subscribe",
-                "SNS:Receive"
-              ],
-              "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts"
-            } 
-          ]
-        },
-        "Topics" : [ { "Ref" : "alertSNStopic" } ]
-      }
-    },
-
-    "alertSNSpolicyTest" : {
-      "Type" : "AWS::SNS::TopicPolicy",
-      "Properties" : {
-        "PolicyDocument" :  {
-          "Id" : "__default_policy_ID",
-          "Version" : "2012-10-17",
-          "Statement" : [ 
-            {
-              "Sid": "__default_statement_ID",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "*"
-              },
-              "Action": [
-                "SNS:ListSubscriptionsByTopic",
-                "SNS:Subscribe",
-                "SNS:DeleteTopic",
-                "SNS:GetTopicAttributes",
-                "SNS:Publish",
-                "SNS:RemovePermission",
-                "SNS:AddPermission",
-                "SNS:Receive",
-                "SNS:SetTopicAttributes"
-              ],
-              "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts"            },
-            {
-              "Sid": "__limit_scopeID",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "*"
-              },
-              "Action": "SNS:Publish",
-              "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts"
-            },
-            {
-              "Sid": "__console_sub_0",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "*"
-              },
-              "Action": [
-                "SNS:Subscribe",
-                "SNS:Receive"
-              ],
-              "Resource": "arn:aws:sns:eu-west-1:707983519786:CloudtrailAlerts"
-            } 
+            }
           ]
         },
         "Topics" : [ { "Ref" : "alertSNStopic" } ]
