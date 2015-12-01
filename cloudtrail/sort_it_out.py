@@ -27,7 +27,7 @@ cf_conn = boto.cloudformation.connect_to_region(args.iamregion)
 ct_conn = boto.cloudtrail.connect_to_region(args.iamregion)
 sns_conn = boto.sns.connect_to_region(args.iamregion)
 iam_conn = boto.iam.connect_to_region(args.iamregion)
-logs_conn = boto.logs.connect_to_region(args.region, profile_name=args.profile)
+logs_conn = boto.logs.connect_to_region(args.iamregion)
 
 def get_regions():
     try:
