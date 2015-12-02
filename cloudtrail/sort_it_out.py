@@ -275,7 +275,7 @@ if args.stackAction == 'create':
 elif args.stackAction == 'delete':
             delete_stack(args.iamRegion, args.iamStackName)
 
-ct_regions = get_cloudtrail_regions():
+ct_regions = get_cloudtrail_regions()
 
 for ct_region in ct_regions:
     if args.stackAction == 'create':
