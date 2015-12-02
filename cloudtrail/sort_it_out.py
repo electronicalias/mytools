@@ -273,7 +273,7 @@ if args.stackAction == 'create':
         time.sleep(10) 
     print("{} Created".format(args.iamStackName))
 elif args.stackAction == 'delete':
-            delete_stack(region, args.iamStackName)
+            delete_stack(args.iamRegion, args.iamStackName)
 
 for region in get_cloudtrail_regions():
     if args.stackAction == 'create':
