@@ -16,7 +16,7 @@ import boto.iam
 
 # Collect the command line parameters with 'iamregion' being the account that will keep the logs for CloudTrail
 parser = argparse.ArgumentParser(prog='Attributes Collection')
-parser.add_argument('--iamregion')
+parser.add_argument('--iamRegion')
 parser.add_argument('--iamStackName')
 parser.add_argument('--stackAction')
 parser.add_argument('--alarmStackName')
@@ -40,11 +40,11 @@ update_sns_cfn_body = update_sns_file.read()
 update_sns_file.close()
 
 # Create connections to all of the services
-cf_conn = boto.cloudformation.connect_to_region(args.iamregion)
-ct_conn = boto.cloudtrail.connect_to_region(args.iamregion)
-sns_conn = boto.sns.connect_to_region(args.iamregion)
-iam_conn = boto.iam.connect_to_region(args.iamregion)
-logs_conn = boto.logs.connect_to_region(args.iamregion)
+cf_conn = boto.cloudformation.connect_to_region(args.iamRegion)
+ct_conn = boto.cloudtrail.connect_to_region(args.iamRegion)
+sns_conn = boto.sns.connect_to_region(args.iamRegion)
+iam_conn = boto.iam.connect_to_region(args.iamRegion)
+logs_conn = boto.logs.connect_to_region(args.iamRegion)
 
 ''' Set up the functions required to provide the information necessary for the
     CloudTrail configuration to point to CloudWatch Logs and the global S3 Bucket '''
@@ -268,8 +268,8 @@ if args.stackAction == 'create':
 
 if args.stackAction == 'create':
     iam_stack = create_iam_stack(args.iamStackName, iam_cfn_body)
-    print("Waiting for the {} in {} to finish creating...".format(args.iamStackName, args.iamregion))
-    while get_stack_status(args.iamStackName) != 'CREATE_COMPLETE':
+    print("Waiting for the {} in {} to finish creating...".format(args.iamStackName, args.iamRegion))
+    while get_stack_status(args.iamRegion, args.iamStackName) != 'CREATE_COMPLETE':
         time.sleep(10) 
     print("{} Created".format(args.iamStackName))
 elif args.stackAction == 'delete':
