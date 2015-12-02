@@ -155,6 +155,12 @@ def configure_trail(name, s3_bucket_name, s3_key_prefix, sns_topic_name, include
         print("Error with configuring CloudTrail: ****StackTrace: {} ***".format(error))
         return (1)
 
+def get_cloudtrail_regions():
+    """ Return list of names of regions where CloudTrail is available """
+
+    cloudtrail_regioninfo_list = boto.regioninfo.get_regions('cloudtrail')
+    return [r.name for r in cloudtrail_regioninfo_list]
+
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
     print "Waiting for the stack to finish creating..."
@@ -211,6 +217,8 @@ if args.stackAction == 'create':
 #elif args.stackAction == 'delete':
 #    delete_iam_stack(args.alarmStackName)
 #    delete_iam_stack(args.stackName)
+
+print(get_cloudtrail_regions())
 
 
 
