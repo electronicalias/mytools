@@ -59,7 +59,7 @@ def get_cloudtrail_regions():
 def create_iam_stack(stack_name, template_body):
     '''Create the IAM resources required for CloudTrail'''
 
-    print("Creating IAM Stack")
+    print("Creating {} Stack in {}".format(stack_name, args.iamRegion))
     try:
         cf_conn.create_stack(
                        stack_name,
