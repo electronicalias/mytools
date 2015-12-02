@@ -171,7 +171,7 @@ def get_cloudtrail_trail(region):
     try:
         trail_list = connection.describe_trails()
         print(trail_list['trailList'][0]['TrailARN'])
-        return trail_list['trailList'][0]['TrailARN']
+        return(trail_list['trailList'][0]['TrailARN'])
     except Exception as error:
         print("Error describing trails in {}: ****StackTrace: {} ***".format(region, error))
         return (1)
