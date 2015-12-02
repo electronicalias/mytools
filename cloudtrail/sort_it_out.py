@@ -123,7 +123,7 @@ def get_sns_topic(region):
         return (1)
 
 def get_cloudtrail_trail():
-    connection = boto.cloudtrail.connect_to_region(region, args.iamregion)
+    connection = boto.cloudtrail.connect_to_region(region)
     trail_list = connection.describe_trails()
     return trail_list['trailList'][0]['TrailARN']
 
@@ -208,7 +208,7 @@ for region in get_cloudtrail_regions():
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
         print("{} has been successfully created.".format(args.alarmStackName))
-        trails = get_cloudtrail_trail()
+        trails = get_cloudtrail_trail(region)
         sns_topic =  get_sns_topic(region)
         cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
         ct_loggroup_arn = get_loggroup_arn(region, args.alarmStackName + '-CloudTrailLogGroup')
