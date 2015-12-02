@@ -36,14 +36,14 @@
       "Type" : "AWS::SNS::TopicPolicy",
       "Properties" : {
         "PolicyDocument" :  {
-          "Id" : "__default_policy_ID",
+          "Id" : "UpdatedSNSTopicPolicy",
           "Version" : "2012-10-17",
           "Statement" : [ 
             {
-              "Sid": "__default_statement_ID",
+              "Sid": "sns_update_policy_document",
               "Effect": "Allow",
               "Principal": {
-                "AWS": { "Fn::Join" : [ "", [ "arn:aws::", { "Ref" : "AWS::AccountId"}, ":root" ]]}
+                "AWS": { "Fn::Join" : [ "", [ "arn:aws:iam::", { "Ref" : "AWS::AccountId"}, ":root" ]]}
               },
               "Action": [
                 "SNS:ListSubscriptionsByTopic",
