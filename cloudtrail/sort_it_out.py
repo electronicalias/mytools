@@ -46,14 +46,11 @@ sns_conn = boto.sns.connect_to_region(args.iamregion)
 iam_conn = boto.iam.connect_to_region(args.iamregion)
 logs_conn = boto.logs.connect_to_region(args.iamregion)
 
-def get_regions():
-    # Get the list of regions for the loop that will apply the template to each region
-    try:
-        regions = boto.ec2.regions()
-        return regions
-    except Exception as error:
-        print("Error with getting Regions: ****StackTrace: {} ***".format(error))
-        return (1)
+def get_cloudtrail_regions():
+    """ Return list of names of regions where CloudTrail is available """
+
+    cloudtrail_regioninfo_list = boto.regioninfo.get_regions('cloudtrail')
+    return [r.name for r in cloudtrail_regioninfo_list]
 
 def create_iam_stack(stack_name, template_body):
     # Create the IAM resources required for CloudTrail
@@ -68,10 +65,11 @@ def create_iam_stack(stack_name, template_body):
                        tags=None
                        )
 
-def create_alarm_stack(stack_name, template_body):
+def create_alarm_stack(region, stack_name, template_body):
+    connection = boto.cloudformation.connect_to_region(region)
     # Create the alarms required in CloudWatch, set the SNS Topic and Open SNS Topic Policy
     print("Creating Alarm Stack")
-    cf_conn.create_stack(
+    connection.create_stack(
                        stack_name,
                        template_body,
                        parameters=[
@@ -81,10 +79,11 @@ def create_alarm_stack(stack_name, template_body):
                        tags=None
                        )
 
-def update_alarm_stack(stack_name, template_body):
+def update_alarm_stack(region, stack_name, template_body):
+    connection = boto.cloudformation.connect_to_region(region)
     # Update the SNS Policy in the stack to only allow the local account
     print("Creating Alarm Stack")
-    cf_conn.update_stack(
+    connection.update_stack(
                        stack_name,
                        template_body,
                        parameters=[
@@ -94,14 +93,16 @@ def update_alarm_stack(stack_name, template_body):
                        tags=None
                        )
 
-def delete_iam_stack(stack_name):
+def delete_stack(region, stack_name):
+    connection = boto.cloudformation.connect_to_region(region)
     print("Deleting {} Stack".format(stack_name))
-    cf_conn.delete_stack(
+    connection.delete_stack(
                        stack_name
                        )
 
-def get_stack_status(stack_name):
-    stacks = cf_conn.describe_stacks(
+def get_stack_status(region, stack_name):
+    connection = boto.cloudformation.connect_to_region(region)
+    stacks = connection.describe_stacks(
                                     stack_name
                                     )
     if len(stacks) == 1:
@@ -110,9 +111,10 @@ def get_stack_status(stack_name):
         print ("No stacks found")
     return stack.stack_status
 
-def get_sns_topic():
+def get_sns_topic(region):
+    connection = boto.sns.connect_to_region(region)
     try:
-        topics = sns_conn.get_all_topics()['ListTopicsResponse']['ListTopicsResult']['Topics']
+        topics = connection.get_all_topics()['ListTopicsResponse']['ListTopicsResult']['Topics']
         for topicname in topics:
             if 'CloudtrailAlerts' in topicname['TopicArn']:
                 return topicname['TopicArn']
@@ -121,7 +123,8 @@ def get_sns_topic():
         return (1)
 
 def get_cloudtrail_trail():
-    trail_list = ct_conn.describe_trails()
+    connection = boto.cloudtrail.connect_to_region(region, args.iamregion)
+    trail_list = connection.describe_trails()
     return trail_list['trailList'][0]['TrailARN']
 
 def get_iam_role(iam_role_name):
@@ -134,15 +137,17 @@ def get_iam_role(iam_role_name):
         print("Error with getting IAM Role: ****StackTrace: {} ***".format(error))
         return (1)
 
-def get_loggroup_arn(logArn):
-    cloudtrail_log_arn = logs_conn.describe_log_groups()['logGroups']
+def get_loggroup_arn(region, logArn):
+    connection = boto.logs.connect_to_region(region)
+    cloudtrail_log_arn = connection.describe_log_groups()['logGroups']
     for logGroup in cloudtrail_log_arn:
         if logArn in logGroup['arn']:
             return logGroup['arn']
 
-def configure_trail(name, s3_bucket_name, s3_key_prefix, sns_topic_name, include_global_service_events, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
+def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name, include_global_service_events, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
+    connection = boto.cloudtrail.connect_to_region(region)
     try:
-        ct_conn.update_trail(
+        connection.update_trail(
             name,
             s3_bucket_name,
             s3_key_prefix,
@@ -154,13 +159,7 @@ def configure_trail(name, s3_bucket_name, s3_key_prefix, sns_topic_name, include
     except Exception as error:
         print("Error with configuring CloudTrail: ****StackTrace: {} ***".format(error))
         return (1)
-
-def get_cloudtrail_regions():
-    """ Return list of names of regions where CloudTrail is available """
-
-    cloudtrail_regioninfo_list = boto.regioninfo.get_regions('cloudtrail')
-    return [r.name for r in cloudtrail_regioninfo_list]
-
+''' Logic has changed, removed section.
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
     print "Waiting for the stack to finish creating..."
@@ -184,6 +183,7 @@ trails = get_cloudtrail_trail()
 sns_topic =  get_sns_topic()
 cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
 ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
+'''
 
 if args.stackAction == 'create':
     print "Creating SNS Policy"
@@ -193,32 +193,32 @@ if args.stackAction == 'create':
     print "Attempting to update the stack SNS Topic Policy"
     update_alarm_stack(args.alarmStackName, update_sns_cfn_body)
 
-#for region in get_regions():
-#    if args.stackAction == 'create' and region == args.iamregion:
-#        iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
-#        print "Waiting for the stack to finish creating..."
-#        while get_stack_status(args.stackName) != 'CREATE_COMPLETE':
-#            time.sleep(10) 
-#        print "Stack Created, getting the values for the IAM Role"
-#    if args.stackAction == 'create'
-#        alarm_stack = create_alarm_stack(args.alarmStackName, alarms_cfn_body)
-#        print("Waiting for the {} stack to finish creating...".format(args.alarmStackName))
-#        while get_stack_status(args.alarmStackName) != 'CREATE_COMPLETE':
-#            time.sleep(10)
-#        print("{} has been successfully created.".format(args.alarmStackName))
-#        trails = get_cloudtrail_trail()
-#        sns_topic =  get_sns_topic()
-#        cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
-#        ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
-#        print "Creating SNS Policy"
-#        configure_trail('Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
-#        time.sleep(2)
-#        update_alarm_stack(args.alarmStackName, update_sns_cfn_body)
-#elif args.stackAction == 'delete':
-#    delete_iam_stack(args.alarmStackName)
-#    delete_iam_stack(args.stackName)
+for region in get_cloudtrail_regions():
+    if args.stackAction == 'create' and region == args.iamregion:
+        iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
+        print "Waiting for the stack to finish creating..."
+        while get_stack_status(args.stackName) != 'CREATE_COMPLETE':
+            time.sleep(10) 
+        print "Stack Created, getting the values for the IAM Role"
+    if args.stackAction == 'create'
+        alarm_stack = create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+        print("Waiting for the {} stack to finish creating...".format(args.alarmStackName))
+        while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+            time.sleep(10)
+        print("{} has been successfully created.".format(args.alarmStackName))
+        trails = get_cloudtrail_trail()
+        sns_topic =  get_sns_topic(region)
+        cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
+        ct_loggroup_arn = get_loggroup_arn(region, args.alarmStackName + '-CloudTrailLogGroup')
+        print "Creating SNS Policy"
+        configure_trail(region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
+        time.sleep(2)
+        update_alarm_stack(region, args.alarmStackName, update_sns_cfn_body)
+    elif args.stackAction == 'delete':
+        delete_stack(region, args.alarmStackName)
+        delete_stack('eu-west-1', args.stackName)
 
-print(get_cloudtrail_regions())
+
 
 
 
