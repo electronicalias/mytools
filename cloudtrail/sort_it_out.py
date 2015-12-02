@@ -122,7 +122,7 @@ def get_sns_topic(region):
         print("Error with getting SNS Topics: ****StackTrace: {} ***".format(error))
         return (1)
 
-def get_cloudtrail_trail():
+def get_cloudtrail_trail(region):
     connection = boto.cloudtrail.connect_to_region(region)
     trail_list = connection.describe_trails()
     return trail_list['trailList'][0]['TrailARN']
@@ -218,7 +218,8 @@ for region in get_cloudtrail_regions():
         update_alarm_stack(region, args.alarmStackName, update_sns_cfn_body)
     elif args.stackAction == 'delete':
         delete_stack(region, args.alarmStackName)
-        delete_stack('eu-west-1', args.stackName)
+        if region == args.iamregion:
+            delete_stack(region, args.stackName)
 
 
 
