@@ -287,6 +287,7 @@ for ct_region in ct_regions:
             time.sleep(10)
         print("{} Stack has been successfully created in {} with final status of: {}".format(args.alarmStackName, ct_region, get_stack_status(ct_region, args.alarmStackName)))
         trails = get_cloudtrail_trail(ct_region)
+        print(trails)
         sns_topic =  get_sns_topic(ct_region)
         cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
         ct_loggroup_arn = get_loggroup_arn(ct_region, args.alarmStackName + '-CloudTrailLogGroup')
