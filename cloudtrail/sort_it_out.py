@@ -237,9 +237,10 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
                 cloud_watch_logs_log_group_arn,
                 cloud_watch_logs_role_arn
                 )
-        print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
-        return (1)
-        
+        except Exception as error:
+            print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
+            return (1)
+
     elif 'create' in action:
         try:
             connection.create_trail(
