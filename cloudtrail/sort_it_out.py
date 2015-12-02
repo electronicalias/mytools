@@ -275,22 +275,25 @@ if args.stackAction == 'create':
 elif args.stackAction == 'delete':
             delete_stack(args.iamRegion, args.iamStackName)
 
-for region in get_cloudtrail_regions():
+ct_regions = get_cloudtrail_regions():
+
+for ct_region in ct_regions:
     if args.stackAction == 'create':
-        alarm_stack = create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+        alarm_stack = create_alarm_stack(ct_region, args.alarmStackName, alarms_cfn_body)
         print("Waiting for the {} in {} to finish creating...".format(args.alarmStackName, region))
-        while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+        while get_stack_status(ct_region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
-        print("{} has been successfully created in {}".format(args.alarmStackName, region))
-        trails = get_cloudtrail_trail(region)
-        sns_topic =  get_sns_topic(region)
+        print("{} has been successfully created in {}".format(args.alarmStackName, ct_region))
+        trails = get_cloudtrail_trail(ct_region)
+        sns_topic =  get_sns_topic(ct_region)
         cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
-        ct_loggroup_arn = get_loggroup_arn(region, args.alarmStackName + '-CloudTrailLogGroup')
-        print("Creating SNS Policy for {}".format(region))
-        configure_trail(region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
+        ct_loggroup_arn = get_loggroup_arn(ct_region, args.alarmStackName + '-CloudTrailLogGroup')
+        print("Creating SNS Policy for {}".format(ct_region))
+        configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
         time.sleep(2)
-        print("Updating {} in {}".format(args.alarmStackName, region))
-        update_alarm_stack(region, args.alarmStackName, update_sns_cfn_body)
+        print("Updating {} in {}".format(args.alarmStackName, ct_region))
+        update_alarm_stack(ct_region, args.alarmStackName, update_sns_cfn_body)
+        ct_region = ''
     elif args.stackAction == 'delete':
         delete_stack(region, args.alarmStackName)
 
