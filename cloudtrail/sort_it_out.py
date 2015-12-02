@@ -1,3 +1,10 @@
+'''
+Purpose:        This script will assist in turning on Logging for CloudTrail in AWS. Requires an existing bucket.
+Creator:        Phil Smith (electronicalias@gmail.com)
+Boto Version:   2.38
+'''
+
+# Import all of the modules required to run the  commands in the script
 import boto.cloudformation
 import boto.ec2
 import boto.logs
@@ -7,6 +14,7 @@ import boto.cloudtrail
 import boto.sns
 import boto.iam
 
+# Collect the command line parameters with 'iamregion' being the account that will keep the logs for CloudTrail
 parser = argparse.ArgumentParser(prog='Attributes Collection')
 parser.add_argument('--iamregion')
 parser.add_argument('--stackName')
@@ -14,15 +22,24 @@ parser.add_argument('--stackAction')
 parser.add_argument('--alarmStackName')
 args = parser.parse_args()
 
+# Force a condition so that the script will set the condition in the template and ensures CloudFormation will run
 IamInstalled = 'False'
 
+# Read the template bodies:
+#  create_iam.json to create a role for CloudTrail to use
+#  create_alarms.json to create the sns topic/policy and the alarms in cloudwatch used to alert for events from CloudTrail
+#  update_sns_policy.json is required to set security on the SNS Policy after it has been attached to CloudTrail
 iam_file = open('create_iam.json')
 iam_cfn_body = iam_file.read()
 iam_file.close()
 alarm_file = open('create_alarms.json')
 alarms_cfn_body = alarm_file.read()
 alarm_file.close()
+update_sns_file = open('update_sns_policy.json')
+update_sns_cfn_body = update_sns_file.read()
+update_sns_file.close()
 
+# Create connections to all of the services
 cf_conn = boto.cloudformation.connect_to_region(args.iamregion)
 ct_conn = boto.cloudtrail.connect_to_region(args.iamregion)
 sns_conn = boto.sns.connect_to_region(args.iamregion)
@@ -30,6 +47,7 @@ iam_conn = boto.iam.connect_to_region(args.iamregion)
 logs_conn = boto.logs.connect_to_region(args.iamregion)
 
 def get_regions():
+    # Get the list of regions for the loop that will apply the template to each region
     try:
         regions = boto.ec2.regions()
         return regions
@@ -38,6 +56,7 @@ def get_regions():
         return (1)
 
 def create_iam_stack(stack_name, template_body):
+    # Create the IAM resources required for CloudTrail
     print("Creating IAM Stack")
     cf_conn.create_stack(
                        stack_name,
@@ -50,6 +69,20 @@ def create_iam_stack(stack_name, template_body):
                        )
 
 def create_alarm_stack(stack_name, template_body):
+    # Create the alarms required in CloudWatch, set the SNS Topic and Open SNS Topic Policy
+    print("Creating Alarm Stack")
+    cf_conn.create_stack(
+                       stack_name,
+                       template_body,
+                       parameters=[
+                                   ('AlarmEmail','electronicalias@gmail.com')
+                                   ],
+                       capabilities=['CAPABILITY_IAM'],
+                       tags=None
+                       )
+
+def update_alarm_stack(stack_name, template_body):
+    # Update the SNS Policy in the stack to only allow the local account
     print("Creating Alarm Stack")
     cf_conn.create_stack(
                        stack_name,
@@ -147,5 +180,35 @@ cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
 ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
 
 if args.stackAction == 'create':
+    print "Creating SNS Policy"
     configure_trail('Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
+    time.sleep(2)
+    update_alarm_stack(args.alarmStackName, update_sns_cfn_body)
+
+#for region in get_regions():
+#    if args.stackAction == 'create' and region == args.iamregion:
+#        iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
+#        print "Waiting for the stack to finish creating..."
+#        while get_stack_status(args.stackName) != 'CREATE_COMPLETE':
+#            time.sleep(10) 
+#        print "Stack Created, getting the values for the IAM Role"
+#    if args.stackAction == 'create'
+#        alarm_stack = create_alarm_stack(args.alarmStackName, alarms_cfn_body)
+#        print("Waiting for the {} stack to finish creating...".format(args.alarmStackName))
+#        while get_stack_status(args.alarmStackName) != 'CREATE_COMPLETE':
+#            time.sleep(10)
+#        print("{} has been successfully created.".format(args.alarmStackName))
+#        trails = get_cloudtrail_trail()
+#        sns_topic =  get_sns_topic()
+#        cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
+#        ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
+#        print "Creating SNS Policy"
+#        configure_trail('Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
+#        time.sleep(2)
+#        update_alarm_stack(args.alarmStackName, update_sns_cfn_body)
+#elif args.stackAction == 'delete':
+#    delete_iam_stack(args.alarmStackName)
+#    delete_iam_stack(args.stackName)
+
+
 
