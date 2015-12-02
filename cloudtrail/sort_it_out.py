@@ -281,7 +281,7 @@ ct_regions = get_cloudtrail_regions()
 
 for ct_region in ct_regions:
     if args.stackAction == 'create':
-        alarm_stack = create_alarm_stack(ct_region, args.alarmStackName, alarms_cfn_body)
+        create_alarm_stack(ct_region, args.alarmStackName, alarms_cfn_body)
         print("Waiting for the {} Stack in {} to finish creating...".format(args.alarmStackName, ct_region))
         while get_stack_status(ct_region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
@@ -295,6 +295,10 @@ for ct_region in ct_regions:
         time.sleep(2)
         print("Updating {} in {}".format(args.alarmStackName, ct_region))
         update_alarm_stack(ct_region, args.alarmStackName, update_sns_cfn_body)
+        trails = ''
+        sns_topic = ''
+        cloudwatch_iam_role = ''
+        ct_loggroup_arn = ''
         ct_region = ''
     elif args.stackAction == 'delete':
         delete_stack(ct_region, args.alarmStackName)
