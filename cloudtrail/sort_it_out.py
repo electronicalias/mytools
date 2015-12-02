@@ -210,7 +210,7 @@ def get_loggroup_arn(region, logArn):
     try:
         cloudtrail_log_arn = connection.describe_log_groups()['logGroups']
         for logGroup in cloudtrail_log_arn:
-            if logArn in logGroup['arn']:
+            if 'CloudTrailLogGroup' in logGroup['arn']:
                 return logGroup['arn']
     except Exception as error:
         print("Error getting LogGroup Name in {}: ****StackTrace: {} ***".format(region, error))
