@@ -170,6 +170,7 @@ def get_cloudtrail_trail(region):
     connection = boto.cloudtrail.connect_to_region(region)
     try:
         trail_list = connection.describe_trails()
+        print(trail_list['trailList'][0]['TrailARN'])
         return trail_list['trailList'][0]['TrailARN']
     except Exception as error:
         print("Error describing trails in {}: ****StackTrace: {} ***".format(region, error))
@@ -272,7 +273,7 @@ if args.stackAction == 'create':
     print("Waiting for the {} Stack in {} to finish creating...".format(args.iamStackName, args.iamRegion))
     while get_stack_status(args.iamRegion, args.iamStackName) != 'CREATE_COMPLETE':
         time.sleep(10) 
-    print("{} Created".format(args.iamStackName))
+    print("{} Stack created".format(args.iamStackName))
 elif args.stackAction == 'delete':
             delete_stack(args.iamRegion, args.iamStackName)
 
@@ -284,7 +285,7 @@ for ct_region in ct_regions:
         print("Waiting for the {} Stack in {} to finish creating...".format(args.alarmStackName, ct_region))
         while get_stack_status(ct_region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
-        print("{} Stack has been successfully created in {}".format(args.alarmStackName, ct_region))
+        print("{} Stack has been successfully created in {} with final status of: {}".format(args.alarmStackName, ct_region get_stack_status(ct_region, args.alarmStackName)))
         trails = get_cloudtrail_trail(ct_region)
         sns_topic =  get_sns_topic(ct_region)
         cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
