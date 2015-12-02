@@ -296,7 +296,8 @@ for ct_region in ct_regions:
         update_alarm_stack(ct_region, args.alarmStackName, update_sns_cfn_body)
         ct_region = ''
     elif args.stackAction == 'delete':
-        delete_stack(region, args.alarmStackName)
+        delete_stack(ct_region, args.alarmStackName)
+        ct_region = ''
 
 
 
