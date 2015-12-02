@@ -128,6 +128,7 @@ def delete_stack(region, stack_name):
         connection.delete_stack(
                        stack_name
                        )
+        print("Deleted {} Stack in {}".format(stack_name, region))
     except Exception as error:
         print("Error deleting {} in {}: ****StackTrace: {} ***".format(stack_name, region, error))
         return (1)
@@ -268,7 +269,7 @@ if args.stackAction == 'create':
 
 if args.stackAction == 'create':
     iam_stack = create_iam_stack(args.iamStackName, iam_cfn_body)
-    print("Waiting for the {} in {} to finish creating...".format(args.iamStackName, args.iamRegion))
+    print("Waiting for the {} Stack in {} to finish creating...".format(args.iamStackName, args.iamRegion))
     while get_stack_status(args.iamRegion, args.iamStackName) != 'CREATE_COMPLETE':
         time.sleep(10) 
     print("{} Created".format(args.iamStackName))
@@ -280,10 +281,10 @@ ct_regions = get_cloudtrail_regions()
 for ct_region in ct_regions:
     if args.stackAction == 'create':
         alarm_stack = create_alarm_stack(ct_region, args.alarmStackName, alarms_cfn_body)
-        print("Waiting for the {} in {} to finish creating...".format(args.alarmStackName, region))
+        print("Waiting for the {} Stack in {} to finish creating...".format(args.alarmStackName, ct_region))
         while get_stack_status(ct_region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
-        print("{} has been successfully created in {}".format(args.alarmStackName, ct_region))
+        print("{} Stack has been successfully created in {}".format(args.alarmStackName, ct_region))
         trails = get_cloudtrail_trail(ct_region)
         sns_topic =  get_sns_topic(ct_region)
         cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
