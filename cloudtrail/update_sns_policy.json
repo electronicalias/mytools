@@ -32,7 +32,7 @@
       }
     },
 
-    "alertSNSpolicy" : {
+    "alertSNSpolicyUpdate" : {
       "Type" : "AWS::SNS::TopicPolicy",
       "Properties" : {
         "PolicyDocument" :  {
