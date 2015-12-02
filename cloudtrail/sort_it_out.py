@@ -237,6 +237,9 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
                 cloud_watch_logs_log_group_arn,
                 cloud_watch_logs_role_arn
                 )
+        print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
+        return (1)
+        
     elif 'create' in action:
         try:
             connection.create_trail(
@@ -248,9 +251,9 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
                 cloud_watch_logs_log_group_arn,
                 cloud_watch_logs_role_arn
                 )
-    except Exception as error:
-        print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
-        return (1)
+        except Exception as error:
+            print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
+            return (1)
 
 ''' Logic has changed, removed section.
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
@@ -316,13 +319,16 @@ for ct_region in ct_regions:
         cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
         ct_loggroup_arn = get_loggroup_arn(ct_region, args.alarmStackName + '-CloudTrailLogGroup')
         print("Creating SNS Policy for {}".format(ct_region))
+
         if 'Default' not in get_cloudtrail_name(ct_region):
             delete_cloudtrail(ct_region, ct_region)
             configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'create')
             time.sleep(2)
+
         elif 'Default' in get_cloudtrail_name(ct_region):
             configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'update')
             time.sleep(2)
+
         print("Updating {} in {}".format(args.alarmStackName, ct_region))
         update_alarm_stack(ct_region, args.alarmStackName, update_sns_cfn_body)
         trails = ''
