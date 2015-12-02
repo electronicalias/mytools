@@ -163,18 +163,29 @@ def get_sns_topic(region):
         return (1)
 
 
-def get_cloudtrail_trail(region):
+def get_cloudtrail_arn(region):
     ''' This is required for the configuration of the CloudTrail settings, in particular
     this script get's the arn for the trail to provide to the later function '''
 
     connection = boto.cloudtrail.connect_to_region(region)
     try:
         trail_list = connection.describe_trails()
-        print(trail_list['trailList'][0]['TrailARN'])
-        return(trail_list['trailList'][0]['TrailARN'])
+        return trail_list['trailList'][0]['TrailARN']
     except Exception as error:
         print("Error describing trails in {}: ****StackTrace: {} ***".format(region, error))
         return (1)
+
+
+def get_cloudtrail_name(region):
+
+    ct_conn = boto.cloudtrail.connect_to_region(region)
+    trail_list = ct_conn.describe_trails()
+    return trail_list['trailList'][0]['Name']
+
+
+def delete_cloudtrail(name, region):
+    ct_conn = boto.cloudtrail.connect_to_region(region)
+    ct_conn.delete_trail(name)
 
 
 def get_iam_role(iam_role_name):
@@ -205,7 +216,7 @@ def get_loggroup_arn(region, logArn):
         print("Error getting LogGroup Name in {}: ****StackTrace: {} ***".format(region, error))
         return (1)
 
-def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name, include_global_service_events, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn):
+def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name, include_global_service_events, cloud_watch_logs_log_group_arn, cloud_watch_logs_role_arn, action):
     ''' This function is required for setting the CloudTrail configuration and points the
     Logs function at the CloudWatch LogGroup, it appears that this cannot be carried out
     unless there are sufficient privileges on the SNS Topic Policy, unfortunately that 
@@ -214,16 +225,29 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
     as expected '''
 
     connection = boto.cloudtrail.connect_to_region(region)
-    try:
-        connection.update_trail(
-            name,
-            s3_bucket_name,
-            s3_key_prefix,
-            sns_topic_name,
-            include_global_service_events,
-            cloud_watch_logs_log_group_arn,
-            cloud_watch_logs_role_arn
-            )
+    
+    if 'update' in action:
+        try:
+            connection.update_trail(
+                name,
+                s3_bucket_name,
+                s3_key_prefix,
+                sns_topic_name,
+                include_global_service_events,
+                cloud_watch_logs_log_group_arn,
+                cloud_watch_logs_role_arn
+                )
+    elif 'create' in action:
+        try:
+            connection.create_trail(
+                name,
+                s3_bucket_name,
+                s3_key_prefix,
+                sns_topic_name,
+                include_global_service_events,
+                cloud_watch_logs_log_group_arn,
+                cloud_watch_logs_role_arn
+                )
     except Exception as error:
         print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
         return (1)
@@ -286,14 +310,19 @@ for ct_region in ct_regions:
         while get_stack_status(ct_region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
         print("{} Stack has been successfully created in {} with final status of: {}".format(args.alarmStackName, ct_region, get_stack_status(ct_region, args.alarmStackName)))
-        trails = get_cloudtrail_trail(ct_region)
+        trails = get_cloudtrail_arn(ct_region)
         print(trails)
         sns_topic =  get_sns_topic(ct_region)
         cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
         ct_loggroup_arn = get_loggroup_arn(ct_region, args.alarmStackName + '-CloudTrailLogGroup')
         print("Creating SNS Policy for {}".format(ct_region))
-        configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
-        time.sleep(2)
+        if 'Default' not in get_cloudtrail_name(ct_region):
+            delete_cloudtrail(ct_region, ct_region)
+            configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'create')
+            time.sleep(2)
+        elif 'Default' in get_cloudtrail_name(ct_region):
+            configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'update')
+            time.sleep(2)
         print("Updating {} in {}".format(args.alarmStackName, ct_region))
         update_alarm_stack(ct_region, args.alarmStackName, update_sns_cfn_body)
         trails = ''
@@ -304,9 +333,3 @@ for ct_region in ct_regions:
     elif args.stackAction == 'delete':
         delete_stack(ct_region, args.alarmStackName)
         ct_region = ''
-
-
-
-
-
-
