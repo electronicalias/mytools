@@ -200,7 +200,7 @@ for region in get_cloudtrail_regions():
         while get_stack_status(args.stackName) != 'CREATE_COMPLETE':
             time.sleep(10) 
         print "Stack Created, getting the values for the IAM Role"
-    if args.stackAction == 'create':
+    ''' if args.stackAction == 'create':
         alarm_stack = create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
         print("Waiting for the {} stack to finish creating...".format(args.alarmStackName))
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
@@ -216,7 +216,7 @@ for region in get_cloudtrail_regions():
         update_alarm_stack(region, args.alarmStackName, update_sns_cfn_body)
     elif args.stackAction == 'delete':
         delete_stack(region, args.alarmStackName)
-        delete_stack('eu-west-1', args.stackName)
+        delete_stack('eu-west-1', args.stackName) '''
 
 
 
