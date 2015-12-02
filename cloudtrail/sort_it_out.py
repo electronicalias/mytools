@@ -84,7 +84,7 @@ def create_alarm_stack(stack_name, template_body):
 def update_alarm_stack(stack_name, template_body):
     # Update the SNS Policy in the stack to only allow the local account
     print("Creating Alarm Stack")
-    cf_conn.create_stack(
+    cf_conn.update_stack(
                        stack_name,
                        template_body,
                        parameters=[
@@ -182,7 +182,9 @@ ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
 if args.stackAction == 'create':
     print "Creating SNS Policy"
     configure_trail('Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
+    print "Policy Created"
     time.sleep(2)
+    print "Attempting to update the stack SNS Topic Policy"
     update_alarm_stack(args.alarmStackName, update_sns_cfn_body)
 
 #for region in get_regions():
