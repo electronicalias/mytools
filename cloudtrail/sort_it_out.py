@@ -159,6 +159,7 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
     except Exception as error:
         print("Error with configuring CloudTrail: ****StackTrace: {} ***".format(error))
         return (1)
+
 ''' Logic has changed, removed section.
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.stackName, iam_cfn_body)
@@ -183,7 +184,7 @@ trails = get_cloudtrail_trail()
 sns_topic =  get_sns_topic()
 cloudwatch_iam_role = get_iam_role(args.stackName + '-CloudwatchLogsRole')
 ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
-'''
+
 
 if args.stackAction == 'create':
     print "Creating SNS Policy"
@@ -192,6 +193,7 @@ if args.stackAction == 'create':
     time.sleep(2)
     print "Attempting to update the stack SNS Topic Policy"
     update_alarm_stack(args.alarmStackName, update_sns_cfn_body)
+'''
 
 for region in get_cloudtrail_regions():
     if args.stackAction == 'create' and region == args.iamregion:
@@ -200,7 +202,7 @@ for region in get_cloudtrail_regions():
         while get_stack_status(args.stackName) != 'CREATE_COMPLETE':
             time.sleep(10) 
         print "Stack Created, getting the values for the IAM Role"
-    ''' if args.stackAction == 'create':
+    if args.stackAction == 'create':
         alarm_stack = create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
         print("Waiting for the {} stack to finish creating...".format(args.alarmStackName))
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
@@ -216,7 +218,7 @@ for region in get_cloudtrail_regions():
         update_alarm_stack(region, args.alarmStackName, update_sns_cfn_body)
     elif args.stackAction == 'delete':
         delete_stack(region, args.alarmStackName)
-        delete_stack('eu-west-1', args.stackName) '''
+        delete_stack('eu-west-1', args.stackName)
 
 
 
