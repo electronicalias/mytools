@@ -254,6 +254,7 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
                 cloud_watch_logs_log_group_arn,
                 cloud_watch_logs_role_arn
                 )
+            connection.start_logging(name)
         except Exception as error:
             print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
             return (1)
@@ -269,6 +270,7 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
                 cloud_watch_logs_log_group_arn,
                 cloud_watch_logs_role_arn
                 )
+            connection.start_logging(name)
         except Exception as error:
             print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
             return (1)
@@ -282,6 +284,7 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
                 sns_topic_name,
                 include_global_service_events
                 )
+            connection.start_logging(name)
         except Exception as error:
             print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
             return (1)
