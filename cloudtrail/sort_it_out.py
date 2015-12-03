@@ -340,18 +340,9 @@ for ct_region in ct_regions:
                 configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'update')
                 time.sleep(2)
         else:
-            if 'None' in get_cloudtrail_name(ct_region):
-                configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'recreatenologs')
-                time.sleep(2)
-
-            elif 'Default' not in get_cloudtrail_name(ct_region):
-                delete_cloudtrail(ct_region, ct_region)
-                configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'recreatenologs')
-                time.sleep(2)
-
-            elif 'Default' in get_cloudtrail_name(ct_region):
-                configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'nologs')
-                time.sleep(2)
+            
+            configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'recreatenologs')
+            time.sleep(2)
 
 
 
