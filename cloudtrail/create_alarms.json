@@ -80,6 +80,7 @@
     },
 
     "SecurityGroupChangesMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -95,6 +96,7 @@
     },
       
     "SecurityGroupChangesAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailSecurityGroupChanges",
@@ -111,6 +113,7 @@
     },
 
     "NetworkAclChangesMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -126,6 +129,7 @@
     },
     
     "NetworkAclChangesAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailNetworkAclChanges",
@@ -142,6 +146,7 @@
     },
 
     "GatewayChangesMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -157,6 +162,7 @@
     },
 
     "GatewayChangesAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailGatewayChanges",
@@ -173,6 +179,7 @@
     },
 
     "VpcChangesMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -188,6 +195,7 @@
     },
 
     "VpcChangesAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailVpcChanges",
@@ -204,6 +212,7 @@
     },
 
     "EC2InstanceChangesMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -219,6 +228,7 @@
     },
 
     "EC2InstanceChangesAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailEC2InstanceChanges",
@@ -235,6 +245,7 @@
     },
 
     "EC2LargeInstanceChangesMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -250,6 +261,7 @@
     },
 
     "EC2LargeInstanceChangesAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailEC2LargeInstanceChanges",
@@ -266,6 +278,7 @@
     },
 
     "CloudTrailChangesMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -281,6 +294,7 @@
     },
 
     "CloudTrailChangesAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailChanges",
@@ -297,6 +311,7 @@
     },
 
     "ConsoleSignInFailuresMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -312,6 +327,7 @@
     },
 
     "ConsoleSignInFailuresAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailConsoleSignInFailures",
@@ -328,6 +344,7 @@
     },
 
     "AuthorizationFailuresMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -343,6 +360,7 @@
     },
 
     "AuthorizationFailuresAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailAuthorizationFailures",
@@ -359,6 +377,7 @@
     },
 
     "IAMPolicyChangesMetricFilter": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::Logs::MetricFilter",
       "Properties": {
         "LogGroupName": { "Ref" : "CloudTrailLogGroup" },
@@ -374,6 +393,7 @@
     },
 
     "IAMPolicyChangesAlarm": {
+      "Condition" : "EnabledLogs",
       "Type": "AWS::CloudWatch::Alarm",
       "Properties": {
         "AlarmName" : "CloudTrailIAMPolicyChanges",
@@ -394,6 +414,7 @@
   "Outputs" : {
 
     "LogGroup" : {
+      "Condition" : "EnabledLogs",
       "Description" : "Configure Cloudtrail send logs to this group",
       "Value" : { "Fn::Join" : [ ":", [ "arn:aws:logs", { "Ref" : "AWS::Region" }, { "Ref" : "AWS::AccountId" }, "log-group", { "Ref" : "CloudTrailLogGroup" }, "*" ] ] }
     }
