@@ -193,7 +193,10 @@ def get_cloudtrail_name(region):
 
     ct_conn = boto.cloudtrail.connect_to_region(region)
     trail_list = ct_conn.describe_trails()
-    return trail_list['trailList'][0]['Name']
+    if trail_list > 0:
+        return trail_list['trailList'][0]['Name']
+    else:
+        return 'NoValue'
 
 
 def delete_cloudtrail(name, region):
@@ -340,9 +343,15 @@ for ct_region in ct_regions:
                 configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'recreatenologs')
                 time.sleep(2)
 
+            elif 'NoValue' in get_cloudtrail_name(ct_region):
+                configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'recreatenologs')
+                time.sleep(2)
+
             elif 'Default' in get_cloudtrail_name(ct_region):
                 configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'nologs')
                 time.sleep(2)
+
+
 
         print("Updating {} in {}".format(args.alarmStackName, ct_region))
         # update_alarm_stack(ct_region, args.alarmStackName, update_sns_cfn_body)
