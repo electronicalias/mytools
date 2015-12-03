@@ -275,14 +275,15 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
             print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
             return (1)
 
-    elif 'nologs' in action:
+    elif 'recreatenologs' in action:
         try:
             connection.create_trail(
                 name,
                 s3_bucket_name,
                 s3_key_prefix,
                 sns_topic_name,
-                include_global_service_events
+                include_global_service_events,
+                cloud_watch_logs_role_arn
                 )
             connection.start_logging(name)
         except Exception as error:
@@ -323,7 +324,7 @@ for ct_region in ct_regions:
             time.sleep(10)
         print("{} Stack has been successfully created in {} with final status of: {}".format(args.alarmStackName, ct_region, get_stack_status(ct_region, args.alarmStackName)))
         time.sleep(20)
-        trails = get_cloudtrail_arn(ct_region)
+        # trails = get_cloudtrail_arn(ct_region)
         sns_topic =  get_sns_topic(ct_region)
         cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
 
@@ -336,7 +337,7 @@ for ct_region in ct_regions:
         if ct_region in get_logs_regions():
             configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'create')
             time.sleep(2)
-            
+
         else:
             
             configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', cloudwatch_iam_role, 'recreatenologs')
