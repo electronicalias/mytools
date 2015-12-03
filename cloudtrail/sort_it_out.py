@@ -56,6 +56,13 @@ def get_cloudtrail_regions():
     return [r.name for r in cloudtrail_regioninfo_list]
 
 
+def get_logs_regions():
+    """ Return list of names of regions where CloudTrail is available """
+
+    cloudtrail_regioninfo_list = boto.regioninfo.get_regions('cloudtrail')
+    return [r.name for r in cloudtrail_regioninfo_list]
+
+
 def create_iam_stack(stack_name, template_body):
     '''Create the IAM resources required for CloudTrail'''
 
@@ -78,6 +85,11 @@ def create_iam_stack(stack_name, template_body):
 def create_alarm_stack(region, stack_name, template_body):
     ''' Create the stack in all cloudtrail regions that turns on the alarms for cloudtrail '''
 
+    if region in get_logs_regions:
+        logs_supported = 'True'
+    else:
+        logs_supported = 'False'
+
     connection = boto.cloudformation.connect_to_region(region)
     # Create the alarms required in CloudWatch, set the SNS Topic and Open SNS Topic Policy
     print("Creating {} Stack in {}".format(stack_name, region))
@@ -86,7 +98,8 @@ def create_alarm_stack(region, stack_name, template_body):
                        stack_name,
                        template_body,
                        parameters=[
-                                   ('AlarmEmail','electronicalias@gmail.com')
+                                   ('AlarmEmail','electronicalias@gmail.com'),
+                                   ('LogsSupported', logs_supported)
                                    ],
                        capabilities=['CAPABILITY_IAM'],
                        tags=None
@@ -256,6 +269,19 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
             print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
             return (1)
 
+    elif 'nologs' in action:
+        try:
+            connection.create_trail(
+                name,
+                s3_bucket_name,
+                s3_key_prefix,
+                sns_topic_name,
+                include_global_service_events
+                )
+        except Exception as error:
+            print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
+            return (1)
+
 ''' Logic has changed, removed section.
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.iamStackName, iam_cfn_body)
@@ -314,24 +340,32 @@ for ct_region in ct_regions:
         while get_stack_status(ct_region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
         print("{} Stack has been successfully created in {} with final status of: {}".format(args.alarmStackName, ct_region, get_stack_status(ct_region, args.alarmStackName)))
+        time.sleep(20)
         trails = get_cloudtrail_arn(ct_region)
-        print(trails)
         sns_topic =  get_sns_topic(ct_region)
         cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
-        ct_loggroup_arn = get_loggroup_arn(ct_region, args.alarmStackName + '-CloudTrailLogGroup')
+
+        if ct_region in get_logs_regions:
+            ct_loggroup_arn = get_loggroup_arn(ct_region, args.alarmStackName + '-CloudTrailLogGroup')
+
         print("Creating SNS Policy for {}".format(ct_region))
 
-        if 'Default' not in get_cloudtrail_name(ct_region):
-            delete_cloudtrail(ct_region, ct_region)
-            configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'create')
-            time.sleep(2)
 
-        elif 'Default' in get_cloudtrail_name(ct_region):
-            configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'update')
+        if ct_region in get_logs_regions:
+            if 'Default' not in get_cloudtrail_name(ct_region):
+                delete_cloudtrail(ct_region, ct_region)
+                configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'create')
+                time.sleep(2)
+
+            elif 'Default' in get_cloudtrail_name(ct_region):
+                configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'update')
+                time.sleep(2)
+        else:
+            configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'nologs')
             time.sleep(2)
 
         print("Updating {} in {}".format(args.alarmStackName, ct_region))
-        update_alarm_stack(ct_region, args.alarmStackName, update_sns_cfn_body)
+        # update_alarm_stack(ct_region, args.alarmStackName, update_sns_cfn_body)
         trails = ''
         sns_topic = ''
         cloudwatch_iam_role = ''

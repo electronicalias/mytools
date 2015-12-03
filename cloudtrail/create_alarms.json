@@ -6,13 +6,28 @@
     "AlarmEmail" : {
       "Description" : "Email for Cloudwatch alerts",
       "Type" : "String"
+    },
+
+    "LogsSupported" : {
+      "Description" : "True or false for the support of Logs in a region.",
+      "Type" : "String"
     }
+
+  },
+  
+  "Conditions" : {
+ 
+    "EnableLogs" : {
+      "Fn::Equals" : [ "True", { "Ref" : "LogsSupported" } ]
+    }
+
 
   },
 
   "Resources" : {
     
     "CloudTrailLogGroup" : {
+      "Condition" : "EnabledLogs",
       "Type" : "AWS::Logs::LogGroup",
       "Properties" : {
         "RetentionInDays" : "1"
