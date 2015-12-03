@@ -282,6 +282,19 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
             print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
             return (1)
 
+    elif 'recreatenologs' in action:
+        try:
+            connection.update_trail(
+                name,
+                s3_bucket_name,
+                s3_key_prefix,
+                sns_topic_name,
+                include_global_service_events
+                )
+        except Exception as error:
+            print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
+            return (1)
+
 ''' Logic has changed, removed section.
 if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
     iam_stack = create_iam_stack(args.iamStackName, iam_cfn_body)
@@ -361,8 +374,14 @@ for ct_region in ct_regions:
                 configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'update')
                 time.sleep(2)
         else:
-            configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'nologs')
-            time.sleep(2)
+            if 'Default' not in get_cloudtrail_name(ct_region):
+                delete_cloudtrail(ct_region, ct_region)
+                configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'recreatenologs')
+                time.sleep(2)
+
+            elif 'Default' in get_cloudtrail_name(ct_region):
+                configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'nologs')
+                time.sleep(2)
 
         print("Updating {} in {}".format(args.alarmStackName, ct_region))
         # update_alarm_stack(ct_region, args.alarmStackName, update_sns_cfn_body)
