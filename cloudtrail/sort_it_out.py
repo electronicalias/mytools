@@ -319,13 +319,13 @@ for ct_region in ct_regions:
         sns_topic =  get_sns_topic(ct_region)
         cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
 
-        if ct_region in get_logs_regions:
+        if ct_region in get_logs_regions():
             ct_loggroup_arn = get_loggroup_arn(ct_region, args.alarmStackName + '-CloudTrailLogGroup')
 
         print("Creating SNS Policy for {}".format(ct_region))
 
 
-        if ct_region in get_logs_regions:
+        if ct_region in get_logs_regions():
             if 'Default' not in get_cloudtrail_name(ct_region):
                 delete_cloudtrail(ct_region, ct_region)
                 configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'create')
