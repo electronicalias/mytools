@@ -191,13 +191,13 @@ def get_cloudtrail_arn(region):
 
 def get_cloudtrail_name(region):
 
-    ct_conn = boto.cloudtrail.connect_to_region(region)
+    ct_conn = boto.cloudtrail.connect_to_region(region_name=region)
     trail_list = ct_conn.describe_trails()
     for line in trail_list['trailList']:
         if line == 'None':
             return "None"
         else:
-            return trail_list['trailList'][0]['TrailARN']
+            return trail_list['trailList'][0]['Name']
 
 
 def delete_cloudtrail(name, region):
