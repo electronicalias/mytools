@@ -193,10 +193,11 @@ def get_cloudtrail_name(region):
 
     ct_conn = boto.cloudtrail.connect_to_region(region)
     trail_list = ct_conn.describe_trails()
-    if trail_list > 0:
-        return trail_list['trailList'][0]['Name']
-    else:
-        return 'NoValue'
+    for line in trail_list['trailList']:
+        if line == 'None':
+            return "None"
+        else:
+            return trail_list['trailList'][0]['TrailARN']
 
 
 def delete_cloudtrail(name, region):
@@ -338,12 +339,12 @@ for ct_region in ct_regions:
                 configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role, 'update')
                 time.sleep(2)
         else:
-            if 'Default' not in get_cloudtrail_name(ct_region):
-                delete_cloudtrail(ct_region, ct_region)
+            if 'None' in get_cloudtrail_name(ct_region):
                 configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'recreatenologs')
                 time.sleep(2)
 
-            elif 'NoValue' in get_cloudtrail_name(ct_region):
+            elif 'Default' not in get_cloudtrail_name(ct_region):
+                delete_cloudtrail(ct_region, ct_region)
                 configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'recreatenologs')
                 time.sleep(2)
 
