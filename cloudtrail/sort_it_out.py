@@ -341,7 +341,7 @@ for ct_region in ct_regions:
                 time.sleep(2)
         else:
             
-            configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', 'NONE', 'recreatenologs')
+            configure_trail(ct_region, 'Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', 'NONE', cloudwatch_iam_role, 'recreatenologs')
             time.sleep(2)
 
 
