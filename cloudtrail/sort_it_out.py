@@ -59,7 +59,7 @@ def get_cloudtrail_regions():
 def get_logs_regions():
     """ Return list of names of regions where CloudTrail is available """
 
-    cloudtrail_regioninfo_list = boto.regioninfo.get_regions('cloudtrail')
+    cloudtrail_regioninfo_list = boto.regioninfo.get_regions('logs')
     return [r.name for r in cloudtrail_regioninfo_list]
 
 
