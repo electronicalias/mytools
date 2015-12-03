@@ -85,7 +85,7 @@ def create_iam_stack(stack_name, template_body):
 def create_alarm_stack(region, stack_name, template_body):
     ''' Create the stack in all cloudtrail regions that turns on the alarms for cloudtrail '''
 
-    if region in get_logs_regions:
+    if region in get_logs_regions():
         logs_supported = 'True'
     else:
         logs_supported = 'False'
@@ -295,45 +295,6 @@ def configure_trail(region, name, s3_bucket_name, s3_key_prefix, sns_topic_name,
             print("Error configuring CloudTrail in {}: ****StackTrace: {} ***".format(region, error))
             return (1)
 
-''' Logic has changed, removed section.
-if args.stackAction == 'create' and args.iamregion == 'eu-west-1':
-    iam_stack = create_iam_stack(args.iamStackName, iam_cfn_body)
-    print "Waiting for the stack to finish creating..."
-    while get_stack_status(args.iamStackName) != 'CREATE_COMPLETE':
-        time.sleep(10) 
-    print "Stack Created, getting the values for the IAM Role"
-elif args.stackAction == 'delete':
-    delete_iam_stack(args.iamStackName)
-
-
-if args.stackAction == 'create':
-    alarm_stack = create_alarm_stack(args.alarmStackName, alarms_cfn_body)
-    print("Waiting for the {} stack to finish creating...".format(args.alarmStackName))
-    while get_stack_status(args.alarmStackName) != 'CREATE_COMPLETE':
-        time.sleep(10)
-    print("{} has been successfully created.".format(args.alarmStackName))
-elif args.stackAction =='delete':
-    delete_iam_stack(args.alarmStackName)
-
-trails = get_cloudtrail_trail()
-sns_topic =  get_sns_topic()
-cloudwatch_iam_role = get_iam_role(args.iamStackName + '-CloudwatchLogsRole')
-ct_loggroup_arn = get_loggroup_arn(args.alarmStackName + '-CloudTrailLogGroup')
-
-
-if args.stackAction == 'create':
-    print "Creating SNS Policy"
-    configure_trail('Default', 'mmc-innovation-centre-logs', 'CloudTrail', 'CloudtrailAlerts', 'True', ct_loggroup_arn, cloudwatch_iam_role)
-    print "Policy Created"
-    time.sleep(2)
-    print "Attempting to update the stack SNS Topic Policy"
-    update_alarm_stack(args.alarmStackName, update_sns_cfn_body)
-'''
-
-
-''' Run the logic that will create the IAM Role and use the master region to send the commands
-    then configure the remaining CloudTrail enabled regions with all the alarms required to notify
-    via SNS Emails '''
 
 if args.stackAction == 'create':
     iam_stack = create_iam_stack(args.iamStackName, iam_cfn_body)
