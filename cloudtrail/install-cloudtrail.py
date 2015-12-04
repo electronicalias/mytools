@@ -136,10 +136,7 @@ def get_iam_role(region, iamStackName):
         return (1)
 
 
-
-ct_regions = get_regions()
-
-for region in ct_regions:
+for region in get_regions():
 
     if args.iamRegion in region.name and 'create' == args.stackAction:
 
