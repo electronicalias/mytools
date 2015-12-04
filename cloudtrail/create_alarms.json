@@ -41,7 +41,7 @@
   "Resources" : {
     
     "CloudTrailLogGroup" : {
-      "Condition" : "EnabledCloudTrail",
+      "Condition" : "EnabledLogs",
       "Type" : "AWS::Logs::LogGroup",
       "Properties" : {
         "RetentionInDays" : "1"
