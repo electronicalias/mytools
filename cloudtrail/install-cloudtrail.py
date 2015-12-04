@@ -147,8 +147,6 @@ for region in get_regions():
 
             iam_role = get_iam_role(args.iamRegion, args.iamStackName)
             create_alarm_stack(region.name, args.alarmStackName, alarms_cfn_body, iam_role)
-            while get_stack_status(region.name, args.alarmStackName) != 'CREATE_COMPLETE':
-                time.sleep(10)
 
         elif 'delete' == args.stackAction:
 
