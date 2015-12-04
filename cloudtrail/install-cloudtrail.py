@@ -81,10 +81,10 @@ def create_alarm_stack(region, stack_name, template_body, iam_role):
                                    ('AlarmEmail','electronicalias@gmail.com'),
                                    ('LogsSupported', logs_supported),
                                    ('CloudTrailSupported', cloudtrail_supported),
-                                   ('IamLogsRole', iam_role),
-                                   ('disable_rollback', True)
+                                   ('IamLogsRole', iam_role)
                                    ],
                        capabilities=['CAPABILITY_IAM'],
+                       disable_rollback=True
                        tags=None
                        )
     except Exception as error:
