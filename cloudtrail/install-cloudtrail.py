@@ -6,6 +6,7 @@ Boto Version:   2.38
 
 ''' Import required modules '''
 import boto.cloudformation
+import boto.ec2
 import argparse
 import time
 
@@ -32,6 +33,12 @@ alarms_cfn_body = alarm_file.read()
 alarm_file.close()
 
 
+def get_regions():
+    """ Return list of names of regions where CloudTrail is available """
+
+    region_list = boto.regioninfo.get_regions('cloudtrail')
+    return [r.name for r in region_list]
+
 def create_iam_stack(region, stack_name, template_body):
     '''Create the IAM resources required for CloudTrail'''
     IamInstalled = 'True'
@@ -56,8 +63,15 @@ def create_alarm_stack(region, stack_name, template_body, iam_role):
     ''' Create the stack in all cloudtrail regions that turns on the alarms for cloudtrail '''
 
     connection = boto.cloudformation.connect_to_region(region_name=region)
+
     # Create the alarms required in CloudWatch, set the SNS Topic and Open SNS Topic Policy
-    logs_supported = 'True'
+    if 'sa-east-1' in region:
+        logs_supported = 'False'
+        cloudtrail_supported = 'True'
+    else:
+        logs_supported = 'False'
+        cloudtrail_supported = 'True'
+
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
         connection.create_stack(
@@ -66,6 +80,7 @@ def create_alarm_stack(region, stack_name, template_body, iam_role):
                        parameters=[
                                    ('AlarmEmail','electronicalias@gmail.com'),
                                    ('LogsSupported', logs_supported),
+                                   ('CloudTrailSupported', cloudtrail_supported),
                                    ('IamLogsRole', iam_role)
                                    ],
                        capabilities=['CAPABILITY_IAM'],
@@ -122,10 +137,12 @@ def get_iam_role(region, iamStackName):
 
 
 
-ct_regions = ['eu-west-1', 'ap-southeast-1']
+ct_regions = get_regions()
 
 for region in ct_regions:
+
     if args.iamRegion in region and 'create' == args.stackAction:
+
         create_iam_stack(region, args.iamStackName, iam_cfn_body)
         while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
@@ -134,14 +151,21 @@ for region in ct_regions:
         create_alarm_stack(region, args.alarmStackName, alarms_cfn_body, iam_role)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
+
+
     elif args.iamRegion not in region and 'create' == args.stackAction:
+
         iam_role = get_iam_role(args.iamRegion, args.iamStackName)
         create_alarm_stack(region, args.alarmStackName, alarms_cfn_body, iam_role)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
+
     elif args.iamRegion not in region and 'delete' == args.stackAction:
+
         delete_stack(region, args.alarmStackName)
+
     elif args.iamRegion in region and 'delete' == args.stackAction:
+
         delete_stack(region, args.alarmStackName)
         delete_stack(region, args.iamStackName)
 
