@@ -102,7 +102,7 @@
         "CloudWatchLogsLogGroupArn" : {
           "Fn::If" : [ 
             "EnabledLogs",
-            { "Fn::Join" : [ ":", [ "arn:aws:logs", { "Ref" : "AWS::Region" }, { "Ref" : "AWS::AccountId" }, "log-group", { "Ref" : "CloudTrailLogGroup" }, "*" ] ] },
+            { "Fn::Join" : [ "", [ "arn:aws:logs", { "Ref" : "AWS::Region" }, { "Ref" : "AWS::AccountId" }, "log-group", { "Ref" : "CloudTrailLogGroup" }, "*" ] ] },
             { "Ref" : "AWS::NoValue" }
           ]
         },
