@@ -99,22 +99,6 @@
       "Condition" : "EnabledCloudTrail",
       "Type" : "AWS::CloudTrail::Trail",
       "Properties" : {
-        "CloudWatchLogsLogGroupArn" : {
-          "Fn::If" : [ 
-            "EnabledLogs",
-            { "Fn::Join" : [ "", [ "arn:aws:logs", { "Ref" : "AWS::Region" }, { "Ref" : "AWS::AccountId" }, "log-group", { "Ref" : "CloudTrailLogGroup" }, "*" ] ] },
-            { "Ref" : "AWS::NoValue" }
-          ]
-        },
-        "CloudWatchLogsRoleArn" : {
-          "Fn::If" : [ 
-            "EnabledLogs",
-            { "Ref" : "IamLogsRole" }, 
-            { "Ref" : "AWS::NoValue" }
-          ]
-        },
-        "EnableLogFileValidation" : "False",
-        "IncludeGlobalServiceEvents" : "True",
         "IsLogging" : "True",
         "S3BucketName" : "mmc-innovation-centre-logs",
         "S3KeyPrefix" : "CloudTrail",
