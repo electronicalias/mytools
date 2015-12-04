@@ -141,7 +141,9 @@ if 'create' == args.stackAction:
         time.sleep(10)
 
 for region in get_regions():
-
+    if 'cn-north-1' in region.name or 'us-gov-west-1' in region.name:
+        break 
+        
     if 'create' == args.stackAction:
 
         iam_role = get_iam_role(args.iamRegion, args.iamStackName)
