@@ -52,7 +52,7 @@ def create_iam_stack(region, stack_name, template_body):
         return (1)
 
 
-def create_alarm_stack(region, stack_name, template_body):
+def create_alarm_stack(region, stack_name, template_body, iam_role):
     ''' Create the stack in all cloudtrail regions that turns on the alarms for cloudtrail '''
 
     connection = boto.cloudformation.connect_to_region(region_name=region)
@@ -65,7 +65,8 @@ def create_alarm_stack(region, stack_name, template_body):
                        template_body,
                        parameters=[
                                    ('AlarmEmail','electronicalias@gmail.com'),
-                                   ('LogsSupported', logs_supported)
+                                   ('LogsSupported', logs_supported),
+                                   ('IamLogsRole', iam_role)
                                    ],
                        capabilities=['CAPABILITY_IAM'],
                        tags=None
@@ -128,12 +129,13 @@ for region in ct_regions:
         create_iam_stack(region, args.iamStackName, iam_cfn_body)
         while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
-        create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+        iam_role = get_iam_role(args.iamRegion)
+        create_alarm_stack(region, args.alarmStackName, alarms_cfn_body, iam_role)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
     elif args.iamRegion not in region and 'create' == args.stackAction:
         iam_role = get_iam_role(args.iamRegion)
-        create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+        create_alarm_stack(region, args.alarmStackName, alarms_cfn_body, iam_role)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
     elif args.iamRegion not in region and 'delete' == args.stackAction:
