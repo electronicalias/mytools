@@ -123,23 +123,23 @@ def get_iam_role(region, iamStackName):
 ct_regions = ['eu-west-1', 'ap-southeast-1']
 
 for region in ct_regions:
-	if args.iamRegion in region and args.stackAction == 'create':
-      create_iam_stack(region, args.iamStackName, iam_cfn_body)
-      while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
-          time.sleep(10)
-      create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
-      while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
-          time.sleep(10)
-	elif args.iamRegion not in region and args.stackAction == 'create':
-      iam_role = get_iam_role(args.iamRegion)
-      logs_supported = 'True'
-      create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
-      while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
-          time.sleep(10)
-  elif args.iamRegion not in region and args.stackAction == 'delete':
-      delete_stack(region, args.alarmStackName)
-  elif args.iamRegion in region and args.stackAction == 'delete':
-      delete_stack(region, args.alarmStackName)
-      delete_stack(region, args.iamStackName)
+	  if args.iamRegion in region and args.stackAction == 'create':
+        create_iam_stack(region, args.iamStackName, iam_cfn_body)
+        while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
+            time.sleep(10)
+        create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+        while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+            time.sleep(10)
+	  elif args.iamRegion not in region and args.stackAction == 'create':
+        iam_role = get_iam_role(args.iamRegion)
+        logs_supported = 'True'
+        create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+        while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+            time.sleep(10)
+    elif args.iamRegion not in region and args.stackAction == 'delete':
+        delete_stack(region, args.alarmStackName)
+    elif args.iamRegion in region and args.stackAction == 'delete':
+        delete_stack(region, args.alarmStackName)
+        delete_stack(region, args.iamStackName)
 
 
