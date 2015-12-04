@@ -69,7 +69,7 @@ def create_alarm_stack(region, stack_name, template_body, iam_role):
         logs_supported = 'False'
         cloudtrail_supported = 'True'
     else:
-        logs_supported = 'False'
+        logs_supported = 'True'
         cloudtrail_supported = 'True'
 
     print("Creating {} Stack in {}".format(stack_name, region))
