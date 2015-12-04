@@ -11,6 +11,11 @@
     "LogsSupported" : {
       "Description" : "True or false for the support of Logs in a region.",
       "Type" : "String"
+    },
+
+    "IamLogsRole" : {
+      "Description" : "The IAM Logs Role Required.",
+      "Type" : "String"
     }
 
   },
@@ -20,7 +25,8 @@
     "EnabledLogs" : {
       "Fn::Or" : [
         { "Fn::Equals" : [ "True", { "Ref" : "LogsSupported" } ]},
-        { "Fn::Equals" : [ "ap-northeast-1", { "Ref" : "AWS::Region" } ]}
+        { "Fn::Equals" : [ "ap-northeast-1", { "Ref" : "AWS::Region" } ]},
+        { "Fn::Equals" : [ "ap-southeast-1", { "Ref" : "AWS::Region" } ]}
       ]
     }
 
@@ -79,6 +85,21 @@
           ]
         },
         "Topics" : [ { "Ref" : "alertSNStopic" } ]
+      }
+    },
+
+    "RegionCloudTrail" : {
+      "Condition" : "EnabledLogs",
+      "Type" : "AWS::CloudTrail::Trail",
+       "Properties" : {
+         "CloudWatchLogsLogGroupArn" : { "Fn::Join" : [ ":", [ "arn:aws:logs", { "Ref" : "AWS::Region" }, { "Ref" : "AWS::AccountId" }, "log-group", { "Ref" : "CloudTrailLogGroup" }, "*" ] ] },
+         "CloudWatchLogsRoleArn" : { "Ref" : "IamLogsRole" }, 
+         "EnableLogFileValidation" : "False",
+         "IncludeGlobalServiceEvents" : "True",
+         "IsLogging" : "True",
+         "S3BucketName" : "mmc-innovation-centre-logs",
+         "S3KeyPrefix" : "CloudTrail",
+         "SnsTopicName" : { "Fn::GetAtt" : [ "alertSNStopic", "TopicName"] }
       }
     },
 
