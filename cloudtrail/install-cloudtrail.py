@@ -162,9 +162,10 @@ for region in get_regions():
     if 'cn-north-1' not in region.name and 'us-gov-west-1' not in region.name:
 
         if region.name in args.iamRegion:
-            print("Stack Status for the {} stack in {} is: \t\t{}".format(args.iamStackName, region.name, get_stack_status(region.name, args.iamStackName)))
-            print("Stack Status for the {} stack in {} is: \t\t{}".format(args.alarmStackName, region.name, get_stack_status(region.name, args.alarmStackName)))
+            print("Region \t \t Stack Name \t \t Status")
+            print("{} \t \t {} \t \t {}".format(args.iamStackName, region.name, get_stack_status(region.name, args.iamStackName)))
+            print("{} \t \t {} \t \t {}".format(args.alarmStackName, region.name, get_stack_status(region.name, args.alarmStackName)))
         
         if region.name not in args.iamRegion:
-            print("Stack Status for the {} stack in {} is: \t\t{}".format(args.alarmStackName, region.name, get_stack_status(region.name, args.alarmStackName)))
+            print("{} \t \t {} \t \t {}".format(args.alarmStackName, region.name, get_stack_status(region.name, args.alarmStackName)))
            
