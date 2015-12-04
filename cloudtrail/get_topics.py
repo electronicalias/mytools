@@ -11,5 +11,15 @@ def getSnsTopics():
         print("Error with getting SNS Topics: ****StackTrace: {} ***".format(error))
         return (1)
 
+def getSnsTopicAttribs(topic):
+    try:
+        topics = sns_conn.get_topic_attributes(topic)
+        return topics
+    except Exception as error:
+        print("Error with getting SNS Topic Attributes: ****StackTrace: {} ***".format(error))
+        return (1)
+
 sns_topics = getSnsTopics()
-print sns_topics
+sns_topic_attribs = getSnsTopicAttribs(sns_topics)
+print("Here are the details of the following Topic: {}".format(sns_topics))
+print sns_topic_attribs

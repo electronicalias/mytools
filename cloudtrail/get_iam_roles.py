@@ -1,7 +1,7 @@
 import boto.iam
 import boto.cloudformation
 
-iam_conn = boto.iam.connect_to_region(region_name='eu-west-1')
+iam_conn = boto.iam.connect_to_region(region_name='ap-southeast-1')
 cf_conn = boto.cloudformation.connect_to_region(region_name='eu-west-1')
 
 
