@@ -20,7 +20,8 @@
     "EnabledLogs" : {
       "Fn::Or" : [
         { "Fn::Equals" : [ "True", { "Ref" : "LogsSupported" } ]},
-        { "Fn::Equals" : [ "ap-northeast-1", { "Ref" : "AWS::Region" } ]}
+        { "Fn::Equals" : [ "ap-northeast-1", { "Ref" : "AWS::Region" } ]},
+        { "Fn::Equals" : [ "ap-southeast-1", { "Ref" : "AWS::Region" } ]}
       ]
     }
 
