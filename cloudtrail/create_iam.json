@@ -19,7 +19,7 @@
   "Conditions" : {
  
     "CreateIamRole" : {
-      "Fn::Equals" : [ "True", { "Ref" : "IamRoleInstalled" } ]
+      "Fn::Equals" : [ "True", { "Ref" : "InstallIamRole" } ]
     }
 
 
