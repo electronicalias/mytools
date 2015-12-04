@@ -129,12 +129,12 @@ for region in ct_regions:
         create_iam_stack(region, args.iamStackName, iam_cfn_body)
         while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
-        iam_role = get_iam_role(args.iamRegion)
+        iam_role = get_iam_role(args.iamRegion, args.iamStackName)
         create_alarm_stack(region, args.alarmStackName, alarms_cfn_body, iam_role)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
     elif args.iamRegion not in region and 'create' == args.stackAction:
-        iam_role = get_iam_role(args.iamRegion)
+        iam_role = get_iam_role(args.iamRegion, args.iamStackName)
         create_alarm_stack(region, args.alarmStackName, alarms_cfn_body, iam_role)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
