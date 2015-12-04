@@ -32,7 +32,7 @@ alarms_cfn_body = alarm_file.read()
 alarm_file.close()
 
 
-def create_iam_stack(stack_name, region, template_body):
+def create_iam_stack(region, stack_name, template_body):
     '''Create the IAM resources required for CloudTrail'''
     if args.iamRegion in region:
         IamInstalled = 'True'
@@ -55,7 +55,7 @@ def create_iam_stack(stack_name, region, template_body):
         return (1)
 
 
-def create_alarm_stack(stack_name, region, template_body):
+def create_alarm_stack(region, stack_name, template_body):
     ''' Create the stack in all cloudtrail regions that turns on the alarms for cloudtrail '''
 
     connection = boto.cloudformation.connect_to_region(region_name=region)
