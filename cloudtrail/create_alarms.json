@@ -32,7 +32,7 @@
     },
 
     "EnabledCloudTrail" : {
-      "Fn::Equals" : [ "True", { "Ref" : "LogsSupported" } ]
+      "Fn::Equals" : [ "True", { "Ref" : "CloudTrailSupported" } ]
     }
 
 
