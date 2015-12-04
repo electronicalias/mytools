@@ -99,7 +99,7 @@
          "IsLogging" : "True",
          "S3BucketName" : "mmc-innovation-centre-logs",
          "S3KeyPrefix" : "CloudTrail",
-         "SnsTopicName" : {"Fn::GetAtt":["Topic","alertSNStopic"]}
+         "SnsTopicName" : { "Fn::GetAtt" : [ "alertSNStopic", "TopicName"] }
       }
     },
 
