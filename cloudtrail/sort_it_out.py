@@ -353,6 +353,5 @@ for ct_region in ct_regions:
         ct_loggroup_arn = ''
         ct_region = ''
     elif args.stackAction == 'delete':
-        delete_cloudtrail('Default', ct_region)
         delete_stack(ct_region, args.alarmStackName)
         ct_region = ''

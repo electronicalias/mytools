@@ -6,6 +6,7 @@ Boto Version:   2.38
 
 ''' Import required modules '''
 import boto.cloudformation
+import argparse
 import time
 
 
@@ -37,7 +38,7 @@ def create_iam_stack(stack_name, region, template_body):
         IamInstalled = 'True'
     else:
     	IamInstalled = 'False'
-
+    cf_conn = boto.cloudformation.connect_to_region(region)
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
         cf_conn.create_stack(
@@ -86,7 +87,7 @@ def get_iam_role(region, iamStackName):
         if len(stacks) == 1:
             stack = stacks[0]
         for output in stack.outputs:
-        return('%s' % (output.value))
+            return('%s' % (output.value))
     except Exception as error:
         print("Error getting IAM Role: ****StackTrace: {} ***".format(error))
         return (1)
@@ -97,11 +98,11 @@ ct_regions = ['eu-west-1', 'ap-southeast-1']
 
 for region in ct_regions:
 	if args.iamRegion in region:
-		create_iam_stack(region, 'cloudtrail-iam', iam_cfn_body)
-		time.sleep(60)
-		create_alarm_stack(region, 'cloudtrail-alarms', alarms_cfn_body)
+            create_iam_stack(region, args.iamStackName, iam_cfn_body)
+            time.sleep(60)
+            create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
 	else:
-        iam_role = get_iam_role(args.iamRegion)
-        logs_supported = 'True'
-        create_alarm_stack(region, 'cloudtrail-alarms', alarms_cfn_body)
-        time.sleep(60)
+            iam_role = get_iam_role(args.iamRegion)
+            logs_supported = 'True'
+            create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+            time.sleep(60)
