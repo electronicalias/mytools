@@ -109,7 +109,6 @@ def delete_stack(region, stack_name):
     reconfigure cloudtrail, so there will be a role left in cloudtrail '''
 
     connection = boto.cloudformation.connect_to_region(region)
-    print("Deleting {} Stack".format(stack_name))
     try:
         connection.delete_stack(
                        stack_name
