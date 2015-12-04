@@ -37,8 +37,7 @@ def get_regions():
     """ Return list of names of regions where CloudTrail is available """
 
     region_list = boto.ec2.regions()
-    for item in region_list:
-        return item.name
+    return region_list
 
 def create_iam_stack(region, stack_name, template_body):
     '''Create the IAM resources required for CloudTrail'''
@@ -142,32 +141,32 @@ ct_regions = get_regions()
 
 for region in ct_regions:
 
-    if args.iamRegion in region and 'create' == args.stackAction:
+    if args.iamRegion in region.name and 'create' == args.stackAction:
 
-        create_iam_stack(region, args.iamStackName, iam_cfn_body)
-        while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
+        create_iam_stack(region.name, args.iamStackName, iam_cfn_body)
+        while get_stack_status(region.name, args.iamStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
         iam_role = get_iam_role(args.iamRegion, args.iamStackName)
         print iam_role
-        create_alarm_stack(region, args.alarmStackName, alarms_cfn_body, iam_role)
-        while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+        create_alarm_stack(region.name, args.alarmStackName, alarms_cfn_body, iam_role)
+        while get_stack_status(region.name, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
 
 
-    elif args.iamRegion not in region and 'create' == args.stackAction:
+    elif args.iamRegion not in region.name and 'create' == args.stackAction:
 
         iam_role = get_iam_role(args.iamRegion, args.iamStackName)
-        create_alarm_stack(region, args.alarmStackName, alarms_cfn_body, iam_role)
-        while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+        create_alarm_stack(region.name, args.alarmStackName, alarms_cfn_body, iam_role)
+        while get_stack_status(region.name, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
 
-    elif args.iamRegion not in region and 'delete' == args.stackAction:
+    elif args.iamRegion not in region.name and 'delete' == args.stackAction:
 
         delete_stack(region, args.alarmStackName)
 
-    elif args.iamRegion in region and 'delete' == args.stackAction:
+    elif args.iamRegion in region.name and 'delete' == args.stackAction:
 
-        delete_stack(region, args.alarmStackName)
-        delete_stack(region, args.iamStackName)
+        delete_stack(region.name, args.alarmStackName)
+        delete_stack(region.name, args.iamStackName)
 
 
