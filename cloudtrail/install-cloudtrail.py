@@ -141,24 +141,22 @@ if 'create' == args.stackAction:
         time.sleep(10)
 
 for region in get_regions():
-    if 'cn-north-1' in region.name or 'us-gov-west-1' in region.name:
-        break 
-        
-    if 'create' == args.stackAction:
+
+    if 'create' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
 
         iam_role = get_iam_role(args.iamRegion, args.iamStackName)
         create_alarm_stack(region.name, args.alarmStackName, alarms_cfn_body, iam_role)
         while get_stack_status(region.name, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
 
-    elif args.iamRegion not in region.name and 'delete' == args.stackAction:
+    elif args.iamRegion not in region.name and 'delete' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
 
         delete_stack(region, args.alarmStackName)
 
-    elif 'delete' == args.stackAction:
+    elif 'delete' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
 
         delete_stack(region.name, args.alarmStackName)
         
 
-if 'delete' == args.stackAction:
+if 'delete' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
     delete_stack(args.iamRegion, args.iamStackName)
