@@ -34,6 +34,7 @@ alarm_file.close()
 
 def create_iam_stack(region, stack_name, template_body):
     '''Create the IAM resources required for CloudTrail'''
+    IamInstalled = 'True'
     cf_conn = boto.cloudformation.connect_to_region(region)
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
@@ -56,6 +57,7 @@ def create_alarm_stack(region, stack_name, template_body):
 
     connection = boto.cloudformation.connect_to_region(region_name=region)
     # Create the alarms required in CloudWatch, set the SNS Topic and Open SNS Topic Policy
+    logs_supported = 'True'
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
         connection.create_stack(
@@ -123,7 +125,6 @@ ct_regions = ['eu-west-1', 'ap-southeast-1']
 
 for region in ct_regions:
     if args.iamRegion in region and args.stackAction == 'create':
-        IamInstalled = 'True'
         create_iam_stack(region, args.iamStackName, iam_cfn_body)
         while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
@@ -132,7 +133,6 @@ for region in ct_regions:
             time.sleep(10)
     elif args.iamRegion not in region and args.stackAction == 'create':
         iam_role = get_iam_role(args.iamRegion)
-        logs_supported = 'True'
         create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
