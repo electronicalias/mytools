@@ -34,7 +34,6 @@ alarm_file.close()
 
 def create_iam_stack(region, stack_name, template_body):
     '''Create the IAM resources required for CloudTrail'''
-    IamInstalled = 'True'
     cf_conn = boto.cloudformation.connect_to_region(region)
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
@@ -124,6 +123,7 @@ ct_regions = ['eu-west-1', 'ap-southeast-1']
 
 for region in ct_regions:
 	  if args.iamRegion in region and args.stackAction == 'create':
+        IamInstalled = 'True'
         create_iam_stack(region, args.iamStackName, iam_cfn_body)
         while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
