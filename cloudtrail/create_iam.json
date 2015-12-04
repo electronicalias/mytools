@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
-  "Description": "S3 bucket for Cloudtrail logs",
+  "Description": "Create IAM Roles for CloudTrail to use with CloudWatch Logs",
 
   "Parameters" : {
 

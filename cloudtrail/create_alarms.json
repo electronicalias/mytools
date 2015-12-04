@@ -87,7 +87,7 @@
                 "SNS:Receive",
                 "SNS:SetTopicAttributes"
               ],
-              "Resource": { "Fn::Join" : [ "", [ "arn:aws:sns:", { "Ref" : "AWS::Region" } ,":", { "Ref" : "AWS::AccountId"}, ":CloudtrailAlerts" ]]}
+              "Resource": { "Fn::Join" : [ ":", [ "arn:aws:sns:", { "Ref" : "AWS::Region" } ,":", { "Ref" : "AWS::AccountId"}, ":CloudtrailAlerts" ]]}
             }
           ]
         },
