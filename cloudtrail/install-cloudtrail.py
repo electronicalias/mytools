@@ -84,7 +84,7 @@ def create_alarm_stack(region, stack_name, template_body, iam_role):
                                    ('IamLogsRole', iam_role)
                                    ],
                        capabilities=['CAPABILITY_IAM'],
-                       disable_rollback=True
+                       disable_rollback=True,
                        tags=None
                        )
     except Exception as error:
