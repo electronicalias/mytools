@@ -36,8 +36,9 @@ alarm_file.close()
 def get_regions():
     """ Return list of names of regions where CloudTrail is available """
 
-    region_list = boto.regioninfo.get_regions('cloudtrail')
-    return [r.name for r in region_list]
+    region_list = boto.ec2.regions()
+    for item in region_list:
+        return item.name
 
 def create_iam_stack(region, stack_name, template_body):
     '''Create the IAM resources required for CloudTrail'''
