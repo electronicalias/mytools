@@ -99,6 +99,7 @@
       "Condition" : "EnabledCloudTrail",
       "Type" : "AWS::CloudTrail::Trail",
       "Properties" : {
+        "IncludeGlobalServiceEvents" : "True",
         "IsLogging" : "True",
         "S3BucketName" : "mmc-innovation-centre-logs",
         "S3KeyPrefix" : "CloudTrail",
