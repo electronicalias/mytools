@@ -150,10 +150,6 @@ for region in get_regions():
             while get_stack_status(region.name, args.alarmStackName) != 'CREATE_COMPLETE':
                 time.sleep(10)
 
-        elif args.iamRegion not in region.name and 'delete' == args.stackAction:
-
-            delete_stack(region, args.alarmStackName)
-
         elif 'delete' == args.stackAction:
 
             delete_stack(region.name, args.alarmStackName)
