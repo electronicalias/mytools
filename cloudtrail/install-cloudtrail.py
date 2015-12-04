@@ -81,7 +81,8 @@ def create_alarm_stack(region, stack_name, template_body, iam_role):
                                    ('AlarmEmail','electronicalias@gmail.com'),
                                    ('LogsSupported', logs_supported),
                                    ('CloudTrailSupported', cloudtrail_supported),
-                                   ('IamLogsRole', iam_role)
+                                   ('IamLogsRole', iam_role),
+                                   ('disable_rollback', True)
                                    ],
                        capabilities=['CAPABILITY_IAM'],
                        tags=None
