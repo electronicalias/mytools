@@ -76,6 +76,20 @@ def create_alarm_stack(region, stack_name, template_body):
         print("Error creating {} in region {}: ****StackTrace: {} ***".format(stack_name, region, error))
         return (1)
 
+def get_stack_status(region, stack_name):
+    ''' This is required to create a wait condition in the script while the stack is
+    creating before the script then tries to read the stack attributes'''
+
+    connection = boto.cloudformation.connect_to_region(region)
+    stacks = connection.describe_stacks(
+                                    stack_name
+                                    )
+    if len(stacks) == 1:
+        stack = stacks[0]
+    else:
+        print ("No stacks found")
+    return stack.stack_status
+
 
 def get_iam_role(region, iamStackName):
     ''' This function gets the IAM Role that is required for CloudTrail to send logs to
@@ -99,10 +113,14 @@ ct_regions = ['eu-west-1', 'ap-southeast-1']
 for region in ct_regions:
 	if args.iamRegion in region:
             create_iam_stack(region, args.iamStackName, iam_cfn_body)
-            time.sleep(60)
+            while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
+                time.sleep(10)
             create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+            while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+                time.sleep(10)
 	else:
             iam_role = get_iam_role(args.iamRegion)
             logs_supported = 'True'
             create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
-            time.sleep(60)
+            while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+                time.sleep(10)
