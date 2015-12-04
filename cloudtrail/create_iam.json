@@ -4,7 +4,7 @@
 
   "Parameters" : {
 
-    "IamRoleInstalled" : {
+    "InstallIamRole" : {
       "Description" : "Requires a true or false to identify whether an IAM role is required",
       "Type" : "String",
       "AllowedValues" : [
@@ -19,7 +19,7 @@
   "Conditions" : {
  
     "CreateIamRole" : {
-      "Fn::Equals" : [ "False", { "Ref" : "IamRoleInstalled" } ]
+      "Fn::Equals" : [ "True", { "Ref" : "IamRoleInstalled" } ]
     }
 
 

@@ -42,7 +42,7 @@ def create_iam_stack(region, stack_name, template_body):
                        stack_name,
                        template_body,
                        parameters=[
-                                   ('IamRoleInstalled',IamInstalled)
+                                   ('InstallIamRole',IamInstalled)
                                    ],
                        capabilities=['CAPABILITY_IAM'],
                        tags=None
