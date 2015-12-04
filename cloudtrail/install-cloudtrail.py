@@ -34,10 +34,7 @@ alarm_file.close()
 
 def create_iam_stack(region, stack_name, template_body):
     '''Create the IAM resources required for CloudTrail'''
-    if args.iamRegion in region:
-        IamInstalled = 'True'
-    else:
-    	IamInstalled = 'False'
+    IamInstalled = 'True'
     cf_conn = boto.cloudformation.connect_to_region(region)
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
@@ -90,6 +87,21 @@ def get_stack_status(region, stack_name):
         print ("No stacks found")
     return stack.stack_status
 
+def delete_stack(region, stack_name):
+    ''' This is used to clean up from within the script, this leaves logging on and doesn't
+    reconfigure cloudtrail, so there will be a role left in cloudtrail '''
+
+    connection = boto.cloudformation.connect_to_region(region)
+    print("Deleting {} Stack".format(stack_name))
+    try:
+        connection.delete_stack(
+                       stack_name
+                       )
+        print("Deleted {} Stack in {}".format(stack_name, region))
+    except Exception as error:
+        print("Error deleting {} in {}: ****StackTrace: {} ***".format(stack_name, region, error))
+        return (1)
+
 
 def get_iam_role(region, iamStackName):
     ''' This function gets the IAM Role that is required for CloudTrail to send logs to
@@ -111,16 +123,23 @@ def get_iam_role(region, iamStackName):
 ct_regions = ['eu-west-1', 'ap-southeast-1']
 
 for region in ct_regions:
-	if args.iamRegion in region:
-            create_iam_stack(region, args.iamStackName, iam_cfn_body)
-            while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
-                time.sleep(10)
-            create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
-            while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
-                time.sleep(10)
-	else:
-            iam_role = get_iam_role(args.iamRegion)
-            logs_supported = 'True'
-            create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
-            while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
-                time.sleep(10)
+	if args.iamRegion in region and args.stackAction == 'create':
+      create_iam_stack(region, args.iamStackName, iam_cfn_body)
+      while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
+          time.sleep(10)
+      create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+      while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+          time.sleep(10)
+	elif args.iamRegion not in region and args.stackAction == 'create':
+      iam_role = get_iam_role(args.iamRegion)
+      logs_supported = 'True'
+      create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
+      while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
+          time.sleep(10)
+  elif args.iamRegion not in region and args.stackAction == 'delete':
+      delete_stack(region, args.alarmStackName)
+  elif args.iamRegion in region and args.stackAction == 'delete':
+      delete_stack(region, args.alarmStackName)
+      delete_stack(region, args.iamStackName)
+
+
