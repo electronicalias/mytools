@@ -135,6 +135,7 @@ def get_iam_role(region, iamStackName):
         print("Error getting IAM Role: ****StackTrace: {} ***".format(error))
         return (1)
 
+
 if 'create' == args.stackAction:
     create_iam_stack(args.iamRegion, args.iamStackName, iam_cfn_body)
     while get_stack_status(args.iamRegion, args.iamStackName) != 'CREATE_COMPLETE':
@@ -157,16 +158,16 @@ if 'cn-north-1' not in region.name and 'us-gov-west-1' not in region.name:
         delete_stack(args.iamRegion, args.iamStackName)
 
 
+print("{0:20} {1:40} {2:50}".format('Stack Name', 'Region Name', 'Stack Status'))
+print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 for region in get_regions():
 
     if 'cn-north-1' not in region.name and 'us-gov-west-1' not in region.name:
 
         if region.name in args.iamRegion:
-            print("Region \t \t Stack Name \t \t Status")
-            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-            print("{} \t \t {} \t \t {}".format(args.iamStackName, region.name, get_stack_status(region.name, args.iamStackName)))
-            print("{} \t \t {} \t \t {}".format(args.alarmStackName, region.name, get_stack_status(region.name, args.alarmStackName)))
+            print("{0:20} {1:40} {2:50}".format(args.iamStackName, region.name, get_stack_status(region.name, args.iamStackName)))
+            print("{0:20} {1:40} {2:50}".format(args.alarmStackName, region.name, get_stack_status(region.name, args.alarmStackName)))
         
         if region.name not in args.iamRegion:
-            print("{} \t \t {} \t \t {}".format(args.alarmStackName, region.name, get_stack_status(region.name, args.alarmStackName)))
+            print("{0:20} {1:40} {2:50}".format(args.alarmStackName, region.name, get_stack_status(region.name, args.alarmStackName)))
            
