@@ -135,22 +135,14 @@ def get_iam_role(region, iamStackName):
         print("Error getting IAM Role: ****StackTrace: {} ***".format(error))
         return (1)
 
-
-for region in get_regions():
-    print region.name
-    if args.iamRegion in region.name and 'create' == args.stackAction:
-
-        create_iam_stack(region.name, args.iamStackName, iam_cfn_body)
+if 'create' == args.stackAction:
+    create_iam_stack(region.name, args.iamStackName, iam_cfn_body)
         while get_stack_status(region.name, args.iamStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
-        iam_role = get_iam_role(args.iamRegion, args.iamStackName)
-        print iam_role
-        create_alarm_stack(region.name, args.alarmStackName, alarms_cfn_body, iam_role)
-        while get_stack_status(region.name, args.alarmStackName) != 'CREATE_COMPLETE':
-            time.sleep(10)
 
-
-    elif args.iamRegion not in region.name and 'create' == args.stackAction:
+for region in get_regions():
+  
+    if 'create' == args.stackAction:
 
         iam_role = get_iam_role(args.iamRegion, args.iamStackName)
         create_alarm_stack(region.name, args.alarmStackName, alarms_cfn_body, iam_role)
@@ -161,9 +153,10 @@ for region in get_regions():
 
         delete_stack(region, args.alarmStackName)
 
-    elif args.iamRegion in region.name and 'delete' == args.stackAction:
+    elif 'delete' == args.stackAction:
 
         delete_stack(region.name, args.alarmStackName)
-        delete_stack(region.name, args.iamStackName)
+        
 
-
+if 'delete' == args.stackAction:
+    delete_stack(region.name, args.iamStackName)
