@@ -141,22 +141,23 @@ if 'create' == args.stackAction:
         time.sleep(10)
 
 for region in get_regions():
+    if 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
 
-    if 'create' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
+        if 'create' == args.stackAction:
 
-        iam_role = get_iam_role(args.iamRegion, args.iamStackName)
-        create_alarm_stack(region.name, args.alarmStackName, alarms_cfn_body, iam_role)
-        while get_stack_status(region.name, args.alarmStackName) != 'CREATE_COMPLETE':
-            time.sleep(10)
+            iam_role = get_iam_role(args.iamRegion, args.iamStackName)
+            create_alarm_stack(region.name, args.alarmStackName, alarms_cfn_body, iam_role)
+            while get_stack_status(region.name, args.alarmStackName) != 'CREATE_COMPLETE':
+                time.sleep(10)
 
-    elif args.iamRegion not in region.name and 'delete' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
+        elif args.iamRegion not in region.name and 'delete' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
 
-        delete_stack(region, args.alarmStackName)
+            delete_stack(region, args.alarmStackName)
 
-    elif 'delete' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
+        elif 'delete' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
 
-        delete_stack(region.name, args.alarmStackName)
+            delete_stack(region.name, args.alarmStackName)
         
-
-if 'delete' == args.stackAction and 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
-    delete_stack(args.iamRegion, args.iamStackName)
+if 'cn-north-1' not in region.name or 'us-gov-west-1' not in region.name:
+    if 'delete' == args.stackAction:
+        delete_stack(args.iamRegion, args.iamStackName)
