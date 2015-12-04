@@ -130,6 +130,7 @@ for region in ct_regions:
         while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
         iam_role = get_iam_role(args.iamRegion, args.iamStackName)
+        print iam_role
         create_alarm_stack(region, args.alarmStackName, alarms_cfn_body, iam_role)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
