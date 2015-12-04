@@ -106,7 +106,13 @@
             { "Ref" : "AWS::NoValue" }
           ]
         },
-        "CloudWatchLogsRoleArn" : { "Ref" : "IamLogsRole" }, 
+        "CloudWatchLogsRoleArn" : {
+          "Fn::If" : [ 
+            "EnabledLogs",
+            { "Ref" : "IamLogsRole" }, 
+            { "Ref" : "AWS::NoValue" }
+          ]
+        },
         "EnableLogFileValidation" : "False",
         "IncludeGlobalServiceEvents" : "True",
         "IsLogging" : "True",
