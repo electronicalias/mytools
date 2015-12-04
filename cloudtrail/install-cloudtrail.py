@@ -124,21 +124,21 @@ def get_iam_role(region, iamStackName):
 ct_regions = ['eu-west-1', 'ap-southeast-1']
 
 for region in ct_regions:
-    if args.iamRegion in region and args.stackAction == 'create':
+    if args.iamRegion in region and 'create' == args.stackAction:
         create_iam_stack(region, args.iamStackName, iam_cfn_body)
         while get_stack_status(region, args.iamStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
         create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
-    elif args.iamRegion not in region and args.stackAction == 'create':
+    elif args.iamRegion not in region and 'create' == args.stackAction:
         iam_role = get_iam_role(args.iamRegion)
         create_alarm_stack(region, args.alarmStackName, alarms_cfn_body)
         while get_stack_status(region, args.alarmStackName) != 'CREATE_COMPLETE':
             time.sleep(10)
-    elif args.iamRegion not in region and args.stackAction == 'delete':
+    elif args.iamRegion not in region and 'delete' == args.stackAction:
         delete_stack(region, args.alarmStackName)
-    elif args.iamRegion in region and args.stackAction == 'delete':
+    elif args.iamRegion in region and 'delete' == args.stackAction:
         delete_stack(region, args.alarmStackName)
         delete_stack(region, args.iamStackName)
 
