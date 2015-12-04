@@ -58,7 +58,7 @@ def create_iam_stack(stack_name, region, template_body):
 def create_alarm_stack(stack_name, region, template_body):
     ''' Create the stack in all cloudtrail regions that turns on the alarms for cloudtrail '''
 
-    connection = boto.cloudformation.connect_to_region(region)
+    connection = boto.cloudformation.connect_to_region(region_name=region)
     # Create the alarms required in CloudWatch, set the SNS Topic and Open SNS Topic Policy
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
