@@ -137,7 +137,7 @@ def get_iam_role(region, iamStackName):
 
 
 for region in get_regions():
-
+    print region.name
     if args.iamRegion in region.name and 'create' == args.stackAction:
 
         create_iam_stack(region.name, args.iamStackName, iam_cfn_body)
