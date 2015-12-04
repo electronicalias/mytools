@@ -163,6 +163,7 @@ for region in get_regions():
 
         if region.name in args.iamRegion:
             print("Region \t \t Stack Name \t \t Status")
+            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - -")
             print("{} \t \t {} \t \t {}".format(args.iamStackName, region.name, get_stack_status(region.name, args.iamStackName)))
             print("{} \t \t {} \t \t {}".format(args.alarmStackName, region.name, get_stack_status(region.name, args.alarmStackName)))
         
