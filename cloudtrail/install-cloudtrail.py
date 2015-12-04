@@ -137,11 +137,11 @@ def get_iam_role(region, iamStackName):
 
 if 'create' == args.stackAction:
     create_iam_stack(region.name, args.iamStackName, iam_cfn_body)
-        while get_stack_status(region.name, args.iamStackName) != 'CREATE_COMPLETE':
-            time.sleep(10)
+    while get_stack_status(region.name, args.iamStackName) != 'CREATE_COMPLETE':
+        time.sleep(10)
 
 for region in get_regions():
-  
+
     if 'create' == args.stackAction:
 
         iam_role = get_iam_role(args.iamRegion, args.iamStackName)
