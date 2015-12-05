@@ -3,19 +3,19 @@ import boto.cloudformation
 cf_conn = boto.cloudformation.connect_to_region(region_name='eu-west-1')
 
 class stacks:
+    
+    cf_conn = boto.cloudformation.connect_to_region(region_name='eu-west-1')
+	
+    def __init__(self, region):
+        self.region = region 
+        self.stacklist = []
+    
+    def add_stack(self, stack):
+        self.stacklist.append(stack)
+        
 
-	def __init__(self, name, region):
-		self.name = name
-		self.stacklist = []
-		self.regions = []
+s = stacks('eu-west-1')
+s.add_stack('thefutureofstacking')
+s.add_stack('someothername')
 
-	def add_stack(self, stack):
-		self.stacklist.append(stack)
-
-
-stacks = cf_conn.describe_stacks('cloudtrail-iams')
-if len(stacks) == 1:
-    stack = stacks[0]
-
-for output in stack.outputs:
-    stacks.add_stack(output.value)
+print(s.stacklist)
