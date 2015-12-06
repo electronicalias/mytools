@@ -139,7 +139,7 @@ if 'POC' in stackAttributes[0]:
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
     routeTable = create_route_table('PocRouteTable', VPC)
-    route = create_route('InternetRoute', gatewayAttachment, internetGateway, '0.0.0.0/0', routeTable)
+    route = create_route('InternetRoute', 'AttachGateway', internetGateway, '0.0.0.0/0', routeTable)
     count = 1
     while count <= int(args.publicSubnets):
         subnet = create_subnet('PublicSubnet', count, 'public')
