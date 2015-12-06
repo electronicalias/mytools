@@ -152,6 +152,7 @@ if 'POC' in stackAttributes[0]:
     cfn_body = cfn_file.read()
     cfn_file.close()
     '''
+    print(t.to_json())
     cfn_body = str(t.to_json())
     create_stack('eu-west-1', 'test-poc', cfn_body)
 elif 'WEB' in stackAttributes[0]:
