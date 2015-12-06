@@ -1,0 +1,217 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Base template to build out of band Jenkins and Public, Private, Dmz and DB subnets.",
+    "Resources": {
+        "AttachGateway": {
+            "Properties": {
+                "InternetGatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "VpcId": {
+                    "Ref": "PocVpc"
+                }
+            },
+            "Type": "AWS::EC2::VPCGatewayAttachment"
+        },
+        "InternetGateway": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::InternetGateway"
+        },
+        "InternetRoute": {
+            "DependsOn": {
+                "Properties": {
+                    "InternetGatewayId": {
+                        "Ref": "InternetGateway"
+                    },
+                    "VpcId": {
+                        "Ref": "PocVpc"
+                    }
+                },
+                "Type": "AWS::EC2::VPCGatewayAttachment"
+            },
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "RouteTableId": {
+                    "Ref": "PocRouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
+        },
+        "PocRouteTable": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "PocVpc"
+                }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "PocVpc": {
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "172.26.0.0/16"
+                },
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::VPC"
+        },
+        "PrivateSubnet1": {
+            "Properties": {
+                "CidrBlock": "172.26.1.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "private"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "PocVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PrivateSubnet2": {
+            "Properties": {
+                "CidrBlock": "172.26.2.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "private"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "PocVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PrivateSubnetAssociation1": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PocRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PrivateSubnetAssociation2": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PocRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PublicSubnet1": {
+            "Properties": {
+                "CidrBlock": "172.26.1.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "public"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "PocVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PublicSubnetAssociation1": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PocRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnet1"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        }
+    }
+}

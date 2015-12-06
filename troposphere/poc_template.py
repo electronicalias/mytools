@@ -109,6 +109,7 @@ t.add_version('2010-09-09')
 t.add_description ("""\
 Base template to build out of band Jenkins and Public, Private, Dmz and DB subnets.""")
 
+''' Section to create POC '''
 
 if 'POC' in stackType[0]:
     VPC = create_vpc('PocVpc')
@@ -126,5 +127,9 @@ if 'POC' in stackType[0]:
         subnet = create_subnet('PublicSubnet', count, 'public')
         subnetRouteTableAssociation = create_subnet_association('PublicSubnetAssociation', subnet, count)
         count = count + 1
-
-print(t.to_json())
+    with open('templates/POC.json', 'w') as f:
+        f.write(str(t.to_json()))
+elif 'WEB' in stackType[0]:
+    VPC = create_vpc('WebStackVpc')
+    with open('templates/WEB.json', 'w') as f:
+        f.write(str(t.to_json()))

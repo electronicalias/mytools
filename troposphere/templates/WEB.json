@@ -1,0 +1,28 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Base template to build out of band Jenkins and Public, Private, Dmz and DB subnets.",
+    "Resources": {
+        "WebStackVpc": {
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "172.26.0.0/16"
+                },
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::VPC"
+        }
+    }
+}
