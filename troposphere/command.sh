@@ -6,4 +6,5 @@ python poc_template.py \
   --publicSubnets 3 \
   --privateSubnets 2 \
   --dmzSubnets 2 \
-  --dbSubnets 1 
+  --dbSubnets 1 \
+  --stackType WEB 

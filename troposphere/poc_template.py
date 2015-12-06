@@ -14,33 +14,14 @@ parser.add_argument('--privateSubnets')
 parser.add_argument('--publicSubnets')
 parser.add_argument('--dmzSubnets')
 parser.add_argument('--dbSubnets')
+parser.add_argument('--stackType')
 args = parser.parse_args()
 
 pubLimit = '6'
 privLimit = '6'
 
 stackAttributes = []
-val0 = raw_input('''Choose an option:
-1 - VPC with Single Public Zone and up to 5 Public Subnets in the zone
-2 - VPC with 4 Zones and up to 5 subnets per zone (Public, Private, Dmz and Db)
-
-Enter your choice here: ''')
-if '1' in val0:
-    val1 = raw_input('''How many public subnets are required: ''')
-elif '2' in val0:
-    val1 = raw_input('''How many public subnets are required: ''')
-    val2 = raw_input('''How many dmz subnets are required: ''')
-    val3 = raw_input('''How many db subnets are required: ''')
-    val4 = raw_input('''How many private subnets are required: ''')
-
-if '1' in val0:
-    stackAttributes.append('POC')
-elif '2' in val0:
-    stackAttributes.append('WEB')
-stackAttributes.append(val1)
-stackAttributes.append(val2)
-stackAttributes.append(val3)
-stackAttributes.append(val4)
+stackAttributes.append(args.stackType)
 stackAttributes.append(args.privateSubnets)
 stackAttributes.append(args.publicSubnets)
 stackAttributes.append(args.dmzSubnets)
