@@ -16,14 +16,21 @@ args = parser.parse_args()
 pubLimit = '6'
 privLimit = '6'
 
-stackType = []
+stackAttributes = []
 val1 = raw_input('''Choose an option:
 1 - VPC with Single Public Zone and up to 5 Public Subnets in the zone
 2 - VPC with 4 Zones and up to 5 subnets per zone (Public, Private, Dmz and Db)
 
 Enter your choice here: ''')
 
-stackType.append(val1)
+val2 = raw_input('''How many public subnets are required: ''')
+
+if '1' in val1:
+    stackAttributes.append('POC')
+elif '2' in val1:
+    stackAttributes.append('WEB')
+stackAttributes.append(val2)
+
 
 if (args.privateSubnets >= privLimit) or (args.publicSubnets >= pubLimit):
      print("Current subnet support is 5 per zone")
@@ -130,7 +137,7 @@ Base template to build out of band Jenkins and Public, Private, Dmz and DB subne
 
 ''' Section to create POC '''
 
-if 'POC' in stackType[0]:
+if 'POC' in stackAttributes[0]:
     VPC = create_vpc('PocVpc')
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
@@ -143,7 +150,7 @@ if 'POC' in stackType[0]:
         count = count + 1
     with open('templates/POC.json', 'w') as f:
         f.write(str(t.to_json()))
-elif 'WEB' in stackType[0]:
+elif 'WEB' in stackAttributes[0]:
     zoneList = ['Public', 'Private', 'Dmz', 'Db']
     VPC = create_vpc('WebStackVpc')
     internetGateway = create_internet_gateway()
