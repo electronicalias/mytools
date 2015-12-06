@@ -145,7 +145,7 @@ if 'POC' in stackAttributes[0]:
     create_stack('eu-west-1', 'test-poc', cfn_body)
 
 elif 'WEB' in stackAttributes[0]:
-    zoneList = ['Public', 'Private', 'Dmz', 'Db']
+    zoneList = ['Private', 'Public', 'Dmz', 'Db']
     VPC = create_vpc('WebStackVpc')
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
@@ -156,14 +156,14 @@ elif 'WEB' in stackAttributes[0]:
         
         count = 1
         def get_var(the_zone):
-            if 'public' in the_zone:
-                var = 5
             if 'private' in the_zone:
-                var = 6
+                var = 1
+            if 'public' in the_zone:
+                var = 2
             if 'dmz' in the_zone:
-                var = 7
+                var = 3
             if 'db' in the_zone:
-                var = 8
+                var = 4
             return stackAttributes[int(var)]
         while count <= int(get_var(zone.lower())):
             subnet = create_subnet(zone + 'Subnet', count, 'public')
