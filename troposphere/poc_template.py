@@ -174,7 +174,7 @@ elif 'WEB' in stackAttributes[0]:
                 var = 4
             return stackAttributes[int(var)]
         while count <= int(get_var(zone.lower())):
-            subnet = create_subnet(zone + 'Subnet' + count, count, net_count, 'public')
+            subnet = create_subnet(zone + 'Subnet', count, net_count, 'public')
             subnetRouteTableAssociation = create_subnet_association(zone + 'SubnetAssociation', subnet, count)
             count = count + 1
             net_count = net_count + 1
