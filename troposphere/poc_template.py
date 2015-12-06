@@ -33,14 +33,14 @@ net = IPNetwork(args.vpcCidr)
 subnets = list(net.subnet(24))
 
 def create_vpc(vpc_name):
-    VPC = t.add_resource(
+    MyVPC = t.add_resource(
         VPC(
             vpc_name,
             CidrBlock=Ref(args.vpcCidr),
             Tags=Tags(
                 Company=Ref(args.companyName),
                 Project=Ref(args.projectName))))
-    return VPC
+    return MyVPC
 
 def create_internet_gateway():
     internetGateway = t.add_resource(
