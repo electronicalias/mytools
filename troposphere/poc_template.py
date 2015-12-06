@@ -145,14 +145,11 @@ if 'POC' in stackType[0]:
         f.write(str(t.to_json()))
 elif 'WEB' in stackType[0]:
     VPC = create_vpc('WebStackVpc')
-<<<<<<< HEAD
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
-=======
     routeTable = create_route_table('PrivateRouteTable', VPC)
     routeTable = create_route_table('PublicRouteTable', VPC)
     routeTable = create_route_table('DmzRouteTable', VPC)
     routeTable = create_route_table('DbRouteTable', VPC)
->>>>>>> refs/remotes/origin/master
     with open('templates/WEB.json', 'w') as f:
         f.write(str(t.to_json()))
