@@ -182,7 +182,7 @@ elif 'WEB' in stackAttributes[0]:
             count = count + 1
             net_count = net_count + 1
             az_num = az_num + 1
-            if '3' in az_num:
+            if 3 in az_num:
                 az_num = ''
 
     cfn_body = str(t.to_json())
