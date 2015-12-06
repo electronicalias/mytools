@@ -84,11 +84,11 @@ def create_route(name, depends, igw_name, dst_block, rt_id):
     return route
 
 
-def create_subnet(name, num, type):
+def create_subnet(name, num, net_num, type):
     subnet = t.add_resource(
         Subnet(
             name + str(num),
-            CidrBlock=str(subnets[int(num)]),
+            CidrBlock=str(subnets[int(net_num)]),
             VpcId=Ref(VPC),
             Tags=Tags(
                 NetType=type,
@@ -155,6 +155,14 @@ elif 'WEB' in stackAttributes[0]:
             route = create_route(zone + 'InternetRoute', 'AttachGateway', internetGateway, '0.0.0.0/0', routeTable)
         
         count = 1
+        if 'Public' in zone:
+            net_count = 100
+        elif 'Private' in zone:
+            net_count = 130
+        elif 'Dmz' in zone:
+            net_count = 160
+        elif 'Db' in zone:
+            net_count = 190
         def get_var(the_zone):
             if 'private' in the_zone:
                 var = 1
@@ -166,9 +174,10 @@ elif 'WEB' in stackAttributes[0]:
                 var = 4
             return stackAttributes[int(var)]
         while count <= int(get_var(zone.lower())):
-            subnet = create_subnet(zone + 'Subnet' + count, count, 'public')
+            subnet = create_subnet(zone + 'Subnet' + count, count, net_count, 'public')
             subnetRouteTableAssociation = create_subnet_association(zone + 'SubnetAssociation', subnet, count)
             count = count + 1
+            net_count = net_count + 1
 
     cfn_body = str(t.to_json())
     create_stack('eu-west-1', 'test-web', cfn_body)
