@@ -12,6 +12,8 @@ parser.add_argument('--projectName')
 parser.add_argument('--vpcCidr')
 parser.add_argument('--privateSubnets')
 parser.add_argument('--publicSubnets')
+parser.add_argument('--dmzSubnets')
+parser.add_argument('--dbSubnets')
 args = parser.parse_args()
 
 pubLimit = '6'
@@ -23,14 +25,20 @@ val1 = raw_input('''Choose an option:
 2 - VPC with 4 Zones and up to 5 subnets per zone (Public, Private, Dmz and Db)
 
 Enter your choice here: ''')
-
-val2 = raw_input('''How many public subnets are required: ''')
+if '1' in val1:
+    val2 = raw_input('''How many public subnets are required: ''')
+elif '2' in val1:
+    val2 = raw_input('''How many private subnets are required: ''')
+    val3 = raw_input('''How many dmz subnets are required: ''')
+    val4 = raw_input('''How many db subnets are required: ''')
 
 if '1' in val1:
     stackAttributes.append('POC')
 elif '2' in val1:
     stackAttributes.append('WEB')
 stackAttributes.append(val2)
+stackAttributes.append(val3)
+stackAttributes.append(val4)
 
 
 if (args.privateSubnets >= privLimit) or (args.publicSubnets >= pubLimit):
@@ -146,25 +154,24 @@ if 'POC' in stackAttributes[0]:
         subnetRouteTableAssociation = create_subnet_association('PublicSubnetAssociation', subnet, count)
         count = count + 1
 
-    '''
-    with open('templates/POC.json', 'w') as f:
-        f.write(str(t.to_json()))
-    cfn_file = f.open('templates/POC.json')
-    cfn_body = cfn_file.read()
-    cfn_file.close()
-    '''
     cfn_body = str(t.to_json())
     create_stack('eu-west-1', 'test-poc', cfn_body)
-    
+
 elif 'WEB' in stackAttributes[0]:
     zoneList = ['Public', 'Private', 'Dmz', 'Db']
     VPC = create_vpc('WebStackVpc')
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
     for zone in zoneList:
-        routeTable = create_route_table( zone + 'RouteTable', VPC)
+        routeTable = create_route_table(zone + 'RouteTable', VPC)
         if 'Public' or 'Dmz' in zone:
             route = create_route('InternetRoute', 'GatewayAttachment', internetGateway, '0.0.0.0/0', routeTable)
+    count = 1
+    var = 'args.' + lower(zone) + 'Subnets'
+    while count <= int(var):
+        subnet = create_subnet(zone + 'Subnet', count, 'public')
+        subnetRouteTableAssociation = create_subnet_association(zone + 'SubnetAssociation', subnet, count)
+        count = count + 1
 
     with open('templates/WEB.json', 'w') as f:
         f.write(str(t.to_json()))
