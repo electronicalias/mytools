@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from troposphere import Parameter, Ref, Tags, Template
+from troposphere import Parameter, Ref, Tags, Template, Join
 from troposphere.ec2 import VPC, Subnet, InternetGateway, NetworkAcl, VPCGatewayAttachment, RouteTable, Route, SubnetRouteTableAssociation
 from netaddr import IPNetwork
 import argparse
