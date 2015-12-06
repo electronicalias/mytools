@@ -17,9 +17,9 @@ pubLimit = '6'
 privLimit = '6'
 
 stackType = []
-val1 = raw_input('''Choose the type of stack you are creating from:
-POC - creates a standard single public subnet with single routing table
-WEB - creates 4 zones, public, private, dmz and db and 4 individual routing tables
+val1 = raw_input('''Choose an option:
+1 - VPC with Single Public Zone and up to 5 Public Subnets in the zone
+2 - VPC with 4 Zones and up to 5 subnets per zone (Public, Private, Dmz and Db)
 
 Enter your choice here: ''')
 
@@ -150,5 +150,8 @@ elif 'WEB' in stackType[0]:
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
     for zone in zoneList:
         routeTable = create_route_table( zone + 'RouteTable', VPC)
+        if 'Public' or 'Dmz' in zone:
+            route = create_route('InternetRoute', gatewayAttachment, internetGateway, '0.0.0.0/0', routeTable)
+
     with open('templates/WEB.json', 'w') as f:
         f.write(str(t.to_json()))
