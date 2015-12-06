@@ -4,6 +4,7 @@ from troposphere import Parameter, Ref, Tags, Template
 from troposphere.ec2 import VPC, Subnet, InternetGateway, NetworkAcl, VPCGatewayAttachment, RouteTable, Route, SubnetRouteTableAssociation
 from netaddr import IPNetwork
 import argparse
+import boto.cloudformation
 
 parser = argparse.ArgumentParser(prog='Attributes Collection')
 parser.add_argument('--companyName')
@@ -109,18 +110,14 @@ def create_subnet_association(name, subnet, num):
         ))
     return subnetRouteTableAssociation
 
-def create_iam_stack(region, stack_name, template_body):
-    '''Create the IAM resources required for CloudTrail'''
-    IamInstalled = 'True'
+def create_stack(region, stack_name, template_body):
+    '''Create a stack'''
     cf_conn = boto.cloudformation.connect_to_region(region)
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
         cf_conn.create_stack(
                        stack_name,
                        template_body,
-                       parameters=[
-                                   ('InstallIamRole',IamInstalled)
-                                   ],
                        capabilities=['CAPABILITY_IAM'],
                        tags=None
                        )
@@ -148,8 +145,15 @@ if 'POC' in stackAttributes[0]:
         subnet = create_subnet('PublicSubnet', count, 'public')
         subnetRouteTableAssociation = create_subnet_association('PublicSubnetAssociation', subnet, count)
         count = count + 1
+    '''
     with open('templates/POC.json', 'w') as f:
         f.write(str(t.to_json()))
+    cfn_file = f.open('templates/POC.json')
+    cfn_body = cfn_file.read()
+    cfn_file.close()
+    '''
+    cfn_body = str(t.to_json())
+    create_stack('eu-west-1', 'test-poc', cfn_body)
 elif 'WEB' in stackAttributes[0]:
     zoneList = ['Public', 'Private', 'Dmz', 'Db']
     VPC = create_vpc('WebStackVpc')
@@ -162,3 +166,5 @@ elif 'WEB' in stackAttributes[0]:
 
     with open('templates/WEB.json', 'w') as f:
         f.write(str(t.to_json()))
+
+
