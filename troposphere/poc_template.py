@@ -162,7 +162,7 @@ elif 'WEB' in stackAttributes[0]:
     for zone in zoneList:
         routeTable = create_route_table( zone + 'RouteTable', VPC)
         if 'Public' or 'Dmz' in zone:
-            route = create_route('InternetRoute', gatewayAttachment, internetGateway, '0.0.0.0/0', routeTable)
+            route = create_route('InternetRoute', 'GatewayAttachment', internetGateway, '0.0.0.0/0', routeTable)
 
     with open('templates/WEB.json', 'w') as f:
         f.write(str(t.to_json()))
