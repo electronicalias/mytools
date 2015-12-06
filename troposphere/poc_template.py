@@ -149,6 +149,6 @@ elif 'WEB' in stackType[0]:
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
     for zone in zoneList:
-    routeTable = create_route_table( zone + 'RouteTable', VPC)
+        routeTable = create_route_table( zone + 'RouteTable', VPC)
     with open('templates/WEB.json', 'w') as f:
         f.write(str(t.to_json()))
