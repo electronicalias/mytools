@@ -13,20 +13,29 @@
             },
             "Type": "AWS::EC2::VPCGatewayAttachment"
         },
+        "DbInternetRoute": {
+            "DependsOn": "GatewayAttachment",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "RouteTableId": {
+                    "Ref": "DbRouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
+        },
         "DbRouteTable": {
             "Properties": {
                 "Tags": [
                     {
                         "Key": "Company",
-                        "Value": {
-                            "Ref": "Travel Republic"
-                        }
+                        "Value": "TravelRepublic"
                     },
                     {
                         "Key": "Project",
-                        "Value": {
-                            "Ref": "PCI Test"
-                        }
+                        "Value": "PCITest"
                     }
                 ],
                 "VpcId": {
@@ -34,21 +43,64 @@
                 }
             },
             "Type": "AWS::EC2::RouteTable"
+        },
+        "DbSubnet1": {
+            "Properties": {
+                "CidrBlock": "172.26.1.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": "TravelRepublic"
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "public"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "PCITest"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "DbSubnetAssociation1": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "DbRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "DbSubnet1"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "DmzInternetRoute": {
+            "DependsOn": "GatewayAttachment",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "RouteTableId": {
+                    "Ref": "DmzRouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
         },
         "DmzRouteTable": {
             "Properties": {
                 "Tags": [
                     {
                         "Key": "Company",
-                        "Value": {
-                            "Ref": "Travel Republic"
-                        }
+                        "Value": "TravelRepublic"
                     },
                     {
                         "Key": "Project",
-                        "Value": {
-                            "Ref": "PCI Test"
-                        }
+                        "Value": "PCITest"
                     }
                 ],
                 "VpcId": {
@@ -56,40 +108,113 @@
                 }
             },
             "Type": "AWS::EC2::RouteTable"
+        },
+        "DmzSubnet1": {
+            "Properties": {
+                "CidrBlock": "172.26.1.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": "TravelRepublic"
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "public"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "PCITest"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "DmzSubnet2": {
+            "Properties": {
+                "CidrBlock": "172.26.2.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": "TravelRepublic"
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "public"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "PCITest"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "DmzSubnetAssociation1": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "DmzRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "DmzSubnet1"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "DmzSubnetAssociation2": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "DmzRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "DmzSubnet2"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
         },
         "InternetGateway": {
             "Properties": {
                 "Tags": [
                     {
                         "Key": "Company",
-                        "Value": {
-                            "Ref": "Travel Republic"
-                        }
+                        "Value": "TravelRepublic"
                     },
                     {
                         "Key": "Project",
-                        "Value": {
-                            "Ref": "PCI Test"
-                        }
+                        "Value": "PCITest"
                     }
                 ]
             },
             "Type": "AWS::EC2::InternetGateway"
+        },
+        "PrivateInternetRoute": {
+            "DependsOn": "GatewayAttachment",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
         },
         "PrivateRouteTable": {
             "Properties": {
                 "Tags": [
                     {
                         "Key": "Company",
-                        "Value": {
-                            "Ref": "Travel Republic"
-                        }
+                        "Value": "TravelRepublic"
                     },
                     {
                         "Key": "Project",
-                        "Value": {
-                            "Ref": "PCI Test"
-                        }
+                        "Value": "PCITest"
                     }
                 ],
                 "VpcId": {
@@ -97,21 +222,132 @@
                 }
             },
             "Type": "AWS::EC2::RouteTable"
+        },
+        "PrivateSubnet1": {
+            "Properties": {
+                "CidrBlock": "172.26.1.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": "TravelRepublic"
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "public"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "PCITest"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PrivateSubnet2": {
+            "Properties": {
+                "CidrBlock": "172.26.2.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": "TravelRepublic"
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "public"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "PCITest"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PrivateSubnet3": {
+            "Properties": {
+                "CidrBlock": "172.26.3.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": "TravelRepublic"
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "public"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "PCITest"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PrivateSubnetAssociation1": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PrivateSubnetAssociation2": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PrivateSubnetAssociation3": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PrivateSubnet3"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PublicInternetRoute": {
+            "DependsOn": "GatewayAttachment",
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                }
+            },
+            "Type": "AWS::EC2::Route"
         },
         "PublicRouteTable": {
             "Properties": {
                 "Tags": [
                     {
                         "Key": "Company",
-                        "Value": {
-                            "Ref": "Travel Republic"
-                        }
+                        "Value": "TravelRepublic"
                     },
                     {
                         "Key": "Project",
-                        "Value": {
-                            "Ref": "PCI Test"
-                        }
+                        "Value": "PCITest"
                     }
                 ],
                 "VpcId": {
@@ -120,23 +356,85 @@
             },
             "Type": "AWS::EC2::RouteTable"
         },
-        "WebStackVpc": {
+        "PublicSubnet1": {
             "Properties": {
-                "CidrBlock": {
-                    "Ref": "172.26.0.0/16"
-                },
+                "CidrBlock": "172.26.1.0/24",
                 "Tags": [
                     {
                         "Key": "Company",
-                        "Value": {
-                            "Ref": "Travel Republic"
-                        }
+                        "Value": "TravelRepublic"
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "public"
                     },
                     {
                         "Key": "Project",
-                        "Value": {
-                            "Ref": "PCI Test"
-                        }
+                        "Value": "PCITest"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PublicSubnet2": {
+            "Properties": {
+                "CidrBlock": "172.26.2.0/24",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": "TravelRepublic"
+                    },
+                    {
+                        "Key": "NetType",
+                        "Value": "public"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "PCITest"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "PublicSubnetAssociation1": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnet1"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PublicSubnetAssociation2": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "PublicSubnet2"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "WebStackVpc": {
+            "Properties": {
+                "CidrBlock": "172.26.0.0/16",
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": "TravelRepublic"
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": "PCITest"
                     }
                 ]
             },

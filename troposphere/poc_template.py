@@ -20,25 +20,31 @@ pubLimit = '6'
 privLimit = '6'
 
 stackAttributes = []
-val1 = raw_input('''Choose an option:
+val0 = raw_input('''Choose an option:
 1 - VPC with Single Public Zone and up to 5 Public Subnets in the zone
 2 - VPC with 4 Zones and up to 5 subnets per zone (Public, Private, Dmz and Db)
 
 Enter your choice here: ''')
-if '1' in val1:
-    val2 = raw_input('''How many public subnets are required: ''')
-elif '2' in val1:
-    val2 = raw_input('''How many private subnets are required: ''')
-    val3 = raw_input('''How many dmz subnets are required: ''')
-    val4 = raw_input('''How many db subnets are required: ''')
+if '1' in val0:
+    val1 = raw_input('''How many public subnets are required: ''')
+elif '2' in val0:
+    val1 = raw_input('''How many public subnets are required: ''')
+    val2 = raw_input('''How many dmz subnets are required: ''')
+    val3 = raw_input('''How many db subnets are required: ''')
+    val4 = raw_input('''How many private subnets are required: ''')
 
-if '1' in val1:
+if '1' in val0:
     stackAttributes.append('POC')
-elif '2' in val1:
+elif '2' in val0:
     stackAttributes.append('WEB')
+stackAttributes.append(val1)
 stackAttributes.append(val2)
 stackAttributes.append(val3)
 stackAttributes.append(val4)
+stackAttributes.append(args.privateSubnets)
+stackAttributes.append(args.publicSubnets)
+stackAttributes.append(args.dmzSubnets)
+stackAttributes.append(args.dbSubnets)
 
 
 if (args.privateSubnets >= privLimit) or (args.publicSubnets >= pubLimit):
@@ -166,12 +172,22 @@ elif 'WEB' in stackAttributes[0]:
         routeTable = create_route_table(zone + 'RouteTable', VPC)
         if 'Public' or 'Dmz' in zone:
             route = create_route(zone + 'InternetRoute', 'GatewayAttachment', internetGateway, '0.0.0.0/0', routeTable)
-    count = 1
-    var = 'args.' + lower(zone) + 'Subnets'
-    while count <= int(var):
-        subnet = create_subnet(zone + 'Subnet', count, 'public')
-        subnetRouteTableAssociation = create_subnet_association(zone + 'SubnetAssociation', subnet, count)
-        count = count + 1
+        
+        count = 1
+        def get_var(the_zone):
+            if 'public' in the_zone:
+                var = 5
+            if 'private' in the_zone:
+                var = 6
+            if 'dmz' in the_zone:
+                var = 7
+            if 'db' in the_zone:
+                var = 8
+            return stackAttributes[int(var)]
+        while count <= int(get_var(zone.lower())):
+            subnet = create_subnet(zone + 'Subnet', count, 'public')
+            subnetRouteTableAssociation = create_subnet_association(zone + 'SubnetAssociation', subnet, count)
+            count = count + 1
 
     with open('templates/WEB.json', 'w') as f:
         f.write(str(t.to_json()))
