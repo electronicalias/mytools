@@ -32,15 +32,54 @@ if (args.privateSubnets >= privLimit) or (args.publicSubnets >= pubLimit):
 net = IPNetwork(args.vpcCidr)
 subnets = list(net.subnet(24))
 
-def create_route_table(name)
+def create_vpc(name):
+    VPC = t.add_resource(
+        VPC(
+            'VPC',
+            CidrBlock=Ref(args.vpcCidr),
+            Tags=Tags(
+                Company=Ref(args.companyName),
+                Project=Ref(args.projectName))))
+    return VPC
+
+def create_internet_gateway():
+    internetGateway = t.add_resource(
+        InternetGateway(
+            'InternetGateway',
+            Tags=Tags(
+                Project=Ref(args.projectName),
+                Company=Ref(args.companyName))))
+    return internetGateway
+
+def create_gateway_attachment(vpc_name, igw_name):
+    gatewayAttachment = t.add_resource(
+        VPCGatewayAttachment(
+            'AttachGateway',
+            VpcId=Ref(vpc_name),
+            InternetGatewayId=Ref(igw_name)))
+    return gatewayAttachment
+
+def create_route_table(name, vpc_name):
     routeTable = t.add_resource(
         RouteTable(
             name,
-            VpcId=Ref(VPC),
+            VpcId=Ref(vpc_name),
             Tags=Tags(
                 Project=Ref(args.projectName),
                 Company=Ref(args.companyName))))
     return routeTable
+
+def create_route(name, depends, igw_name, dst_block, rt_id):
+    route = t.add_resource(
+        Route(
+            name,
+            DependsOn=depends,
+            GatewayId=Ref(igw_name),
+            DestinationCidrBlock=dst_block,
+            RouteTableId=Ref(rt_id),
+        ))
+    return route
+
 
 def create_subnet(name, num, type):
     subnet = t.add_resource(
@@ -71,44 +110,13 @@ t.add_description ("""\
 Base template to build out of band Jenkins and Public, Private, Dmz and DB subnets.""")
 
 
-VPC = t.add_resource(
-    VPC(
-        'VPC',
-        CidrBlock=Ref(args.vpcCidr),
-        Tags=Tags(
-            Company=Ref(args.companyName),
-            Project=Ref(args.projectName))))
-
-internetGateway = t.add_resource(
-    InternetGateway(
-        'InternetGateway',
-        Tags=Tags(
-            Project=Ref(args.projectName),
-            Company=Ref(args.companyName))))
-
-gatewayAttachment = t.add_resource(
-    VPCGatewayAttachment(
-        'AttachGateway',
-        VpcId=Ref(VPC),
-        InternetGatewayId=Ref(internetGateway)))
-
 if 'POC' in stackType[0]:
+    VPC = create_vpc()
+    internetGateway = create_internet_gateway()
+    gatewayAttachment = create_gateway_attachment('VPC', 'internetGateway')
+    routeTable = create_route_table('RouteTable', 'VPC')
+    route = create_route('InternetRoute', gatewayAttachment, internetGateway, '0.0.0.0/0', routeTable)
 
-    routeTable = t.add_resource(
-        RouteTable(
-            'RouteTable',
-            VpcId=Ref(VPC),
-            Tags=Tags(
-                Project=Ref(args.projectName),
-                Company=Ref(args.companyName))))
-    route = t.add_resource(
-        Route(
-            'InternetRoute',
-            DependsOn='AttachGateway',
-            GatewayId=Ref('InternetGateway'),
-            DestinationCidrBlock='0.0.0.0/0',
-            RouteTableId=Ref(routeTable),
-        ))
 
 count = 1
 while count <= int(args.privateSubnets):
