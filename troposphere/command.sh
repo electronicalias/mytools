@@ -1,6 +1,6 @@
 python poc_template.py \
-  --companyName test \
-  --projectName test \
+  --companyName 'Travel Republic' \
+  --projectName 'PCI Test' \
   --vpcCidr 172.26.0.0/16 \
-  --privateSubnets 6 \
-  --publicSubnets 4
+  --privateSubnets 2 \
+  --publicSubnets 1
