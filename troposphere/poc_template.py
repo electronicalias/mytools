@@ -32,10 +32,10 @@ if (args.privateSubnets >= privLimit) or (args.publicSubnets >= pubLimit):
 net = IPNetwork(args.vpcCidr)
 subnets = list(net.subnet(24))
 
-def create_vpc(name):
+def create_vpc(vpc_name):
     VPC = t.add_resource(
         VPC(
-            name,
+            vpc_name,
             CidrBlock=Ref(args.vpcCidr),
             Tags=Tags(
                 Company=Ref(args.companyName),
@@ -113,8 +113,8 @@ Base template to build out of band Jenkins and Public, Private, Dmz and DB subne
 if 'POC' in stackType[0]:
     VPC = create_vpc('PocVpc')
     internetGateway = create_internet_gateway()
-    gatewayAttachment = create_gateway_attachment('VPC', 'internetGateway')
-    routeTable = create_route_table('RouteTable', 'VPC')
+    gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
+    routeTable = create_route_table('PocRouteTable', VPC)
     route = create_route('InternetRoute', gatewayAttachment, internetGateway, '0.0.0.0/0', routeTable)
 
 
