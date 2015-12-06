@@ -152,7 +152,7 @@ elif 'WEB' in stackAttributes[0]:
     for zone in zoneList:
         routeTable = create_route_table(zone + 'RouteTable', VPC)
         if 'Public' or 'Dmz' in zone:
-            route = create_route(zone + 'InternetRoute', 'GatewayAttachment', internetGateway, '0.0.0.0/0', routeTable)
+            route = create_route(zone + 'InternetRoute', 'AttachGateway', internetGateway, '0.0.0.0/0', routeTable)
         
         count = 1
         def get_var(the_zone):
