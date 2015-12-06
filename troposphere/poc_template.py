@@ -126,5 +126,7 @@ if 'POC' in stackType[0]:
         f.write(str(t.to_json()))
 elif 'WEB' in stackType[0]:
     VPC = create_vpc('WebStackVpc')
+    internetGateway = create_internet_gateway()
+    gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
     with open('templates/WEB.json', 'w') as f:
         f.write(str(t.to_json()))

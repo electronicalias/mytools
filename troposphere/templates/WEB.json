@@ -2,6 +2,124 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Base template to build out of band Jenkins and Public, Private, Dmz and DB subnets.",
     "Resources": {
+        "AttachGateway": {
+            "Properties": {
+                "InternetGatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::VPCGatewayAttachment"
+        },
+        "DbRouteTable": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "DmzRouteTable": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "InternetGateway": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::InternetGateway"
+        },
+        "PrivateRouteTable": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "PublicRouteTable": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Company",
+                        "Value": {
+                            "Ref": "Travel Republic"
+                        }
+                    },
+                    {
+                        "Key": "Project",
+                        "Value": {
+                            "Ref": "PCI Test"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "WebStackVpc"
+                }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
         "WebStackVpc": {
             "Properties": {
                 "CidrBlock": {
