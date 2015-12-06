@@ -116,18 +116,15 @@ if 'POC' in stackType[0]:
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
     routeTable = create_route_table('PocRouteTable', VPC)
     route = create_route('InternetRoute', gatewayAttachment, internetGateway, '0.0.0.0/0', routeTable)
-
-
-count = 1
-while count <= int(args.privateSubnets):
-    subnet = create_subnet('PrivateSubnet', count, 'private')
-    subnetRouteTableAssociation = create_subnet_association('PrivateSubnetAssociation', subnet, count)
-    count = count + 1
-
-count = 1
-while count <= int(args.publicSubnets):
-    subnet = create_subnet('PublicSubnet', count, 'public')
-    subnetRouteTableAssociation = create_subnet_association('PublicSubnetAssociation', subnet, count)
-    count = count + 1
+    count = 1
+    while count <= int(args.privateSubnets):
+        subnet = create_subnet('PrivateSubnet', count, 'private')
+        subnetRouteTableAssociation = create_subnet_association('PrivateSubnetAssociation', subnet, count)
+        count = count + 1
+    count = 1
+    while count <= int(args.publicSubnets):
+        subnet = create_subnet('PublicSubnet', count, 'public')
+        subnetRouteTableAssociation = create_subnet_association('PublicSubnetAssociation', subnet, count)
+        count = count + 1
 
 print(t.to_json())
