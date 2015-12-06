@@ -170,7 +170,7 @@ elif 'WEB' in stackAttributes[0]:
             subnetRouteTableAssociation = create_subnet_association(zone + 'SubnetAssociation', subnet, count)
             count = count + 1
 
-    with open('templates/WEB.json', 'w') as f:
-        f.write(str(t.to_json()))
+    cfn_body = str(t.to_json())
+    create_stack('eu-west-1', 'test-web', cfn_body)
 
 
