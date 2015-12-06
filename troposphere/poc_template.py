@@ -144,12 +144,11 @@ if 'POC' in stackType[0]:
     with open('templates/POC.json', 'w') as f:
         f.write(str(t.to_json()))
 elif 'WEB' in stackType[0]:
+    zoneList = ['Public', 'Private', 'Dmz', 'Db']
     VPC = create_vpc('WebStackVpc')
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
-    routeTable = create_route_table('PrivateRouteTable', VPC)
-    routeTable = create_route_table('PublicRouteTable', VPC)
-    routeTable = create_route_table('DmzRouteTable', VPC)
-    routeTable = create_route_table('DbRouteTable', VPC)
+    for zone in zoneList:
+    routeTable = create_route_table( zone + 'RouteTable', VPC)
     with open('templates/WEB.json', 'w') as f:
         f.write(str(t.to_json()))
