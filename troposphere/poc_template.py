@@ -44,7 +44,7 @@ def create_vpc(vpc_name):
     MyVPC = t.add_resource(
         VPC(
             vpc_name,
-            CidrBlock=Ref(args.vpcCidr),
+            CidrBlock=args.vpcCidr,
             Tags=Tags(
                 Company=Ref(args.companyName),
                 Project=Ref(args.projectName))))
