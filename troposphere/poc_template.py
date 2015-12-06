@@ -13,6 +13,14 @@ parser.add_argument('--privateSubnets')
 parser.add_argument('--publicSubnets')
 args = parser.parse_args()
 
+pubLimit = '6'
+privLimit = '6'
+
+
+if (args.privateSubnets >= privLimit) or (args.publicSubnets >= pubLimit):
+     print("Current subnet support is 5 per zone")
+     exit (1)
+
 net = IPNetwork(args.vpcCidr)
 subnets = list(net.subnet(24))
 
@@ -33,46 +41,6 @@ VPC = t.add_resource(
         Tags=Tags(
             Company=Ref(args.companyName),
             Project=Ref(args.projectName))))
-'''
-subnet = t.add_resource(
-    Subnet(
-        'PrivateSubnet01',
-        CidrBlock=str(subnets[0]),
-        VpcId=Ref(VPC),
-        Tags=Tags(
-            Company=Ref(args.companyName),
-            Project=Ref(args.projectName),
-            NetType='private')))
-
-subnet = t.add_resource(
-    Subnet(
-        'PublicSubnet01',
-        CidrBlock=str(subnets[1]),
-        VpcId=Ref(VPC),
-        Tags=Tags(
-            Company=Ref(args.companyName),
-            Project=Ref(args.projectName),
-            NetType='public')))
-
-subnet = t.add_resource(
-    Subnet(
-        'DmzSubnet01',
-        CidrBlock=str(subnets[2]),
-        VpcId=Ref(VPC),
-        Tags=Tags(
-            Company=Ref(args.companyName),
-            Project=Ref(args.projectName),
-            NetType='dmz')))
-
-subnet = t.add_resource(
-    Subnet(
-        'DbSubnet01',
-        CidrBlock=str(subnets[3]),
-        VpcId=Ref(VPC),
-        Tags=Tags(
-            Company=Ref(args.companyName),
-            Project=Ref(args.projectName),
-            NetType='db')))
 
 internetGateway = t.add_resource(
     InternetGateway(
@@ -103,7 +71,6 @@ route = t.add_resource(
         DestinationCidrBlock='0.0.0.0/0',
         RouteTableId=Ref(routeTable),
     ))
-'''
 
 count = 1
 while count <= int(args.privateSubnets):
