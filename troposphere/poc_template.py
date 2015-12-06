@@ -35,7 +35,7 @@ subnets = list(net.subnet(24))
 def create_vpc(name):
     VPC = t.add_resource(
         VPC(
-            'VPC',
+            name,
             CidrBlock=Ref(args.vpcCidr),
             Tags=Tags(
                 Company=Ref(args.companyName),
@@ -111,7 +111,7 @@ Base template to build out of band Jenkins and Public, Private, Dmz and DB subne
 
 
 if 'POC' in stackType[0]:
-    VPC = create_vpc()
+    VPC = create_vpc('PocVpc')
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment('VPC', 'internetGateway')
     routeTable = create_route_table('RouteTable', 'VPC')
