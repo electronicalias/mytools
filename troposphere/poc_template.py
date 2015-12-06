@@ -46,8 +46,8 @@ def create_vpc(vpc_name):
             vpc_name,
             CidrBlock=args.vpcCidr,
             Tags=Tags(
-                Company=Ref(args.companyName),
-                Project=Ref(args.projectName))))
+                Company=args.companyName,
+                Project=args.projectName)))
     return MyVPC
 
 def create_internet_gateway():
@@ -55,8 +55,8 @@ def create_internet_gateway():
         InternetGateway(
             'InternetGateway',
             Tags=Tags(
-                Project=Ref(args.projectName),
-                Company=Ref(args.companyName))))
+                Project=args.projectName,
+                Company=args.companyName)))
     return internetGateway
 
 def create_gateway_attachment(vpc_name, igw_name):
@@ -73,8 +73,8 @@ def create_route_table(name, vpc_name):
             name,
             VpcId=Ref(vpc_name),
             Tags=Tags(
-                Project=Ref(args.projectName),
-                Company=Ref(args.companyName))))
+                Project=args.projectName,
+                Company=args.companyName)))
     return routeTable
 
 def create_route(name, depends, igw_name, dst_block, rt_id):
@@ -97,8 +97,8 @@ def create_subnet(name, num, type):
             VpcId=Ref(VPC),
             Tags=Tags(
                 NetType=type,
-                Company=Ref(args.companyName),
-                Project=Ref(args.projectName))))
+                Company=args.companyName,
+                Project=args.projectName)))
     return subnet
 
 def create_subnet_association(name, subnet, num):
@@ -139,12 +139,13 @@ if 'POC' in stackAttributes[0]:
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
     routeTable = create_route_table('PocRouteTable', VPC)
-    route = create_route('InternetRoute', 'AttachGateway', internetGateway, '0.0.0.0/0', routeTable)
+    route = create_route('InternetRoute', gatewayAttachment, internetGateway, '0.0.0.0/0', routeTable)
     count = 1
     while count <= int(args.publicSubnets):
         subnet = create_subnet('PublicSubnet', count, 'public')
         subnetRouteTableAssociation = create_subnet_association('PublicSubnetAssociation', subnet, count)
         count = count + 1
+
     '''
     with open('templates/POC.json', 'w') as f:
         f.write(str(t.to_json()))
@@ -152,9 +153,13 @@ if 'POC' in stackAttributes[0]:
     cfn_body = cfn_file.read()
     cfn_file.close()
     '''
+
     print(t.to_json())
+
+    '''
     cfn_body = str(t.to_json())
     create_stack('eu-west-1', 'test-poc', cfn_body)
+    '''
 elif 'WEB' in stackAttributes[0]:
     zoneList = ['Public', 'Private', 'Dmz', 'Db']
     VPC = create_vpc('WebStackVpc')
