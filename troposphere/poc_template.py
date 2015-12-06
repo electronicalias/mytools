@@ -85,11 +85,12 @@ def create_route(name, depends, igw_name, dst_block, rt_id):
 
 
 def create_subnet(name, num, net_num, type, az):
+    azones = ['NoValue', 'a', 'b', 'c', 'a', 'b', 'c']
     subnet = t.add_resource(
         Subnet(
             name + str(num),
             CidrBlock=str(subnets[int(net_num)]),
-            AvailabilityZone=Join("", [ Ref("AWS::Region"), az ] ),
+            AvailabilityZone=Join("", [ Ref("AWS::Region"), azones[int(az)] ] ),
             VpcId=Ref(VPC),
             Tags=Tags(
                 NetType=type,
@@ -175,15 +176,10 @@ elif 'WEB' in stackAttributes[0]:
                 var = 4
             return stackAttributes[int(var)]
         while count <= int(get_var(zone.lower())):
-            az = ['a', 'b', 'c']
-            az_num = 0
-            subnet = create_subnet(zone + 'Subnet', count, net_count, 'public', az[az_num])
+            subnet = create_subnet(zone + 'Subnet', count, net_count, 'public', count)
             subnetRouteTableAssociation = create_subnet_association(zone + 'SubnetAssociation', subnet, count)
             count = count + 1
             net_count = net_count + 1
-            az_num = az_num + 1
-            if '3' in str(az_num):
-                az_num = ''
 
     cfn_body = str(t.to_json())
     create_stack('eu-west-1', 'test-web', cfn_body)
