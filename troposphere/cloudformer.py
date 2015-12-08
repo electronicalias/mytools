@@ -49,6 +49,7 @@ class aws_resources:
                     Project=company,
                     Company=project)))
         self.data.append(routeTable)
+        return routeTable
 
     def create_route(self, name, depends, igw_name, dst_block, rt_id):
         route = self.t.add_resource(
@@ -60,7 +61,44 @@ class aws_resources:
                 RouteTableId=Ref(rt_id),
             ))
         self.data.append(route)
+        return route
+
+    def create_subnet(self, name, vpc_name, network, type, az, company, project):
+        subnet = self.t.add_resource(
+            Subnet(
+                name,
+                CidrBlock=network,
+                AvailabilityZone=Join("", [ Ref("AWS::Region"), az ] ),
+                VpcId=Ref(vpc_name),
+                Tags=Tags(
+                    Name=name,
+                    Public=type,
+                    Project=company,
+                    Company=project)))
+        self.data.append(subnet)
+        return subnet
+
+    def create_subnet_association(self, name, subnet, rt_id):
+        subnetRouteTableAssociation = self.t.add_resource(
+            SubnetRouteTableAssociation(
+                name,
+                SubnetId=Ref(subnet),
+                RouteTableId=Ref(rt_id),
+            ))
+        self.data.append(subnetRouteTableAssociation)
+
+    def create_sg(self, name, description, vpc_id, project, company):
+        myvpcsecuritygroup = self.t.add_resource(SecurityGroup(
+            name,
+            GroupDescription=description,
+            VpcId=Ref(vpc_name),
+            Tags=Tags(
+                    Name=name,
+                    Project=company,
+                    Company=project)))
+            ))
+
 
     def complete_cfn(self):
-        print(self.t.to_json())            
+        return(self.t.to_json())            
 

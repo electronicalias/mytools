@@ -7,6 +7,7 @@ import argparse
 import boto.cloudformation
 
 parser = argparse.ArgumentParser(prog='Attributes Collection')
+parser.add_argument('--profileName')
 parser.add_argument('--companyName')
 parser.add_argument('--projectName')
 parser.add_argument('--vpcCidr')
@@ -107,9 +108,9 @@ def create_subnet_association(name, subnet, num):
         ))
     return subnetRouteTableAssociation
 
-def create_stack(region, stack_name, template_body):
+def create_stack(region, stack_name, template_body, profile):
     '''Create a stack'''
-    cf_conn = boto.cloudformation.connect_to_region(region)
+    cf_conn = boto.cloudformation.connect_to_region(region, profile_name=profile)
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
         cf_conn.create_stack(
@@ -144,7 +145,7 @@ if 'POC' in stackAttributes[0]:
         count = count + 1
 
     cfn_body = str(t.to_json())
-    create_stack('eu-west-1', 'test-poc', cfn_body)
+    create_stack('eu-west-1', 'tp-poc', cfn_body, args.profileName)
 
 elif 'WEB' in stackAttributes[0]:
     zoneList = ['Private', 'Public', 'Dmz', 'Db']
@@ -182,6 +183,6 @@ elif 'WEB' in stackAttributes[0]:
             net_count = net_count + 1
 
     cfn_body = str(t.to_json())
-    create_stack('eu-west-1', 'test-web', cfn_body)
+    create_stack('eu-west-1', 'tp-poc', cfn_body, args.profileName)
 
 

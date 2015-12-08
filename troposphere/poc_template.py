@@ -42,7 +42,8 @@ def create_vpc(vpc_name):
             CidrBlock=args.vpcCidr,
             Tags=Tags(
                 Company=args.companyName,
-                Project=args.projectName)))
+                Project=args.projectName,
+                Name=args.projectName + '-vpc')))
     return MyVPC
 
 def create_internet_gateway():
@@ -69,7 +70,8 @@ def create_route_table(name, vpc_name):
             VpcId=Ref(vpc_name),
             Tags=Tags(
                 Project=args.projectName,
-                Company=args.companyName)))
+                Company=args.companyName,
+                Name=args.projectName + '-' + name)))
     return routeTable
 
 def create_route(name, depends, igw_name, dst_block, rt_id):
@@ -95,7 +97,8 @@ def create_subnet(name, num, net_num, type, az):
             Tags=Tags(
                 NetType=type,
                 Company=args.companyName,
-                Project=args.projectName)))
+                Project=args.projectName,
+                Name=args.projectName + '-' + name)))
     return subnet
 
 def create_subnet_association(name, subnet, num):
@@ -107,9 +110,9 @@ def create_subnet_association(name, subnet, num):
         ))
     return subnetRouteTableAssociation
 
-def create_stack(region, stack_name, template_body):
+def create_stack(region, stack_name, template_body, profile):
     '''Create a stack'''
-    cf_conn = boto.cloudformation.connect_to_region(region)
+    cf_conn = boto.cloudformation.connect_to_region(region, profile_name=profile)
     print("Creating {} Stack in {}".format(stack_name, region))
     try:
         cf_conn.create_stack(
@@ -127,7 +130,7 @@ t = Template()
 t.add_version('2010-09-09')
 
 t.add_description ("""\
-Base template to build out of band Jenkins and Public, Private, Dmz and DB subnets.""")
+Base template to build out a VPC with a seleciton of network zones.""")
 
 ''' Section to create POC '''
 
@@ -139,16 +142,16 @@ if 'POC' in stackAttributes[0]:
     route = create_route('InternetRoute', 'AttachGateway', internetGateway, '0.0.0.0/0', routeTable)
     count = 1
     while count <= int(args.publicSubnets):
-        subnet = create_subnet('PublicSubnet', count, 'public')
+        subnet = create_subnet('PublicSubnet', count, '1', 'public', '1')
         subnetRouteTableAssociation = create_subnet_association('PublicSubnetAssociation', subnet, count)
         count = count + 1
 
     cfn_body = str(t.to_json())
-    create_stack('eu-west-1', 'test-poc', cfn_body)
+    create_stack('eu-west-1', 'test-poc', cfn_body, 'travel_republic')
 
 elif 'WEB' in stackAttributes[0]:
     zoneList = ['Private', 'Public', 'Dmz', 'Db']
-    VPC = create_vpc('WebStackVpc')
+    VPC = create_vpc('PciPocVpc')
     internetGateway = create_internet_gateway()
     gatewayAttachment = create_gateway_attachment(VPC, internetGateway)
     for zone in zoneList:
@@ -169,11 +172,11 @@ elif 'WEB' in stackAttributes[0]:
             if 'private' in the_zone:
                 var = 1
             if 'public' in the_zone:
-                var = 2
+                var = 1
             if 'dmz' in the_zone:
-                var = 3
+                var = 1
             if 'db' in the_zone:
-                var = 4
+                var = 1
             return stackAttributes[int(var)]
         while count <= int(get_var(zone.lower())):
             subnet = create_subnet(zone + 'Subnet', count, net_count, 'public', count)
@@ -182,6 +185,6 @@ elif 'WEB' in stackAttributes[0]:
             net_count = net_count + 1
 
     cfn_body = str(t.to_json())
-    create_stack('eu-west-1', 'test-web', cfn_body)
+    create_stack('eu-west-1', 'test-poc', cfn_body, 'travel_republic')
 
 

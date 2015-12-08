@@ -1,5 +1,7 @@
 #!/bin/python
 import argparse
+import boto.cloudformation
+
 
 class commands:
 
@@ -18,10 +20,6 @@ class commands:
         parser.add_argument('-con','--company-name')
         parser.add_argument('-prn','--project-name')
         parser.add_argument('-vcr','--vpc-cidr')
-        parser.add_argument('-prs','--private-subnets')
-        parser.add_argument('-pus','--public-subnets')
-        parser.add_argument('-dms','--dmz-subnets')
-        parser.add_argument('-dbs','--db-subnets')
         parser.add_argument('-stk','--stack-type')
         ns = parser.parse_args()
         return ns
@@ -39,6 +37,56 @@ class commands:
 
     def test(self):
         print("I don't understand Python yet!!")
+
+class aws:
+
+    def __init__(self, region, profile):
+        self.region = region
+        self.cf_conn = boto.cloudformation.connect_to_region(region, profile_name=profile)
+
+    def create_stack(self, stack_name, template_body):
+        '''Create a stack'''
+        
+        print("Creating {} Stack in {}".format(stack_name, self.region))
+        try:
+            self.cf_conn.create_stack(
+                           stack_name,
+                           template_body,
+                           capabilities=['CAPABILITY_IAM'],
+                           tags=None
+                           )
+        except Exception as error:
+            print("Error creating {}: ****StackTrace: {} ***".format(stack_name, error))
+            return (1)
+
+    def update_stack(self, stack_name, template_body):
+        '''Update a stack'''
+        
+        print("Updating {} Stack in {}".format(stack_name, self.region))
+        try:
+            self.cf_conn.create_stack(
+                           stack_name,
+                           template_body,
+                           capabilities=['CAPABILITY_IAM'],
+                           tags=None
+                           )
+        except Exception as error:
+            print("Error updating {}: ****StackTrace: {} ***".format(stack_name, error))
+            return (1)
+
+    def get_stack_status(self, region, stack_name):
+        ''' This is required to create a wait condition in the script while the stack is
+        creating before the script then tries to read the stack attributes'''
+
+        stacks = self.cf_conn.describe_stacks(
+                                    stack_name
+                                    )
+        if len(stacks) == 1:
+            stack = stacks[0]
+        else:
+            print ("No stacks found")
+        return stack.stack_status
+
 
 if __name__ == "__main__":
     cmd = commands()
