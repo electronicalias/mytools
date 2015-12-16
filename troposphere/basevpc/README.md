@@ -6,8 +6,9 @@ Usage Examples
 ---------------
 To use this tool, observe the following options:
 
-    -azs | --availability-zones  : Required
-    Specify the AZs for the region you are using, you can specify a single AZ (not recommended) or, a b c for example:
+Required: Specify the AZs for the region you are using, you can specify a single AZ (not recommended) or, a b c for example:
+    
+    --availability-zones a b c d 
     -azs a b c
 
    -nzs | --network-zones' : Required
