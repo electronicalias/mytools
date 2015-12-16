@@ -2,6 +2,8 @@ BaseVPC
 =======
 
 
+Usage Examples
+---------------
 To use this tool, observe the following options:
 
    -azs | --availability-zones  : Required
