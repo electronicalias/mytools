@@ -6,9 +6,9 @@ Usage Examples
 ---------------
 To use this tool, observe the following options:
 
-   -azs | --availability-zones  : Required
-         Specify the AZs for the region you are using, you can specify a single AZ (not recommended) or, a b c for example:
-         -azs a b c
+    -azs | --availability-zones  : Required
+    Specify the AZs for the region you are using, you can specify a single AZ (not recommended) or, a b c for example:
+    -azs a b c
 
    -nzs | --network-zones' : Required
          Specify the zones you require, here you need to enter 3 bits of information, separated by comma and written as a key=value, below is an example:
