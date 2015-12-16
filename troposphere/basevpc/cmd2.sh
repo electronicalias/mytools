@@ -6,6 +6,6 @@ python stacker.py \
     name=dmz,subnets=2,internet=true \
     name=db,subnets=2,internet=false \
 --vpc-cidr 172.26.0.0/16 \
---project-name PciPoc \
---company-name "TravelRepublic"
-
+--project-name psmith \
+--company-name electronical \
+--profile-name electronicalias

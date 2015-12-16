@@ -7,6 +7,15 @@ from netaddr import IPNetwork
 import boto.cloudformation
 import time
 
+""" Set values that can be used as an operator for subnetting. For example, here, if you're using only 2 subnets
+you can safely use 0, 128 as the 3rd octet of an IP range, like:
+   172.26.0.0/17
+   172.26.128.0/17
+
+Although this segment is used more for 'cycling' through /16 networks, slicing them up based on how many networks are required and then
+using the value returned as the operator by which to multiply octet 3. In all cases, the subnetting for this script will opt for /24
+subnets. """
+
 subnetworking = {
     1: 0,
     2: 128,
@@ -18,6 +27,14 @@ subnetworking = {
     8: 32
     }
 
+""" This function is called in order to set the operator and insert it into the list that makes up each subnet:
+Original:
+['name=public', 'subnets=N', 'internet=true']
+
+Result:
+['name=public', 'subnets=N', 'internet=true', 'network=32']
+"""
+
 def set_octet(zones):
     num_zones = len(zones)
     operator =  subnetworking.get(num_zones)
@@ -27,16 +44,17 @@ def set_octet(zones):
     return zones
 
 
-
 cmd = commander.commands()
-awscmd = commander.aws('eu-west-1', 'travel_republic')
 attribs = cmd.stack_cmd()
-
 network_zones = attribs.network_zones
 availability_zones =  attribs.availability_zones
 company_name = attribs.company_name
 project_name = attribs.project_name
 vpc_cidr = attribs.vpc_cidr
+profile_name = attribs.profile_name
+
+
+awscmd = commander.aws('eu-west-1', profile_name)
 
 net = IPNetwork(vpc_cidr)
 subnets = list(net.subnet(24))

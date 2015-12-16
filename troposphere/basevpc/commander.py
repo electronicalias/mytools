@@ -4,7 +4,11 @@ import boto.cloudformation
 
 
 class commands:
-
+    """
+    Usage:
+    If you import this as a module then you can call all of the parameters stored in the command line
+    """
+    
     def __init__(self):
         self.data = []
 
@@ -21,22 +25,26 @@ class commands:
         ''')
         parser.add_argument('-azs','--availability-zones', nargs='+', help='specify the region azs, like a b c d etc', required=True)
         parser.add_argument('-nzs','--network-zones', nargs='+', help='see the long help message or look in the BitBucket Repo for clearer help', required=True)
-        parser.add_argument('-con','--company-name', required=True)
-        parser.add_argument('-prn','--project-name', required=True)
+        parser.add_argument('-con','--company-name')
+        parser.add_argument('-prn','--project-name')
         parser.add_argument('-vcr','--vpc-cidr', required=True)
-        parser.add_argument('-stk','--stack-type', required=True)
+        parser.add_argument('-stk','--stack-type')
+        parser.add_argument('-pfl','--profile-name', required=True)
         ns = parser.parse_args()
         return ns
 
-    def other_cmd(self):
-        parser = argparse.ArgumentParser(
-        prog='stack_creator',
+    def security_cmd(self):
+        secparse = argparse.ArgumentParser(
+        prog='security_creator',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='''
         add stuff here
         ''')
-        parser.add_argument('-stk','--stack-type')
-        ns = parser.parse_args()
+        secparse.add_argument('-csg','--component-security-groups', nargs='+', required=True)
+        secparse.add_argument('-vpc','--vpc-id', required=True)
+        secparse.add_argument('-pfl','--profile-name', required=True)
+        secparse.add_argument('-rli','--rule-list', nargs='+')
+        ns = secparse.parse_args()
         return ns
 
     def test(self):
@@ -90,6 +98,13 @@ class aws:
         else:
             print ("No stacks found")
         return stack.stack_status
+
+    def get_stack_data(self, stack_name):
+        ''' Hopefully this will return the VPC we want to use from the name given '''
+        stacks = self.cf_conn.describe_stacks(stack_name)
+        if len(stacks) == 1:
+            stack = stacks[0]
+        return stack
 
 
 if __name__ == "__main__":
