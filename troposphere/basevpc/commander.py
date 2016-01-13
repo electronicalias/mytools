@@ -76,7 +76,7 @@ class aws:
         
         print("Updating {} Stack in {}".format(stack_name, self.region))
         try:
-            self.cf_conn.create_stack(
+            self.cf_conn.update_stack(
                            stack_name,
                            template_body,
                            capabilities=['CAPABILITY_IAM'],
@@ -98,6 +98,10 @@ class aws:
         else:
             print ("No stacks found")
         return stack.stack_status
+
+    def get_stacks(self, stack_name):
+        stacks = self.cf_conn.describe_stacks(stack_name)
+        return stacks[0].stack_name
 
     def get_stack_data(self, stack_name):
         ''' Hopefully this will return the VPC we want to use from the name given '''

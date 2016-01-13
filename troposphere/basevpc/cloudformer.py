@@ -28,6 +28,7 @@ class aws_resources:
                 CidrBlock=cidr,
                 Tags=Tags(
                     Name=vpc_name + '-' + company + '-' + project,
+                    StackType=project,
                     Company=company,
                     Project=project)))
         self.data.append(aVPC)
