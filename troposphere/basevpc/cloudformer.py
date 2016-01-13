@@ -86,8 +86,8 @@ class aws_resources:
                 Tags=Tags(
                     Name=name,
                     Public=type,
-                    Project=company,
-                    Company=project)))
+                    Project=project,
+                    Company=company)))
         self.data.append(subnet)
         return subnet
 

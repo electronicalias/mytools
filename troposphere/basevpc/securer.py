@@ -9,12 +9,11 @@ cmd = commander.commands()
 attribs = cmd.security_cmd()
 
 sg_names =  attribs.component_security_groups
-profile_name = attribs.profile_name
 vpc_id = attribs.vpc_id
 rule_list = attribs.rule_list
 
 
-awscmd = commander.aws('eu-west-1', profile_name)
+awscmd = commander.aws('eu-west-1')
 
 aws_cmd = cloudformer.aws_resources()
 

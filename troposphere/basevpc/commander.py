@@ -29,7 +29,8 @@ class commands:
         parser.add_argument('-prn','--project-name')
         parser.add_argument('-vcr','--vpc-cidr', required=True)
         parser.add_argument('-stk','--stack-type')
-        parser.add_argument('-pfl','--profile-name', required=True)
+        parser.add_argument('-rgn','--region-name', required=True)
+        parser.add_argument('-snm','--stack-name', required=True)
         ns = parser.parse_args()
         return ns
 
@@ -42,7 +43,6 @@ class commands:
         ''')
         secparse.add_argument('-csg','--component-security-groups', nargs='+', required=True)
         secparse.add_argument('-vpc','--vpc-id', required=True)
-        secparse.add_argument('-pfl','--profile-name', required=True)
         secparse.add_argument('-rli','--rule-list', nargs='+')
         ns = secparse.parse_args()
         return ns
@@ -52,9 +52,9 @@ class commands:
 
 class aws:
 
-    def __init__(self, region, profile):
+    def __init__(self, region):
         self.region = region
-        self.cf_conn = boto.cloudformation.connect_to_region(region, profile_name=profile)
+        self.cf_conn = boto.cloudformation.connect_to_region(region)
 
     def create_stack(self, stack_name, template_body):
         '''Create a stack'''

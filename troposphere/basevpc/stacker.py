@@ -51,21 +51,22 @@ availability_zones =  attribs.availability_zones
 company_name = attribs.company_name
 project_name = attribs.project_name
 vpc_cidr = attribs.vpc_cidr
-profile_name = attribs.profile_name
+region_name = attribs.region_name
+stack_name = attribs.stack_name
 
 
-awscmd = commander.aws('eu-west-1', profile_name)
+awscmd = commander.aws(region_name)
 
 net = IPNetwork(vpc_cidr)
-subnets = list(net.subnet(24))
+subnets = list(net.subnet(26))
 
 zones = list(item.split(",") for item in network_zones)
 aws_cmd = cloudformer.aws_resources()
 
 
-VPC = aws_cmd.create_vpc(project_name + 'Vpc', company_name, project_name, vpc_cidr)
+VPC = aws_cmd.create_vpc(project_name, company_name, project_name, vpc_cidr)
 IGW = aws_cmd.create_internet_gateway(company_name, project_name, 'InternetGateway')
-IGWATT = aws_cmd.create_gateway_attachment(project_name + 'Vpc', 'InternetGateway')
+IGWATT = aws_cmd.create_gateway_attachment(project_name, 'InternetGateway')
 
 zone_list = set_octet(zones)
 for record in range(0, len(zones)):
@@ -74,13 +75,13 @@ for record in range(0, len(zones)):
     public = zone_list[record][2].split("=")[1]
     net_range = zone_list[record][3].split("=")[1]
     
-    route_table = aws_cmd.create_route_table(name + 'RouteTable', company_name, project_name, project_name + 'Vpc')
+    route_table = aws_cmd.create_route_table(name + 'RouteTable', company_name, project_name, project_name)
     if 'true' in public:
     	public_route = aws_cmd.create_route(name + 'Route', 'AttachGateway', 'InternetGateway', '0.0.0.0/0', name + 'RouteTable')
 
     count = 0
     for seq in range(0, int(num_of_nets)):
-        network =  subnets[int(seq) + int(net_range)]
+        network = subnets[int(seq) + int(net_range)]
         if count <= int(len(availability_zones) - 1):
             az = availability_zones[int(count)]
             count = count + 1
@@ -88,7 +89,7 @@ for record in range(0, len(zones)):
             count = 0
             az = availability_zones[int(count)]
             count = count + 1
-        subnet = aws_cmd.create_subnet(name + 'Subnet' + str(int(seq) + 1), project_name + 'Vpc', str(network), public, az, company_name, project_name)
+        subnet = aws_cmd.create_subnet(name + 'Subnet' + str(int(seq) + 1), project_name, str(network), public, az, company_name, project_name)
         associate_subnet = aws_cmd.create_subnet_association(name + 'Subnet' + str(int(seq + 1)) + 'Association', subnet, route_table)
 
 
@@ -96,6 +97,5 @@ for record in range(0, len(zones)):
 
 cfn_body = aws_cmd.complete_cfn()
 print cfn_body
-awscmd.create_stack('test-poc-2', cfn_body)
+awscmd.create_stack(stack_name, cfn_body)
 time.sleep(60)
-awscmd.get_stack_status('eu-west-1', 'test-poc-2')
