@@ -99,9 +99,12 @@ class aws:
             print ("No stacks found")
         return stack.stack_status
 
-    def get_stacks(self, stack_name):
-        stacks = self.cf_conn.describe_stacks(stack_name)
-        return stacks[0].stack_name
+    def get_stacks(self):
+        stacks = self.cf_conn.describe_stacks()
+        if len(stacks) == 1:
+            return stacks[0].stack_name
+        else:
+            return ""
 
     def get_stack_data(self, stack_name):
         ''' Hopefully this will return the VPC we want to use from the name given '''

@@ -99,8 +99,7 @@ cfn_body = aws_cmd.complete_cfn()
 # print cfn_body
 # awscmd.create_stack(stack_name, cfn_body)
 # time.sleep(60)
-print awscmd.get_stack_status(region_name, stack_name)
-if stack_name in awscmd.get_stacks(stack_name):
+if stack_name in awscmd.get_stacks():
     awscmd.update_stack(stack_name, cfn_body)
 else:
     awscmd.create_stack(stack_name, cfn_body)
