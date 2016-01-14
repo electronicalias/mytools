@@ -103,5 +103,4 @@ if stack_name in awscmd.get_stacks():
     # awscmd.update_stack(stack_name, cfn_body)
     print "I found the stack"
 else:
-    # awscmd.create_stack(stack_name, cfn_body)
-    print "It doesn't exist!"
+    awscmd.create_stack(stack_name, cfn_body)
