@@ -100,6 +100,8 @@ cfn_body = aws_cmd.complete_cfn()
 # awscmd.create_stack(stack_name, cfn_body)
 # time.sleep(60)
 if stack_name in awscmd.get_stacks():
-    awscmd.update_stack(stack_name, cfn_body)
+    # awscmd.update_stack(stack_name, cfn_body)
+    print "I found the stack"
 else:
-    awscmd.create_stack(stack_name, cfn_body)
+    # awscmd.create_stack(stack_name, cfn_body)
+    print "It doesn't exist!"
