@@ -54,3 +54,11 @@ if average < 10:
     print "We're all going to die!!"
 else:
     print "Still processing!!"
+
+cloudwatch.put_metric_data(
+    'HPC',
+    'CPU',
+    value = average,
+    timestamp = datetime.datetime.utcnow(),
+    unit = 'Percent'
+    )
