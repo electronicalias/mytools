@@ -1,10 +1,25 @@
 #!/usr/bin/env pythoA
+import argparse
 import datetime
 import boto.ec2
 import boto.ec2.cloudwatch
 
-ec2 = boto.ec2.connect_to_region('sa-east-1')
-cloudwatch = boto.ec2.cloudwatch.connect_to_region('sa-east-1')
+parser = argparse.ArgumentParser(
+    prog='HPC_OPTIMIZER',
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description='''
+    Welcoe to the HPC Cluster Optimizer, this optimizer works on the basis that you are using a tag called 'Usage', the value of which
+    can be used to query running instances to see if they have finished processing. If they have it will stop the instances.
+    ''')
+parser.add_argument('-rgn','--region_name', required=True)
+parser.add_argument('-tag','--tag_name', required=True)
+arg = parser.parse_args()
+
+region = arg.region_name
+tag = arg.tag_name
+
+ec2 = boto.ec2.connect_to_region(region)
+cloudwatch = boto.ec2.cloudwatch.connect_to_region(region)
 
 
 def metric_series(instance_id):
@@ -20,7 +35,7 @@ def metric_series(instance_id):
     )
     return metric
 
-reservations = ec2.get_all_reservations(filters={'instance-state-name': 'running', "tag:Usage" : "OCR"})
+reservations = ec2.get_all_reservations(filters={'instance-state-name': 'running', 'tag:Usage' : tag})
 
 ave_count = 0
 cpu_value = 0
@@ -31,6 +46,11 @@ for reservation in reservations:
             cpu_value = cpu_value + metric['Average']
             ave_count = ave_count + 1
 
-print('The average value of CPU over 30 minutes is: {}'.format(cpu_value / ave_count))
+average = cpu_value / ave_count
 
+print('The average value of CPU over 30 minutes is: {}'.format(average))
 
+if average < 10:
+    print "We're all going to die!!"
+else:
+    print "Still processing!!"
