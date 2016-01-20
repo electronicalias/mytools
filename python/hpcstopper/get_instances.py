@@ -20,7 +20,7 @@ def metric_series(instance_id):
     )
     return metric
 
-reservations = ec2.get_all_reservations(filters={"tag:Type" : "HPC", "tag:NodeType" : "compute"})
+reservations = ec2.get_all_reservations(filters={'instance-state-name': 'running', "tag:Usage" : "OCR"})
 
 ave_count = 0
 cpu_value = 0
@@ -28,12 +28,9 @@ cpu_value = 0
 for reservation in reservations:
     for instance in reservation.instances:
         for metric in (metric_series(instance.id)):
-            print(metric['Average'])
             cpu_value = cpu_value + metric['Average']
             ave_count = ave_count + 1
 
-print ave_count
-print cpu_value
-print('The average value of CPU over 100 minutes is: {}'.format(cpu_value / ave_count))
+print('The average value of CPU over 30 minutes is: {}'.format(cpu_value / ave_count))
 
 
