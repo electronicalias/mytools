@@ -35,7 +35,7 @@ def metric_series(instance_id):
     )
     return metric
 
-reservations = ec2.get_all_reservations(filters={'instance-state-name': 'running', 'tag:Usage' : tag})
+reservations = ec2.get_all_reservations(filters={'instance-state-name': 'running', 'tag:Job' : tag})
 
 ave_count = 0
 cpu_value = 0

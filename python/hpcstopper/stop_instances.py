@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import boto3
 
-client = boto3.client('cloudwatch', 'sa-east-1')
+cw = boto3.client('cloudwatch', 'sa-east-1')
+ec2 = boto3.client('ec2', 'sa-east-1')
 
-response = client.put_metric_alarm(
+response = cw.put_metric_alarm(
     AlarmName='OCRLoad',
     AlarmDescription='The CPU Average load of the OCR job has reduced below 10%',
     ActionsEnabled=False,
@@ -18,7 +19,7 @@ response = client.put_metric_alarm(
 )
 
 def alarm_state():
-    alarm_status = client.describe_alarms(
+    alarm_status = cw.describe_alarms(
         AlarmNames=[
             'OCRLoad'
         ]
@@ -26,7 +27,28 @@ def alarm_state():
     for val in alarm_status['MetricAlarms']:
         return val['StateValue']
 
+def terminate_instance():
+    response = ec2.describe_instances(
+        Filters=[
+            {
+                'Name': 'instance-state-name',
+                'Values': [ 'running' ]
+            },
+            {
+                'Name': 'tag:Job',
+                'Values': [ 'OCR' ]
+            }
+        ]
+    )
+    for item in response['Reservations']:
+        for instance in item['Instances']:
+            stop = ec2.stop_instances(
+                InstanceIds=[
+                     instance['InstanceId']
+                ]
+            )
+
 if 'OK' in alarm_state():
-    print "Do nothing"
+    print "Do nothing, the alarm status is currently OK"
 else:
-    print "Do something"
+    terminate_instance()
