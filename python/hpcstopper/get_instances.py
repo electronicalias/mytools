@@ -47,13 +47,9 @@ for reservation in reservations:
             ave_count = ave_count + 1
 
 average = cpu_value / ave_count
-
-print('The average value of CPU over 30 minutes is: {}'.format(average))
-
-if average < 10:
-    print "We're all going to die!!"
-else:
-    print "Still processing!!"
+print ave_count
+print cpu_value
+print average
 
 cloudwatch.put_metric_data(
     'HPC',
