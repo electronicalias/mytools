@@ -93,6 +93,13 @@ spot_price_param = template.add_parameter(Parameter(
     Default=args.spot_price,
 ))
 
+iam_role_param = template.add_parameter(Parameter(
+    "IamRoleProfile",
+    Description="The IAM Role for the Spot Instances",
+    Type="String",
+    Default="ec2-bastion-role",
+))
+
 launch_config = template.add_resource(asc.LaunchConfiguration(
     "ClusterLaunchConfiguration",
     ImageId=Ref(ami_param),
@@ -107,7 +114,7 @@ launch_config = template.add_resource(asc.LaunchConfiguration(
         "    --stack ", Ref("AWS::StackName"),
         "    --region ", Ref("AWS::Region"), "\n"
     ])),
-    IamInstanceProfile=Ref(ec2-bastion-role),
+    IamInstanceProfile=Ref(iam_role_param),
     BlockDeviceMappings=[
         ec2.BlockDeviceMapping(
             DeviceName="/dev/sda1",
