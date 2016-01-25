@@ -161,7 +161,7 @@ response = cfn.create_stack(
         'CAPABILITY_IAM',
     ],
     Tags=[ 
-        { "Key": "Name", "Value": "Node" + str(num) },
+        { "Key": "Name", "Value": "Spot-Hpc-Node" },
         { "Key": "Job", "Value": "OCR"},
     ],
 )
