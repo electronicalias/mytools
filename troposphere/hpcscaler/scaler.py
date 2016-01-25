@@ -139,7 +139,7 @@ response = cfn.create_stack(
     Tags=[
         {
             'Key': 'Name',
-            'Value': 'ClusterNodeStack'
+            'Value': 'ClusterNodeStack-spot'
         }
      ],
 )
