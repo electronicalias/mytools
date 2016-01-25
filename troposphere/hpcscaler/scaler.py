@@ -128,11 +128,9 @@ launch_config = template.add_resource(asc.LaunchConfiguration(
 autoscaling_group = template.add_resource(asc.AutoScalingGroup(
     "AutoscalingGroup",
     DesiredCapacity=Ref(max),
-    Tags=[
-        {
-            'Key': 'Name',
-            'Value': 'ClusterNodeStack-spot'
-        }
+    Tags=[ 
+        { "Key": "Name", "Value": "Node" + str(num) },
+        { "Key": "Job", "Value": "OCR"},
     ],
     LaunchConfigurationName=Ref(launch_config),
     MinSize=Ref(max),
@@ -160,10 +158,12 @@ response = cfn.create_stack(
     Capabilities=[
         'CAPABILITY_IAM',
     ],
-    Tags=[ 
-        { "Key": "Name", "Value": "Spot-Hpc-Node" },
-        { "Key": "Job", "Value": "OCR"},
-    ],
+    Tags=[
+        {
+            'Key': 'Name',
+            'Value': 'ClusterNodeStack-spot'
+        }
+     ],
 )
 
 print response 
