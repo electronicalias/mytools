@@ -77,7 +77,7 @@ instance_type_param = template.add_parameter(Parameter(
     Default=args.node_size,
 ))
 
-instance_type_param = template.add_parameter(Parameter(
+ami_param = template.add_parameter(Parameter(
     "AmiId",
     Description="The AMI for the nodes",
     Type="String",
