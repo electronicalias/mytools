@@ -52,6 +52,7 @@ keyname_param = template.add_parameter(Parameter(
     "KeyName",
     Description="Name of your EC2 Keypair",
     Type="String",
+    Default=args.key_name,
 ))
 
 subnet_param = template.add_parameter(Parameter(
@@ -65,6 +66,7 @@ securitygroup_param = template.add_parameter(Parameter(
     "SecurityGroupId",
     Description="The Security Group that the cluster nodes will use",
     Type="String",
+    Default=args.security_group,
 ))
 
 for num in range(min, max):
