@@ -125,6 +125,20 @@ launch_config = template.add_resource(asc.LaunchConfiguration(
     ],
 ))
 
+autoscaling_group = t.add_resource(AutoScalingGroup(
+    "AutoscalingGroup",
+    DesiredCapacity=Ref(max),
+    Tags=[
+        Tag("Environment", "Test", True)
+    ],
+    LaunchConfigurationName=Ref(launch_config),
+    MinSize=Ref(max),
+    MaxSize=Ref(max),
+    VPCZoneIdentifier=[Ref(subnet_param), Ref(ApiSubnet2)],
+    AvailabilityZones=["sa-east-1"],
+    HealthCheckType="EC2",
+))
+
 
 
 '''
