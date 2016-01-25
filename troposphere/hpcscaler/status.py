@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import boto3
+import time
 
 parser = argparse.ArgumentParser(
 prog='hpc_stack_deleter',
@@ -26,4 +27,5 @@ while var == 1 :
         break
     elif 'ROLLBACK_COMPLETE' in get_stack_state(args.stack_name):
         raise SystemExit
+    time.sleep(2)
 
