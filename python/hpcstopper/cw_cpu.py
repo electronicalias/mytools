@@ -48,8 +48,8 @@ response = ec2.describe_instances(
             'Values': [ 'running' ]
         },
         {
-            'Name': 'tag:Usage',
-            'Values': [ 'OCR' ]
+            'Name': 'tag:Job',
+            'Values': [ tag ]
         }
     ]
 )
