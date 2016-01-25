@@ -139,8 +139,9 @@ autoscaling_group = template.add_resource(asc.AutoScalingGroup(
     "AutoscalingGroup",
     DesiredCapacity=max,
     Tags=[
-        asc.Tag("Environment", "test", True),
+        asc.Tag("Environment", "HPC", True),
         asc.Tag("RequestedBy", args.build_user, True),
+        asc.Tag("Job", "hpc-spot", True),
     ],
     LaunchConfigurationName=Ref(launch_config),
     MinSize=max,
