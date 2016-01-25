@@ -30,7 +30,7 @@ def create_node(num, node_ami, node_size):
         ImageId=node_ami,
         InstanceType=node_size,
         KeyName=Ref(keyname_param),
-        SecurityGroups=[Ref(securitygroup_param)],
+        SecurityGroupIds=[Ref(securitygroup_param)],
         UserData=Base64("80"),
         SubnetId=Ref(subnet_param),
         Tags=[ 
