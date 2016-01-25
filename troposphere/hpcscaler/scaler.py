@@ -107,7 +107,7 @@ launch_config = template.add_resource(asc.LaunchConfiguration(
         "    --stack ", Ref("AWS::StackName"),
         "    --region ", Ref("AWS::Region"), "\n"
     ])),
-    IamInstanceProfile="somename",
+    IamInstanceProfile="aws-ec2-spot-fleet-role",
     BlockDeviceMappings=[
         ec2.BlockDeviceMapping(
             DeviceName="/dev/sda1",
