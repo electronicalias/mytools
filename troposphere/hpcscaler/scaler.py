@@ -125,7 +125,7 @@ launch_config = template.add_resource(asc.LaunchConfiguration(
     ],
 ))
 
-autoscaling_group = t.add_resource(AutoScalingGroup(
+autoscaling_group = template.add_resource(AutoScalingGroup(
     "AutoscalingGroup",
     DesiredCapacity=Ref(max),
     Tags=[
