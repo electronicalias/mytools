@@ -18,6 +18,7 @@ parser.add_argument('-nsz','--node_size', help='Specify a Node Size', required=T
 parser.add_argument('-num','--num_nodes', help='Specify the number of Nodes to use', required=True)
 parser.add_argument('-rgn','--region', help='Specify the region this will be deployed in', required=True)
 parser.add_argument('-spt','--spot_price', help='Specify the maximum price you are willing to pay for the type of instance you are choosing', required=True)
+parser.add_argument('-usr','--build_user', required=True)
 args = parser.parse_args()
 
 min = 0
@@ -129,7 +130,8 @@ autoscaling_group = template.add_resource(asc.AutoScalingGroup(
     "AutoscalingGroup",
     DesiredCapacity=max,
     Tags=[
-        asc.Tag("Environment", "test", True)
+        asc.Tag("Environment", "test", True),
+        asc.Tag("RequestedBy", args.build_user, True),
     ],
     LaunchConfigurationName=Ref(launch_config),
     MinSize=max,
@@ -161,6 +163,10 @@ response = cfn.create_stack(
         {
             'Key': 'Name',
             'Value': 'ClusterNodeStack-spot'
+        },
+        {
+            'Key': 'RequestedBy',
+            'Value': args.build_user
         }
     ],
 )
