@@ -25,6 +25,9 @@ while var == 1 :
     if 'CREATE_COMPLETE' in get_stack_state(args.stack_name):
         print("Passed Stack Build")
         break
+    elif 'DELETE_IN_PROGRESS' in get_stack_state(args.stack_name):
+        print("Waiting for old stack to delete")
+        time.sleep(10)
     elif 'ROLLBACK_COMPLETE' in get_stack_state(args.stack_name):
         raise SystemExit
     time.sleep(2)

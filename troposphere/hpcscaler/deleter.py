@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import boto3
+import time
 
 parser = argparse.ArgumentParser(
 prog='hpc_stack_deleter',
@@ -19,3 +20,4 @@ response = cfn.delete_stack(
 
 print response 
 
+time.sleep(20)
