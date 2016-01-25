@@ -131,7 +131,7 @@ cfn = boto3.client('cloudformation', region)
 cfn_body = template.to_json()
 
 response = cfn.create_stack(
-    StackName='ClusterNodes',
+    StackName='Spot-ClusterNodes',
     TemplateBody=cfn_body,
     Capabilities=[
         'CAPABILITY_IAM',
