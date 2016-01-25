@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
 from troposphere import Base64, FindInMap, GetAtt, AWSHelperFn, AWSObject, AWSProperty, Join
-from troposphere import Parameter, Output, Ref, Template
+from troposphere import Parameter, Output, Ref, Template, Tag
 import troposphere.autoscaling as asc
 import troposphere.ec2 as ec2
 import boto3
