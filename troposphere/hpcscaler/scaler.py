@@ -135,7 +135,7 @@ autoscaling_group = template.add_resource(asc.AutoScalingGroup(
     MinSize=max,
     MaxSize=max,
     VPCZoneIdentifier=[Ref(subnet_param)],
-    AvailabilityZones=["sa-east-1"],
+    AvailabilityZones=["sa-east-1a"],
     HealthCheckType="EC2",
 ))
 
