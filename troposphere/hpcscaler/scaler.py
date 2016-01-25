@@ -128,9 +128,8 @@ launch_config = template.add_resource(asc.LaunchConfiguration(
 autoscaling_group = template.add_resource(asc.AutoScalingGroup(
     "AutoscalingGroup",
     DesiredCapacity=max,
-    Tags=[ 
-        { "Key": "Name", "Value": "Hpc-Spot-Node" },
-        { "Key": "Job", "Value": "OCR"},
+    Tags=[
+        Tag("Environment", "test", True)
     ],
     LaunchConfigurationName=Ref(launch_config),
     MinSize=max,
