@@ -99,7 +99,7 @@ launch_config = template.add_resource(asc.LaunchConfiguration(
     InstanceType=Ref(instance_type_param),
     SpotPrice=Ref(spot_price_param),
     KeyName=Ref(keyname_param),
-    SecurityGroups=Ref(securitygroup_param),
+    SecurityGroups=[Ref(securitygroup_param)],
     UserData=Base64(Join('', [
         "#!/bin/bash\n",
         "cfn-signal -e 0",
