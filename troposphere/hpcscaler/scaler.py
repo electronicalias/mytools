@@ -20,15 +20,13 @@ args = parser.parse_args()
 
 min = 0
 max = int(args.num_nodes)
-ami_id = args.ami_id
-node_type = args.node_size
 region = args.region
 
-def create_node(num, node_ami, node_size):
+def create_node(num):
     ec2_instance = template.add_resource(ec2.Instance(
         "Node" + str(num),
-        ImageId=node_ami,
-        InstanceType=node_size,
+        ImageId=Ref(ami_param),
+        InstanceType=Ref(keyname_param),
         KeyName=Ref(keyname_param),
         SecurityGroupIds=[Ref(securitygroup_param)],
         UserData=Base64("80"),
@@ -72,8 +70,22 @@ securitygroup_param = template.add_parameter(Parameter(
     Default=args.security_group,
 ))
 
+instance_type_param = template.add_parameter(Parameter(
+    "InstanceType",
+    Description="The Cluster Node Size",
+    Type="String",
+    Default=args.node_size,
+))
+
+instance_type_param = template.add_parameter(Parameter(
+    "AmiId",
+    Description="The AMI for the nodes",
+    Type="String",
+    Default=args.ami_id,
+))
+
 for num in range(min, max):
-    create_node(num, ami_id, node_type)
+    create_node(num,)
 
 
 cfn = boto3.client('cloudformation', region)
