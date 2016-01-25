@@ -3,6 +3,7 @@ import argparse
 from troposphere import Base64, FindInMap, GetAtt
 from troposphere import Parameter, Output, Ref, Template
 import troposphere.ec2 as ec2
+import boto3
 
 parser = argparse.ArgumentParser(
 prog='hpc_stack_creator',
@@ -14,12 +15,14 @@ parser.add_argument('-net','--subnet_id', help='Specify the ID of a Subnet', req
 parser.add_argument('-key','--key_name', help='Specify an existing Key Name', required=True)
 parser.add_argument('-nsz','--node_size', help='Specify a Node Size', required=True)
 parser.add_argument('-num','--num_nodes', help='Specify the number of Nodes to use', required=True)
+parser.add_argument('-rgn','--region', help='Specify the region this will be deployed in', required=True)
 args = parser.parse_args()
 
 min = 0
 max = int(args.num_nodes)
 ami_id = args.ami_id
 node_type = args.node_size
+region = args.region
 
 def create_node(num, node_ami, node_size):
     ec2_instance = template.add_resource(ec2.Instance(
@@ -72,4 +75,22 @@ securitygroup_param = template.add_parameter(Parameter(
 for num in range(min, max):
     create_node(num, ami_id, node_type)
 
-print(template.to_json())
+
+cfn = boto3.client('cloudformation', region)
+cfn_body = template.to_json()
+
+response = cfn.create_stack(
+    StackName='ClusterNodes',
+    TemplateBody=cfn_body,
+    Capabilities=[
+        'CAPABILITY_IAM',
+    ],
+    Tags=[
+        {
+            'Key': 'Name',
+            'Value': 'ClusterNodeStack'
+        }
+     ],
+)
+
+print response
