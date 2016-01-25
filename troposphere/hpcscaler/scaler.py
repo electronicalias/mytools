@@ -20,6 +20,7 @@ parser.add_argument('-rgn','--region', help='Specify the region this will be dep
 parser.add_argument('-spt','--spot_price', help='Specify the maximum price you are willing to pay for the type of instance you are choosing', required=True)
 parser.add_argument('-usr','--build_user', required=True)
 parser.add_argument('-stk','--stack_name', required=True)
+parser.add_argument('-vol','--volume_size', required=True)
 args = parser.parse_args()
 
 min = 0
@@ -102,6 +103,13 @@ iam_role_param = template.add_parameter(Parameter(
     Default="ec2-bastion-role",
 ))
 
+volume_size_param = template.add_parameter(Parameter(
+    "VolumeSize",
+    Description="The size of the EBS Volumes attached to the spot instance",
+    Type="String",
+    Default=args.volume_size,
+))
+
 launch_config = template.add_resource(asc.LaunchConfiguration(
     "ClusterLaunchConfiguration",
     ImageId=Ref(ami_param),
@@ -121,7 +129,7 @@ launch_config = template.add_resource(asc.LaunchConfiguration(
         ec2.BlockDeviceMapping(
             DeviceName="/dev/sda1",
             Ebs=ec2.EBSBlockDevice(
-                VolumeSize="8"
+                VolumeSize=Ref(volume_size_param)
             ),
         ),
     ],
