@@ -19,6 +19,7 @@ parser.add_argument('-num','--num_nodes', help='Specify the number of Nodes to u
 parser.add_argument('-rgn','--region', help='Specify the region this will be deployed in', required=True)
 parser.add_argument('-spt','--spot_price', help='Specify the maximum price you are willing to pay for the type of instance you are choosing', required=True)
 parser.add_argument('-usr','--build_user', required=True)
+parser.add_argument('-stk','--stack_name', required=True)
 args = parser.parse_args()
 
 min = 0
@@ -154,7 +155,7 @@ cfn = boto3.client('cloudformation', region)
 cfn_body = template.to_json()
 
 response = cfn.create_stack(
-    StackName='Spot-ClusterNodes',
+    StackName=args.stack_name,
     TemplateBody=cfn_body,
     Capabilities=[
         'CAPABILITY_IAM',
