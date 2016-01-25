@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import argparse
-from troposphere import Base64, FindInMap, GetAtt
+from troposphere import Base64, FindInMap, GetAtt, AWSHelperFn, AWSObject, AWSProperty, Join
 from troposphere import Parameter, Output, Ref, Template
+import troposphere.autoscaling as asc
 import troposphere.ec2 as ec2
 import boto3
 
@@ -16,6 +17,7 @@ parser.add_argument('-key','--key_name', help='Specify an existing Key Name', re
 parser.add_argument('-nsz','--node_size', help='Specify a Node Size', required=True)
 parser.add_argument('-num','--num_nodes', help='Specify the number of Nodes to use', required=True)
 parser.add_argument('-rgn','--region', help='Specify the region this will be deployed in', required=True)
+parser.add_argument('-spt','--spot_price', help='Specify the maximum price you are willing to pay for the type of instance you are choosing', required=True)
 args = parser.parse_args()
 
 min = 0
@@ -84,9 +86,46 @@ ami_param = template.add_parameter(Parameter(
     Default=args.ami_id,
 ))
 
+spot_price_param = template.add_parameter(Parameter(
+    "SpotPrice",
+    Description="The bid price for the spot instances being used",
+    Type="String",
+    Default=args.spot_price,
+))
+
+launch_config = template.add_resource(asc.LaunchConfiguration(
+    "ClusterLaunchConfiguration",
+    ImageId=Ref(ami_param),
+    InstanceType=Ref(instance_type_param),
+    SpotPrice=Ref(spot_price_param),
+    KeyName=Ref(keyname_param),
+    SecurityGroups=Ref(securitygroup_param),
+    UserData=Base64(Join('', [
+        "#!/bin/bash\n",
+        "cfn-signal -e 0",
+        "    --resource AutoscalingGroup",
+        "    --stack ", Ref("AWS::StackName"),
+        "    --region ", Ref("AWS::Region"), "\n"
+    ])),
+    IamInstanceProfile="somename",
+    BlockDeviceMappings=[
+        ec2.BlockDeviceMapping(
+            DeviceName="/dev/sda1",
+            Ebs=ec2.EBSBlockDevice(
+                VolumeSize="8"
+            ),
+        ),
+    ],
+))
+
+
+
+'''
 for num in range(min, max):
     create_node(num,)
+'''
 
+print(template.to_json())
 
 cfn = boto3.client('cloudformation', region)
 cfn_body = template.to_json()
@@ -105,4 +144,5 @@ response = cfn.create_stack(
      ],
 )
 
-print response
+print response 
+
