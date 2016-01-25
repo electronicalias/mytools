@@ -26,7 +26,7 @@ def create_node(num):
     ec2_instance = template.add_resource(ec2.Instance(
         "Node" + str(num),
         ImageId=Ref(ami_param),
-        InstanceType=Ref(keyname_param),
+        InstanceType=Ref(instance_type_param),
         KeyName=Ref(keyname_param),
         SecurityGroupIds=[Ref(securitygroup_param)],
         UserData=Base64("80"),
