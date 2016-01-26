@@ -6,6 +6,8 @@ import troposphere.autoscaling as asc
 import troposphere.ec2 as ec2
 import boto3
 
+
+''' Collect all of the command line variables '''
 parser = argparse.ArgumentParser(
 prog='hpc_stack_creator',
 formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -23,10 +25,10 @@ parser.add_argument('-stk','--stack_name', required=True)
 parser.add_argument('-vol','--volume_size', required=True)
 args = parser.parse_args()
 
-min = 0
+''' Set the 'max' variable for multiple use later '''
 max = int(args.num_nodes)
-region = args.region
 
+''' Old function for creating a number of nodes that are not spot: 
 def create_node(num):
     ec2_instance = template.add_resource(ec2.Instance(
         "Node" + str(num),
@@ -51,6 +53,7 @@ def create_node(num):
             }
         ]
     ))
+'''
 
 template = Template()
 
@@ -147,7 +150,7 @@ autoscaling_group = template.add_resource(asc.AutoScalingGroup(
     MinSize=max,
     MaxSize=max,
     VPCZoneIdentifier=[Ref(subnet_param)],
-    AvailabilityZones=["sa-east-1a"],
+    AvailabilityZones=[Ref("AWS::Region")],
     HealthCheckType="EC2",
 ))
 
@@ -160,7 +163,7 @@ for num in range(min, max):
 
 print(template.to_json())
 
-cfn = boto3.client('cloudformation', region)
+cfn = boto3.client('cloudformation', args.region)
 cfn_body = template.to_json()
 
 response = cfn.create_stack(
