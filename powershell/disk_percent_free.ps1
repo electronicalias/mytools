@@ -1,10 +1,13 @@
-﻿
-param (
-    [string]$region = $(throw "-region is required")
+﻿param (
+    [string]$region = $(throw "-region is required"),
+    [string]$accKey = $(throw "-accKey is required"),
+    [string]$secKey = $(throw "-secKey is required")
  )
 
 Import-Module AWSPowerShell
-Set-DefaultAWSRegion -Region $region
+Set-AWSCredentials -AccessKey $accKey -SecretKey $secKey -StoreAs tempProfile
+Initialize-AWSDefaults -ProfileName tempProfile -Region $region
+
 
 $InstanceId = invoke-restmethod -uri http://169.254.169.254/latest/meta-data/instance-id
 $disks = Get-WmiObject Win32_LogicalDisk
@@ -42,5 +45,5 @@ foreach ($disk in $disks) {
                     -Period 21600 `
                     -Statistic Average `
                     -Threshold 20
-
 }
+Set-AWSCredentials -AccessKey 1111111111 -SecretKey aaaaaaaaaaaaaaaaaaaaaa -StoreAs tempProfile
