@@ -1,3 +1,8 @@
+param (
+    [string]$region = $(throw "-region is required"),
+    [string]$disk = $(throw "-disk is required.")
+ )
+
 Import-Module AWSPowerShell
 Set-DefaultAWSRegion -Region sa-east-1
 
