@@ -34,16 +34,18 @@ foreach ($disk in $disks) {
     $dat.Dimensions = $dimensions
     Write-CWMetricData -Namespace "Disk Metrics" -MetricData $dat
     
-    Write-CWMetricAlarm -AlarmName "Disk % Free" `
+    $disk_id = $disk.deviceid.Substring(0,$disk.deviceid.Length-1)
+
+    Write-CWMetricAlarm -AlarmName "Disk % Free ${InstanceId} $disk_id" `
                     -AlarmDescription "Alarm when the disk percent used is above 80%" `
                     -Namespace "Disk Metrics" `
                     -MetricName DiskFreePercent `
-                    -Dimensions @{ Name="InstanceId"; Value="${InstanceId}" } `
                     -AlarmActions $topicARN `
                     -ComparisonOperator LessThanOrEqualToThreshold `
                     -EvaluationPeriods 1 `
                     -Period 21600 `
                     -Statistic Average `
-                    -Threshold 20
+                    -Threshold 20 `
+                    -Dimension $dimensions
 }
 Set-AWSCredentials -AccessKey 1111111111 -SecretKey aaaaaaaaaaaaaaaaaaaaaa -StoreAs tempProfile
