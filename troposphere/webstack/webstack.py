@@ -29,7 +29,7 @@ count = 1
 t = Template()
 
 for key, value in resources.iteritems():
-	subnet_param = template.add_parameter(Parameter(
+    subnet_param = template.add_parameter(Parameter(
         "SubnetId",
         Description="Subnet Id of the network where nodes are deployed",
         Type="String",
