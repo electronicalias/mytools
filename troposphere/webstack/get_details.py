@@ -1,49 +1,39 @@
 #!/usr/bin/env python
-import argparse
+__author__ = 'Philip Smith'
+
+""" 
+Versions: boto3
+Usage:
+
+Pulls out all the details from the stack
+"""
 import boto3
-from troposphere import Base64, FindInMap, GetAtt, AWSHelperFn, AWSObject, AWSProperty, Join
-from troposphere import Parameter, Output, Ref, Template
-import troposphere.autoscaling as asc
-import troposphere.ec2 as ec2
-
-parser = argparse.ArgumentParser(
-    prog='ID Grabber',
-    formatter_class=argparse.RawDescriptionHelpFormatter,
-    description='''
-    Grab the id of various things
-    ''')
-parser.add_argument('-rgn','--region_name', required=True)
-arg = parser.parse_args()
 
 
-ec2 = boto3.client('ec2', arg.region_name)
+class resources:
+    """Initialise the class used to collect resource ids"""
+    def __init__(self, region_name):
+        self.data = []
+        self.ec2 = boto3.client('ec2', region_name)
+    
+    """Find availability zone names"""
+    
+    def az(self, project, zone)
+        response = self.ec2.describe_subnets(
+            Filters=[
+                {
+                    'Name': 'tag:Zone',
+                    'Values': [
+                        zone,
+                    ]
+                },
+                {
+                    'Name': 'tag:Project',
+                    'Values': [
+                        project,
+                    ]
+                },
+            ]
+        )
+        return response['Subnets']    
 
-def get_vals(zone, project, resource):
-    response = ec2.describe_subnets(
-        Filters=[
-            {
-                'Name': 'tag:Zone',
-                'Values': [
-                    zone,
-                ]
-            },
-            {
-                'Name': 'tag:Project',
-                'Values': [
-                    project,
-                ]
-            },
-        ]
-    )
-    return response['Subnets']
-
-# t = Template()
-
-
-azs = get_vals('public', 'production', 'AvailabilityZone')
-for az in azs:
-    print(az['AvailabilityZone'] + " " + az['SubnetId'])
-
-
-
-# print(t.to_json())
