@@ -23,6 +23,7 @@ for i in cmd.az('production', 'public'):
     resources[str(i['SubnetId'])] = str(i['AvailabilityZone'])
 
 print resources
+len(resources)
 
 count = 1
 
@@ -35,5 +36,6 @@ for key, value in resources.iteritems():
         Type="String",
         Default=args.subnet_id,
         ))
-    public_prod_subnet_ + str(count) = subnet_param
-    return public_prod_subnet + str(count)
+    return subnet_param
+
+print(t.to_json()))
