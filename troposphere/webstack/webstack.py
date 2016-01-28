@@ -13,4 +13,12 @@ args = parser.parse_args()
 
 cmd = detailer.resource(args.region)
 
-print cmd.az('production', 'public')
+resources = {}
+
+for i in cmd.az('production', 'public'):
+    resources[str(i['SubnetId'])] = str(i['AvailabilityZone'])
+
+print resources
+
+for key, value in resources.iteritems():
+    print value 
