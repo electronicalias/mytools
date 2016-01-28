@@ -38,4 +38,4 @@ for key, value in resources.iteritems():
         ))
     return subnet_param
 
-print(t.to_json()))
+print(t.to_json())
