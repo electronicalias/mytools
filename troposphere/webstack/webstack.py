@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import argparse
 import detailer
+from troposphere import Base64, FindInMap, GetAtt, AWSHelperFn, AWSObject, AWSProperty, Join
+from troposphere import Parameter, Output, Ref, Template
+import troposphere.autoscaling as asc
+import troposphere.ec2 as ec2
 
 
 ''' Collect all of the command line variables '''
@@ -20,5 +24,16 @@ for i in cmd.az('production', 'public'):
 
 print resources
 
+count = 1
+
+t = Template()
+
 for key, value in resources.iteritems():
-    print value 
+	subnet_param = template.add_parameter(Parameter(
+        "SubnetId",
+        Description="Subnet Id of the network where nodes are deployed",
+        Type="String",
+        Default=args.subnet_id,
+        ))
+    public_prod_subnet_ + str(count) = subnet_param
+    return public_prod_subnet + str(count)
