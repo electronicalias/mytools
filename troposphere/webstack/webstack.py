@@ -37,14 +37,6 @@ def subnet(value):
 
 t = Template()
 
-params = {}
-for num in range(len(resources) + 1):
-    params[str([num])] = ''
-
-for key, value in resources.iteritems():
-    subnet(value)
-    count += 1
-
 subnets = []
 azs = []
 
@@ -70,4 +62,3 @@ autoscaling_group = t.add_resource(asc.AutoScalingGroup(
     HealthCheckType="EC2",
 ))
 print(t.to_json())
-print params
