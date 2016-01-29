@@ -150,7 +150,7 @@ autoscaling_group = template.add_resource(asc.AutoScalingGroup(
     MinSize=max,
     MaxSize=max,
     VPCZoneIdentifier=[Ref(subnet_param)],
-    AvailabilityZones=Join("", [ Ref("AWS::Region"), "a"]),
+    AvailabilityZones=[ Join("", [ Ref("AWS::Region"), "a"])],
     HealthCheckType="EC2",
 ))
 
