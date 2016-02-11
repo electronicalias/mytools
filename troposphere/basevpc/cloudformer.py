@@ -77,7 +77,7 @@ class aws_resources:
         self.data.append(route)
         return route
 
-    def create_subnet(self, name, vpc_name, network, type, az, company, project):
+    def create_subnet(self, name, vpc_name, network, type, az, company, project, zone_name):
         subnet = self.t.add_resource(
             Subnet(
                 name,
@@ -89,7 +89,7 @@ class aws_resources:
                     Public=type,
                     Project=project,
                     Company=company,
-                    Zone=name)))
+                    Zone=zone_name)))
         self.data.append(subnet)
         return subnet
 

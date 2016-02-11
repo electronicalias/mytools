@@ -89,7 +89,7 @@ for record in range(0, len(zones)):
             count = 0
             az = availability_zones[int(count)]
             count = count + 1
-        subnet = aws_cmd.create_subnet(name + 'Subnet' + str(int(seq) + 1), project_name, str(network), public, az, company_name, project_name)
+        subnet = aws_cmd.create_subnet(name + 'Subnet' + str(int(seq) + 1), project_name, str(network), public, az, company_name, project_name, name)
         associate_subnet = aws_cmd.create_subnet_association(name + 'Subnet' + str(int(seq + 1)) + 'Association', subnet, route_table)
 
 
