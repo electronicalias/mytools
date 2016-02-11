@@ -88,7 +88,8 @@ class aws_resources:
                     Name=name,
                     Public=type,
                     Project=project,
-                    Company=company)))
+                    Company=company,
+                    Zone=name)))
         self.data.append(subnet)
         return subnet
 
