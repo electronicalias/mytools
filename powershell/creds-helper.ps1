@@ -16,5 +16,6 @@ Set-AWSCredentials -AccessKey $accKey -SecretKey $secKey -StoreAs tempProfile
 Initialize-AWSDefaults -ProfileName tempProfile -Region $region
 
 $Creds = (Use-STSRole -RoleArn $roleArn -RoleSessionName $roleName).Credentials
+[Environment]::SetEnvironmentVariable("Creds", $Creds, "Machine")
 
 Clear-AWSCredentials -StoredCredentials tempProfile
