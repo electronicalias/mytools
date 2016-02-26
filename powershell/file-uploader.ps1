@@ -18,13 +18,14 @@ This script does the following:
   
   file-uploader.ps1 -bucketName SOMEBUCKET -rootFolder "E:\Some\Root\Folder" -uploadFolder "upload"
 #>
-Import-Module AWSPowerShell
-
 param (
-    [string]$bucketName = $(throw "-bucketName is required in order to copy the files to the destination bucket"),
-    [string]$rootFolder = $(throw "-rootFolder is required so that the script can find all folders with in the root to generate a list"),
-    [string]$uploadFolder = $(throw "-uploadFolder is required and should be specified as the folder that contains the source files"),
+    [string]$rootFolder = $(throw "-rootFolder is required!"),
+    [string]$bucketName = $(throw "-bucketName is required!"),
+    [string]$uploadFolder = $(throw "-uploadFolder is required!")
 )
+
+<# Use the Powershell Tools for AWS #>
+Import-Module AWSPowerShell
 
 foreach ($i in Get-ChildItem $rootFolder)
 { 
