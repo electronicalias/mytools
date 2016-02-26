@@ -18,17 +18,19 @@ This script does the following:
   
   file-uploader.ps1 -bucketName SOMEBUCKET -rootFolder "E:\Some\Root\Folder" -uploadFolder "upload"
 #>
-
-$bucketName = args[0]
-
 Import-Module AWSPowerShell
 
-$rootFolder = "D:\sftp"
+param (
+    [string]$bucketName = $(throw "-bucketName is required in order to copy the files to the destination bucket"),
+    [string]$rootFolder = $(throw "-rootFolder is required so that the script can find all folders with in the root to generate a list"),
+    [string]$uploadFolder = $(throw "-uploadFolder is required and should be specified as the folder that contains the source files"),
+)
+
 foreach ($i in Get-ChildItem $rootFolder)
 { 
     if($i.Name -ne "test" -and $i.Name -ne "Administrator")
     {
-        $localPath = "$RootFolder\$i\upload"
+        $localPath = "$rootFolder\$i\$uploadFolder"
         foreach($item in Get-ChildItem $localPath)
         {
             $localfile = "$localPath\$item"
