@@ -63,7 +63,7 @@ class aws:
     	instance = self.ec2_resource.Instance(InstanceId)
     	return(instance.private_ip_address)
 
-    def get_rt_ids(self,VpcId,Zone):
+    def get_rt_tables(self,VpcId,Zone):
         PrivateRouteTables = self.ec2_client.describe_route_tables(
             Filters=[
                 {
@@ -80,8 +80,8 @@ class aws:
                 }
             ]
         )
-        for table in PrivateRouteTables[]:
-            return table['RouteTableId']
+        for table in PrivateRouteTables:
+            return self.ec2_resource.RouteTable(table['RouteTableId'])
 
 
 class bash:
