@@ -80,7 +80,7 @@ class aws:
                 }
             ]
         )
-        for table in PrivateRouteTables['Associations']:
+        for table in PrivateRouteTables:
             return table['RouteTableId']
 
 
