@@ -6,9 +6,9 @@ import cmd
 
 InstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
 AvailabilityZone = urllib2.urlopen('http://169.254.169.254/latest/meta-data/placement/availability-zone').read()
-if AvailabilityZone[:1].endswith('a'):
+if AvailabilityZone.endswith('a'):
     PeerAz = str(AvailabilityZone[:-1] + 'b')
-elif AvailabilityZone[:1].endswith('b'):
+elif AvailabilityZone.endswith('b'):
     PeerAz = str(AvailabilityZone[:-1] + 'a')
 
 print(PeerAz)
