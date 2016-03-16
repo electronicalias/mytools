@@ -59,6 +59,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 print("Other Instance is Win!")
             elif InstanceId not in route.get('InstanceId') and 'FAIL' in state_check(PeerIp):
                 print("taking the route now")
-                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId))
+                aws.associate_eip(InstanceId,arg.allocation_id)
+                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId))
 
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
