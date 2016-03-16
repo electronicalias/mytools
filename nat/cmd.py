@@ -55,7 +55,7 @@ class aws:
                 }
             ]
         )
-        for id in peer['Instnaces']:
+        for id in peer['Instances']:
         	return id['InstanceId']
 
 
