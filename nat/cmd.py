@@ -23,9 +23,9 @@ class aws:
         )
         return response
 
-    def source_dest(InstanceId):
+    def source_dest(self,InstanceId):
         instance = self.ec2_resource.Instance(InstanceId)
-        if True ==  instance.source_dest_check:
+        if True == instance.source_dest_check:
             update = instance.modify_attribute(
                 SourceDestCheck={
                     'Value': False

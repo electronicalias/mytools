@@ -40,7 +40,8 @@ def state_check(host):
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
-# aws.associate_eip(InstanceId,arg.allocation_id)
+''' First thing to do as an action is to set source/dest to False because this will be a NAT instance '''
+aws.source_dest(InstanceId)
 PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
 PeerIp = aws.instance_ip(PeerId)
 CurrentEipInstanceId = aws.eip_allocation(arg.allocation_id)
@@ -63,5 +64,3 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 print(str('Healthcheck has failed, setting route to: ' + InstanceId))
                 aws.associate_eip(InstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
-
-# shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
