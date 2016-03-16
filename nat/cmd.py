@@ -24,13 +24,41 @@ class aws:
         return response
 
     def source_dest(InstanceId):
-        request = ec2.Instance(InstanceId)
-        if True ==  request.source_dest_check:
-            update = request.modify_attribute(
+        instance = self.ec2_resource.Instance(InstanceId)
+        if True ==  instance.source_dest_check:
+            update = instance.modify_attribute(
                 SourceDestCheck={
                     'Value': False
                 })
             return update
+
+    def get_peer(AvailabilityZone,Application,VpcId):
+        peer = self.ec2_client.describe_instances(
+            Filters=[
+                {
+                    'Name': 'availability-zone',
+                    'Values': [
+                        AvailabilityZone,
+                    ]
+                },
+                {
+                    'Name': 'tag:Application',
+                    'Values': [
+                        Application,
+                    ]
+                },
+                {
+                    'Name': 'vpc-id',
+                    'Values': [
+                        VpcId,
+                    ]
+                }
+            ]
+        )
+
+
+    def instance_ip(InstanceId):
+    	instance = self.ec2_resource.Instance('id')
 
 class bash:
     '''

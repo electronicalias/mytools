@@ -13,6 +13,7 @@ elif AvailabilityZone[:1].endswith('b'):
 
 
 
+
 ''' Setup the Command Line to accept the variables required '''
 parser = argparse.ArgumentParser(
     prog='Nat Updater',
@@ -23,10 +24,12 @@ parser = argparse.ArgumentParser(
     ''')
 parser.add_argument('-a','--allocation_id', required=True)
 parser.add_argument('-r','--region_name', required=True)
+parser.add_argument('-v','--vpc_id', required=True)
 arg = parser.parse_args()
 
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
 aws.associate_eip(InstanceId,arg.allocation_id)
-shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
+print(aws.get_peer(PeerAz,'nat',arg.vpc_id))
+# shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
