@@ -32,7 +32,7 @@ class aws:
                 })
             return update
 
-    def get_peer(AvailabilityZone,Application,VpcId):
+    def get_peer(self,AvailabilityZone,Application,VpcId):
         peer = self.ec2_client.describe_instances(
             Filters=[
                 {
