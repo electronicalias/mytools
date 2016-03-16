@@ -16,3 +16,7 @@ if (check_url(url1) == 200) or (check_url(url2) == 200) or (check_url(url3) == 2
     f = open('/var/www/html/index.html', 'w')
     f.write("OK")
     f.close()
+elif (check_url(url1) != 200) and (check_url(url2) != 200) and (check_url(url3) != 200):
+    f = open('/var/www/html/index.html', 'w')
+    f.write("FAIL")
+    f.close()
