@@ -60,7 +60,7 @@ class aws:
         		return id['InstanceId']
 
     def instance_ip(self,InstanceId):
-    	instance = self.ec2_resource.Instance('id')
+    	instance = self.ec2_resource.Instance(InstanceId)
     	return(instance.private_ip_address)
 
 class bash:
