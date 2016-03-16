@@ -1,6 +1,7 @@
 #!/usr/env/bin python
 import cmd
 import argparse
+import urllib2
 
 ''' Setup the Command Line to accept the variables required '''
 parser = argparse.ArgumentParser(
