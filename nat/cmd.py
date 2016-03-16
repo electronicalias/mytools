@@ -55,7 +55,8 @@ class aws:
                 }
             ]
         )
-        return peer
+        for id in peer['Instnaces']:
+        	return id['InstanceId']
 
 
     def instance_ip(InstanceId):
