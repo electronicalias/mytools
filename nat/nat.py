@@ -6,6 +6,7 @@ import cmd
 
 InstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
 AvailabilityZone = urllib2.urlopen('http://169.254.169.254/latest/meta-data/placement/availability-zone').read()
+LocalIp = urllib2.urlopen('http://169.254.169.254/latest/meta-data/local-ipv4').read()
 if AvailabilityZone.endswith('a'):
     PeerAz = str(AvailabilityZone[:-1] + 'b')
 elif AvailabilityZone.endswith('b'):
@@ -28,14 +29,13 @@ aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
 aws.associate_eip(InstanceId,arg.allocation_id)
-peer_id = aws.get_peer(PeerAz,'nat',arg.vpc_id)
-print(peer_id)
-peer_ip = aws.instance_ip(peer_id)
+PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
+PeerIp = aws.instance_ip(PeerId)
 
-print(peer_ip)
-peer_state = urllib2.urlopen(str('http://' + peer_ip + '/index.html')).read()
-local_state = urllib2.urlopen(str('http://localhost/index.html')).read()
 
-print peer_state
-print local_state
+LocalState = urllib2.urlopen(str('http://' + LocalIp + '/index.html')).read()
+print LocalState
+
+PeerState = urllib2.urlopen(str('http://' + PeerIp + '/index.html')).read()
+print PeerState
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
