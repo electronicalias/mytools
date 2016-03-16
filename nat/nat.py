@@ -57,7 +57,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 print ("I'm not the win!")
             elif InstanceId not in route.get('InstanceId') and 'BlackHole' not in route.get('State') and PeerId in route.get('InstanceId'):
                 print("Other Instance is Win!")
-            elif InstnaceId not in route.get('InstanceId') and 'FAIL' in state_check(PeerIp):
+            elif InstanceId not in route.get('InstanceId') and 'FAIL' in state_check(PeerIp):
                 print("taking the route now")
 
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
