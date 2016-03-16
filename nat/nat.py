@@ -11,9 +11,6 @@ if AvailabilityZone.endswith('a'):
 elif AvailabilityZone.endswith('b'):
     PeerAz = str(AvailabilityZone[:-1] + 'a')
 
-print(PeerAz)
-
-
 ''' Setup the Command Line to accept the variables required '''
 parser = argparse.ArgumentParser(
     prog='Nat Updater',
@@ -32,7 +29,13 @@ shell = cmd.bash()
 
 aws.associate_eip(InstanceId,arg.allocation_id)
 peer_id = aws.get_peer(PeerAz,'nat',arg.vpc_id)
+print(peer_id)
 peer_ip = aws.instance_ip(peer_id)
 
 print(peer_ip)
+peer_state = urllib2.urlopen(str('http://' + peer_ip + '/index.html')).read()
+local_state = urllib2.urlopen(str('http://localhost/index.html')).read()
+
+print peer_state
+print local_state
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
