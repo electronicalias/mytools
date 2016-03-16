@@ -2,12 +2,12 @@
 import boto3
 
 class aws:
-	'''
-	Usage: can be imported as a module for the following functions:
-	Attach EIP, requires Instance Id
-	Set Source/Dest Check, requires Instance Id
-	'''
-    
+    '''
+    Usage: can be imported as a module for the following functions:
+    Attach EIP, requires Instance Id
+    Set Source/Dest Check, requires Instance Id
+    '''
+
     def __init__(self,region):
         self.region = region
         self.ec2_client = boto3.client('ec2',region)
@@ -20,4 +20,4 @@ class aws:
             AllocationId=AllocationId,
             AllowReassociation=True
         )
-    	return response
+        return response
