@@ -25,6 +25,13 @@ parser.add_argument('-r','--region_name', required=True)
 parser.add_argument('-v','--vpc_id', required=True)
 arg = parser.parse_args()
 
+def state_check(host):
+    try:
+        response = urllib2.urlopen(str('http://' + host + '/index.html')).read()
+        return response
+    except:
+    	return str('FAIL')
+
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
@@ -33,9 +40,9 @@ PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
 PeerIp = aws.instance_ip(PeerId)
 
 
-LocalState = urllib2.urlopen(str('http://' + LocalIp + '/index.html')).read()
+LocalState = state_check(LocalIp)
 print LocalState
 
-PeerState = urllib2.urlopen(str('http://' + PeerIp + '/index.html')).read()
+PeerState = state_check(PeerIp)
 print PeerState
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
