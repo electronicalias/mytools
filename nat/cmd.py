@@ -33,9 +33,6 @@ class aws:
             return update
 
     def get_peer(self,AvailabilityZone,Application,VpcId):
-        print(AvailabilityZone)
-        print(Application)
-        print(VpcId)
         peer = self.ec2_client.describe_instances(
             Filters=[
                 {
@@ -58,6 +55,7 @@ class aws:
                 }
             ]
         )
+        return peer
 
 
     def instance_ip(InstanceId):
