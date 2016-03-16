@@ -47,6 +47,8 @@ PeerState = state_check(PeerIp)
 print PeerState
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
-    print aws.get_table_id(table)
+    table_id = aws.get_table_id(table)
+    for route in table_id.routes:
+    	print route.get('InstanceId')
 
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
