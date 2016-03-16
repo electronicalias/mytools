@@ -85,6 +85,14 @@ class aws:
     def get_table_id(self,table):
         return self.ec2_resource.RouteTable(table['RouteTableId'])
 
+    def eip_association(self,id):
+    	instance = self.ec2_client.describe_addresses(
+    		AllocationIds=[
+    		    id,
+    		]
+    	)
+    	return(instance['InstanceId'])
+
 
 class bash:
     '''
