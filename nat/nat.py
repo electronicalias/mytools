@@ -29,4 +29,4 @@ aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
 aws.associate_eip(InstanceId,arg.allocation_id)
-shell.bash.cmd('ls -l')
+shell.cmd('ls -l')
