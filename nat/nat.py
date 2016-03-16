@@ -35,9 +35,10 @@ def state_check(host):
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
-aws.associate_eip(InstanceId,arg.allocation_id)
+# aws.associate_eip(InstanceId,arg.allocation_id)
 PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
 PeerIp = aws.instance_ip(PeerId)
+CurrentEipInstanceId = aws.eip_allocation(arg.allocation_id)
 
 
 LocalState = state_check(LocalIp)
@@ -52,19 +53,11 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     	default = 'NoValue'
         if '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
             DestBlock = route.get('DestinationCidrBlock')
-            if InstanceId not in route.get('InstanceId'):
+            if InstanceId not in route.get('InstanceId') and 'OK' in state_check(PeerIp):
                 print ("I'm not the win!")
-            else:
+            elif InstanceId not in route.get('InstanceId') and 'BlackHole' not in route.get('State'):
                 print("Other Instance is Win!")
-
-CurrentRouteInstanceId = aws.eip_allocation(arg.allocation_id)
-
-if 'FAIL' in state_check(PeerIp) and InstanceId not in CurrentRouteInstanceId:
-	print "I want the route!"
-else:
-    print state_check(PeerIp)
-    print InstanceId
-    print CurrentRouteInstanceId
-    print "No, I do not need to do anything"
+            elif InstnaceId not in route.get('InstanceId') and 'FAIL' in state_check(PeerIp):
+                print("taking the route now")
 
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
