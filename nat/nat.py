@@ -11,7 +11,7 @@ if AvailabilityZone[:1].endswith('a'):
 elif AvailabilityZone[:1].endswith('b'):
     PeerAz = AvailabilityZone[:-1] + 'a'
 
-print PeerAz
+
 
 ''' Setup the Command Line to accept the variables required '''
 parser = argparse.ArgumentParser(
@@ -26,4 +26,6 @@ parser.add_argument('-r','--region_name', required=True)
 arg = parser.parse_args()
 
 aws = cmd.aws(arg.region_name)
+shell = cmd.bash(command)
 aws.associate_eip(InstanceId,arg.allocation_id)
+shell.bash.cmd('ls -l')

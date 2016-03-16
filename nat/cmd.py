@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import boto3
+from subprocess import call
 
 class aws:
     '''
@@ -30,3 +31,14 @@ class aws:
                     'Value': False
                 })
             return update
+
+class bash:
+    '''
+    Usage: Execute the 'cmd' supplied in a bash terminal
+    '''
+
+    def __init__(self):
+        self.data = []
+
+    def cmd(self,command):
+        call([command])
