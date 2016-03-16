@@ -59,9 +59,9 @@ class aws:
         	for id in instances['Instances']:
         		return id['InstanceId']
 
-
     def instance_ip(InstanceId):
     	instance = self.ec2_resource.Instance('id')
+    	return(instance.private_ip_address)
 
 class bash:
     '''

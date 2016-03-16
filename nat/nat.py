@@ -31,5 +31,8 @@ aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
 aws.associate_eip(InstanceId,arg.allocation_id)
-print(aws.get_peer(PeerAz,'nat',arg.vpc_id))
+peer_id = aws.get_peer(PeerAz,'nat',arg.vpc_id)
+peer_ip = aws.instance_ip(peer_id)
+
+print(peer_ip)
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
