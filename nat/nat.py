@@ -1,4 +1,9 @@
 #!/usr/env/bin python
+''' 
+This script only works with:
+boto3 == 1.2.6
+'''
+
 ''' Import Modules '''
 import urllib2
 import argparse
