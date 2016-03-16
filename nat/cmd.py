@@ -41,4 +41,5 @@ class bash:
         self.data = []
 
     def cmd(self,command):
+    	print(command)
         call([command])
