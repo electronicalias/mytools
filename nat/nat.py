@@ -57,6 +57,6 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             else:
                 print("Other Instance is Win!")
 
-print(aws.eip_association(arg.assocation_id))
+print(aws.eip_allociation(arg.allocation_id))
 
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
