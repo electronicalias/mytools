@@ -45,12 +45,9 @@ PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
 PeerIp = aws.instance_ip(PeerId)
 CurrentEipInstanceId = aws.eip_allocation(arg.allocation_id)
 
-
+''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalState = state_check(LocalIp)
-print LocalState
-
 PeerState = state_check(PeerIp)
-print PeerState
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
     table_id = aws.get_table_id(table)
@@ -59,11 +56,11 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
         if '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
             DestBlock = route.get('DestinationCidrBlock')
             if InstanceId not in route.get('InstanceId') and 'OK' in state_check(PeerIp):
-                print ("I'm not the win!")
+                print (str('Route owned by: ' + PeerId))
             elif InstanceId not in route.get('InstanceId') and 'BlackHole' not in route.get('State') and PeerId in route.get('InstanceId'):
-                print("Other Instance is Win!")
+                print (str('Healthcheck failed but no BlackHole, route owned by: ' + InstanceId))
             elif InstanceId not in route.get('InstanceId') and 'FAIL' in state_check(PeerIp):
-                print("taking the route now")
+                print(str('Healthcheck has failed, setting route to: ' + InstanceId))
                 aws.associate_eip(InstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
 
