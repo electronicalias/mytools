@@ -11,6 +11,7 @@ if AvailabilityZone[:1].endswith('a'):
 elif AvailabilityZone[:1].endswith('b'):
     PeerAz = AvailabilityZone[:-1] + 'a'
 
+print(PeerAz)
 
 
 
