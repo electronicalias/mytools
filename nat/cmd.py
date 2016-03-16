@@ -91,7 +91,8 @@ class aws:
     		    id,
     		]
     	)
-    	return(instance['InstanceId'])
+    	for address in instance['Addresses']:
+    		return address['InstanceId']
 
 
 class bash:
