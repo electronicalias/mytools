@@ -55,8 +55,8 @@ class aws:
                 }
             ]
         )
-        for id in peer['Instances']:
-        	return id['InstanceId']
+        for id in peer['Reservations']:
+        	return id['Instances']['InstanceId']
 
 
     def instance_ip(InstanceId):
