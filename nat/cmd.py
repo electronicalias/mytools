@@ -21,3 +21,12 @@ class aws:
             AllowReassociation=True
         )
         return response
+
+    def source_dest(InstanceId):
+        request = ec2.Instance(InstanceId)
+        if True ==  request.source_dest_check:
+            update = request.modify_attribute(
+                SourceDestCheck={
+                    'Value': False
+                })
+            return update

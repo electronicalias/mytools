@@ -18,5 +18,5 @@ parser.add_argument('-a','--allocation_id', required=True)
 parser.add_argument('-r','--region_name', required=True)
 arg = parser.parse_args()
 
-aws = cmd.aws(region_name)
+aws = cmd.aws(arg.region_name)
 aws.associate_eip(InstanceId,arg.allocation_id)
