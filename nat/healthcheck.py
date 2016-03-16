@@ -2,6 +2,7 @@
 import cmd
 import argparse
 import urllib2
+import time
 
 ''' Setup the Command Line to accept the variables required '''
 parser = argparse.ArgumentParser(
@@ -35,5 +36,6 @@ aws = cmd.aws(arg.region_name)
 PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
 PeerIp = aws.instance_ip(PeerId)
 
-for num in range(1,3):
+while True:
     print state_check(PeerIp)
+    time.sleep(10)
