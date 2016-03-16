@@ -80,7 +80,10 @@ class aws:
                 }
             ]
         )
-        for table in PrivateRouteTables:
+        return PrivateRouteTables
+
+    def get_table_id(self,tables):
+        for table in tables:
             return self.ec2_resource.RouteTable(table['RouteTableId'])
 
 
