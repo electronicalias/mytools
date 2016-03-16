@@ -63,6 +63,26 @@ class aws:
     	instance = self.ec2_resource.Instance(InstanceId)
     	return(instance.private_ip_address)
 
+    def get_rt_ids(self,VpcId,Zone):
+        PrivateRouteTables = self.ec2_client.describe_route_tables(
+            Filters=[
+                {
+                    'Name': 'vpc-id',
+                    'Values': [
+                        'vpc-ca681faf',
+                    ]
+                },
+                {
+                    'Name': 'tag:Zone',
+                    'Values': [
+                        'private'
+                    ]
+                }
+            ]
+        )
+        return PrivateRouteTables['RouteTables']
+
+
 class bash:
     '''
     Usage: Execute the 'cmd' supplied in a bash terminal
