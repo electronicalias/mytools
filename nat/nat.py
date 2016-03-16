@@ -29,4 +29,4 @@ aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
 aws.associate_eip(InstanceId,arg.allocation_id)
-shell.cmd('aws ec2 describe-instances')
+shell.cmd('/usr/bin/aws ec2 describe-instances')
