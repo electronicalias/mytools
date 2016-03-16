@@ -35,4 +35,5 @@ aws = cmd.aws(arg.region_name)
 PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
 PeerIp = aws.instance_ip(PeerId)
 
-print state_check(PeerIp)
+for num in range(1,3):
+    print state_check(PeerIp)
