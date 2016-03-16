@@ -80,7 +80,7 @@ class aws:
                 }
             ]
         )
-        return PrivateRouteTables
+        return PrivateRouteTables['RouteTables']
 
     def get_table_id(self,tables):
         for table in tables:
