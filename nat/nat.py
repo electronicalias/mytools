@@ -55,7 +55,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             DestBlock = route.get('DestinationCidrBlock')
             if InstanceId not in route.get('InstanceId') and 'OK' in state_check(PeerIp):
                 print ("I'm not the win!")
-            elif InstanceId not in route.get('InstanceId') and 'BlackHole' not in route.get('State'):
+            elif InstanceId not in route.get('InstanceId') and 'BlackHole' not in route.get('State') and PeerId in route.get('InstanceId'):
                 print("Other Instance is Win!")
             elif InstnaceId not in route.get('InstanceId') and 'FAIL' in state_check(PeerIp):
                 print("taking the route now")
