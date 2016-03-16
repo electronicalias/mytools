@@ -47,6 +47,7 @@ PeerState = state_check(PeerIp)
 print PeerState
 
 RouteTables = aws.get_rt_tables(arg.vpc_id,'private')
-	print aws.get_table_id(RouteTables)
+
+print aws.get_table_id(RouteTables)
 
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
