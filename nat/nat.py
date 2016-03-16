@@ -57,6 +57,11 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             else:
                 print("Other Instance is Win!")
 
-print(aws.eip_allociation(arg.allocation_id))
+CurrentRouteInstanceId = aws.eip_allocation(arg.allocation_id)
+
+if 'FAIL' in state_check(PeerIp) and InstanceId not in CurrentRouteInstanceId:
+	print "I want the route!"
+else:
+    print "No, I do not need to do anything"
 
 # shell.cmd(str('/usr/bin/aws ec2 describe-instances --region ' + arg.region_name))
