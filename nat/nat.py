@@ -5,7 +5,7 @@ import argparse
 import cmd
 
 InstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
-AvailabilityZone = urllib2.urlopen('http://169.254.169.254/latest/meta-data/placement/aeailability-zone').read()
+AvailabilityZone = urllib2.urlopen('http://169.254.169.254/latest/meta-data/placement/availability-zone').read()
 if AvailabilityZone[:-1].endswith('a'):
     PeerAz = AvailabilityZone[:-1] + 'b'
 elif AvailabilityZone[:-1].endswith('b'):
