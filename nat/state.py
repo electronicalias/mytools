@@ -1,6 +1,5 @@
 #!/usr/env/bin python
 ''' Import Modules '''
-import urllib
 import urllib2
 
 ''' Set all required Variables '''
