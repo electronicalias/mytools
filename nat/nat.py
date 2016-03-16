@@ -11,8 +11,8 @@ if AvailabilityZone[:1].endswith('a'):
 elif AvailabilityZone[:1].endswith('b'):
     PeerAz = str(AvailabilityZone[:1] + 'a')
 
-print(PeerAz)
-
+print(AvailabilityZone[:-1])
+print(AvailabilityZone[:1])
 
 
 ''' Setup the Command Line to accept the variables required '''
