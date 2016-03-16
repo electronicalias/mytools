@@ -34,6 +34,9 @@ class aws:
 
     def get_peer(self,AvailabilityZone,Application,VpcId):
         peer = self.ec2_client.describe_instances(
+            print(AvailabilityZone)
+            print(Application)
+            print(VpcId)
             Filters=[
                 {
                     'Name': 'availability-zone',
