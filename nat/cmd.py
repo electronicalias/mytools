@@ -110,15 +110,15 @@ class aws:
         
         if running_instance:
             return dict(
-                Id=instance['InstanceId'],
-                State=instance['State'],
-                PrivateIpAddress=instance['PrivateIpAddress']
+                Id=running_instance['InstanceId'],
+                State=running_instance['State'],
+                PrivateIpAddress=running_instance['PrivateIpAddress']
             )
         elif terminated_instance:
             return dict(
-                Id=instance['InstanceId'],
-                State=instance['State'],
-                PrivateIpAddress=instance['PrivateIpAddress']
+                Id=terminated_instance['InstanceId'],
+                State=terminated_instance['State'],
+                PrivateIpAddress=terminated_instance['PrivateIpAddress']
             )
 
     def instance_ip(self,InstanceId):
