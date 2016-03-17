@@ -39,8 +39,8 @@ shell = cmd.bash()
 
 syslog.syslog(str('Getting Variables'))
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
-syslog.syslog(Peer)
 PeerId = Peer.get('Id', None)
+syslog.syslog(str('Getting PeerId: ',PeerId))
 PeerIp = Peer.get('PrivateIpAddress', None)
 
 while True:
