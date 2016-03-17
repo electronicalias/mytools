@@ -10,7 +10,7 @@ import argparse
 import cmd
 import syslog
 
-InstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
+LocalInstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
 AvailabilityZone = urllib2.urlopen('http://169.254.169.254/latest/meta-data/placement/availability-zone').read()
 LocalIp = urllib2.urlopen('http://169.254.169.254/latest/meta-data/local-ipv4').read()
 if AvailabilityZone.endswith('a'):
@@ -31,30 +31,23 @@ parser.add_argument('-r','--region_name', required=True)
 parser.add_argument('-v','--vpc_id', required=True)
 arg = parser.parse_args()
 
-def state_check(host):
-    try:
-        response = urllib2.urlopen(str('http://' + host + '/index.html')).read()
-        return response
-    except:
-        return str('FAIL')
-
+''' Setup Class Commands from the cmd class '''
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 hc = cmd.state()
 
 ''' First thing to do as an action is to set source/dest to False because this will be a NAT instance '''
-aws.source_dest(InstanceId)
+aws.source_dest(LocalInstanceId)
 
 ''' Find out what we can about our NAT Peer '''
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
 PeerId = Peer.get('Id', None)
 PeerIp = Peer.get('PrivateIpAddress', None)
 PeerAwsState = Peer.get('State', {}).get('Name', None)
-PeerHcState = state_check(PeerIp)
-print("got this from class {}".format(hc.check_ha(PeerIp)))
+PeerHcState = hc.check_ha(PeerIp)
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
-LocalHcState = state_check(LocalIp)
+LocalHcState = hc.check_ha(LocalIp)
 
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
@@ -63,49 +56,48 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     for route in table_id.routes:
         print("Going through the routes")
         default = 'NoValue'
-        if 'locked' in aws.get_tag(InstanceId):
+        if 'locked' in aws.get_tag(LocalInstanceId):
             print("I was locked so I broke out")
             break
         elif '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
             print("Found a 0.0.0.0 route")
             if 'blackhole' in route.get('State'):
                 print("Has black hole, will set to myself then break")
-                aws.associate_eip(InstanceId,arg.allocation_id)
-                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
-                aws.set_tag(InstanceId,'active')
-                syslog.syslog(str('Moved NAT due to BlackHole in the route, to: ' + InstanceId))    
+                aws.associate_eip(LocalInstanceId,arg.allocation_id)
+                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
+                aws.set_tag(LocalInstanceId,'active')
+                syslog.syslog(str('Moved NAT due to BlackHole in the route, to: ' + LocalInstanceId))    
                 break    
             DestBlock = route.get('DestinationCidrBlock')
             print PeerId
             print PeerIp
-            print state_check(PeerIp)
-            print route.get('InstanceId')
-            if PeerId in route.get('InstanceId') and 'OK' in state_check(PeerIp):
+            print route.get('LocalInstanceId')
+            if PeerId in route.get('LocalInstanceId') and 'OK' in PeerHcState:
                 print("Checking remote peer, if found will set standby")
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
-                aws.set_tag(InstanceId,'standby')
-            elif InstanceId in route.get('InstanceId') and 'OK' in state_check(LocalIp):
+                aws.set_tag(LocalInstanceId,'standby')
+            elif LocalInstanceId in route.get('LocalInstanceId') and 'OK' in LocalHcState:
                 print("other server not active, I am active, I am route, I am router")
-                syslog.syslog(str('Healthcheck OK and Route owned by: ' + InstanceId))
-            elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('PeerId'):
+                syslog.syslog(str('Healthcheck OK and Route owned by: ' + LocalInstanceId))
+            elif LocalInstanceId not in route.get('LocalInstanceId') and PeerId not in route.get('PeerId'):
                 print("NoValue found for either myself or peer in the route table, something is wrong!")
-                if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(InstanceId):
+                if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
                     print("Active was in peer, standby was in myself")
                     syslog.syslog('I am Standby, setting tag to Standby')
-                    aws.set_tag(InstanceId,'standby')
+                    aws.set_tag(LocalInstanceId,'standby')
                     aws.set_tag(PeerId,'active')
-                elif 'active' not in aws.get_tag(PeerId) and 'new' in aws.get_tag(InstanceId):
+                elif 'active' not in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
                     aws.set_tag(PeerId,'locked')
-                    aws.associate_eip(InstanceId,arg.allocation_id)
-                    shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
-                    aws.set_tag(InstanceId,'active')
+                    aws.associate_eip(LocalInstanceId,arg.allocation_id)
+                    shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
+                    aws.set_tag(LocalInstanceId,'active')
                     aws.set_tag(PeerId,'standby')
-            	elif 'active' not in aws.get_tag(InstanceId) and 'active' not in aws.get_tag(PeerId):
+            	elif 'active' not in aws.get_tag(LocalInstanceId) and 'active' not in aws.get_tag(PeerId):
                     aws.set_tag(PeerId,'locked')
-                    syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + InstanceId))
-                    aws.associate_eip(InstanceId,arg.allocation_id)
-                    shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
-                    syslog.syslog(str('Moved NAT to: ' + InstanceId))
+                    syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + LocalInstanceId))
+                    aws.associate_eip(LocalInstanceId,arg.allocation_id)
+                    shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
+                    syslog.syslog(str('Moved NAT to: ' + LocalInstanceId))
                     aws.set_tag(PeerId,'standby')
                     syslog.syslog(str('Set standby to: ' + PeerId))
 
