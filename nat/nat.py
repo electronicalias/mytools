@@ -63,7 +63,6 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     print("Getting the table")
     table_id = aws.get_table_id(table)
     for route in table_id.routes:
-        print("Going through the routes")
         default = 'NoValue'
         if 'locked' in aws.get_tag(LocalInstanceId):
             print("I was locked so I broke out")
@@ -77,7 +76,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 aws.set_tag(LocalInstanceId,'active')
                 syslog.syslog(str('Moved NAT due to BlackHole in the route, to: ' + LocalInstanceId))    
                 break 
-            elif 'terminated' in PeerAwsState:
+            elif 'terminated' in PeerAwsState or 'shutting-down' in PeerAwsState or 'pending' in PeerAwsState:
                 print("No Peer Found!")
                 aws.associate_eip(LocalInstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))

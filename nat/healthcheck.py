@@ -27,7 +27,7 @@ elif AvailabilityZone.endswith('b'):
 
 def state_check(host):
     try:
-        response = urllib2.urlopen(str('http://' + host + '/index.html')).read()
+        response = urllib2.urlopen(str('http://' + host + '/index.html', timeout=2)).read()
         if 'OK' in response:
         	syslog.syslog(str('Response from host is OK'))
         return response
