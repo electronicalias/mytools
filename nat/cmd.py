@@ -95,6 +95,10 @@ class aws:
                 State=instance['State'],
                 PrivateIpAddress=instance['PrivateIpAddress']
             )
+        else:
+            return dict(
+                Id=instance['InstanceId']
+            )
 
     def instance_ip(self,InstanceId):
     	instance = self.ec2_resource.Instance(InstanceId)
