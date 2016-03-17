@@ -42,12 +42,15 @@ aws.source_dest(LocalInstanceId)
 
 ''' Find out what we can about our NAT Peer '''
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
-pprint.pprint(Peer)
+syslog.syslog(str('Value of Peer: ' + Peer))
 PeerId = Peer.get('Id', None)
-print PeerId
+syslog.syslog(str('Value of PeerId: ' + PeerId))
 PeerIp = Peer.get('PrivateIpAddress', None)
+syslog.syslog(str('Value of PeerIp: ' + PeerIp))
 PeerAwsState = Peer.get('State', {}).get('Name', None)
+syslog.syslog(str('Value of PeerAwsState: ' + PeerAwsState))
 PeerHcState = hc.check_ha(PeerIp)
+syslog.syslog(str('Value of PeerHcState: ' + PeerHcState))
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
