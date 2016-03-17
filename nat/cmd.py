@@ -59,6 +59,42 @@ class aws:
         	for id in instances['Instances']:
         		return id['InstanceId']
 
+    def get_instance(self,AvailabilityZone,Application,VpcId):
+        peer = self.ec2_client.describe_instances(
+            Filters=[
+                {
+                    'Name': 'availability-zone',
+                    'Values': [
+                        AvailabilityZone,
+                    ]
+                },
+                {
+                    'Name': 'tag:Application',
+                    'Values': [
+                        Application,
+                    ]
+                },
+                {
+                    'Name': 'vpc-id',
+                    'Values': [
+                        VpcId,
+                    ]
+                }
+            ]
+        )
+        instances = peer['Reservations']['0']['Instances']
+        if instances:
+            InstanceId=instances['InstanceId']
+            State=instances['State']
+            PrivateIpAddress=instances['PrivateIpAddress']
+            return dict(
+                id=InstanceId,
+                state=State,
+                PrivateIpAddress=PrivateIpAddress
+            )
+         else:
+             return None
+
     def instance_ip(self,InstanceId):
     	instance = self.ec2_resource.Instance(InstanceId)
     	return(instance.private_ip_address)
