@@ -51,7 +51,7 @@ PeerId = Peer.get('Id', None)
 PeerIp = Peer.get('PrivateIpAddress', None)
 PeerAwsState = Peer.get('State', {}).get('Name', None)
 PeerHcState = state_check(PeerIp)
-print("got this from class {}".format(hc.check_ha(PeerIp))
+print("got this from class {}".format(hc.check_ha(PeerIp)))
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = state_check(LocalIp)
