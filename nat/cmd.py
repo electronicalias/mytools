@@ -105,14 +105,9 @@ class aws:
                 }
             ]
         )
-        try:
-            running_instance = peer['Reservations'][0]['Instances'][0]
-        except (ValueError,IndexError):
-
-        try:
-            terminated_instance = peer['Reservations'][0]['Instances'][0]
-        except(ValueError,IndexError):
-
+        running_instance = peer['Reservations'][0]['Instances'][0]
+        terminated_instance = peer['Reservations'][0]['Instances'][0]
+        
         if running_instance:
             return dict(
                 Id=instance['InstanceId'],
