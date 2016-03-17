@@ -61,13 +61,10 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 aws.associate_eip(InstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(InstanceId,'active')
-                syslog.syslog(str('Moved NAT due to BlackHole in the route, to: ' + InstanceId))
-                    
+                syslog.syslog(str('Moved NAT due to BlackHole in the route, to: ' + InstanceId))        
             DestBlock = route.get('DestinationCidrBlock')
-
             if PeerId in route.get('InstanceId') and 'OK' in state_check(PeerIp):
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
-
             elif InstanceId in route.get('InstanceId') and 'OK' in state_check(LocalIp):
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + InstanceId))
             elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('PeerId'):
