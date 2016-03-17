@@ -55,11 +55,11 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     for route in table_id.routes:
     	default = 'NoValue'
     	print(route.get('DestinationCidrBlock', default))
-        print (route.get('Status', default))
+        print(route.get('State', default))
     	if 'locked' in aws.get_tag(InstanceId):
             break
         if '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
-            if 'Black Hole' in route.get('Status'):
+            if 'BlackHole' in route.get('State'):
                 aws.associate_eip(InstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(InstanceId,'active')
