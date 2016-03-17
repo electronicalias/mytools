@@ -47,6 +47,9 @@ PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
 PeerIp = aws.instance_ip(PeerId)
 OtherInstance = aws.get_instance(PeerAz,'nat',arg.vpc_id)
 print OtherInstance
+print OtherInstance.get('State', {}).get('Name', None)
+print OtherInstance.get('Id', None)
+print OtherInstance.get('PrivateIpAddress', None)
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalState = state_check(LocalIp)
