@@ -83,12 +83,48 @@ class aws:
                 }
             ]
         )
-        instance = peer['Reservations'][0]['Instances'][0]
-        return dict(
-            Id=instance['InstanceId'],
-            State=instance['State'],
-            PrivateIpAddress=instance['PrivateIpAddress']
-        ) if instance else None
+        term = self.ec2_client.describe_instances(
+            Filters=[
+                {
+                    'Name': 'availability-zone',
+                    'Values': [
+                        AvailabilityZone,
+                    ]
+                },
+                {
+                    'Name': 'tag:Application',
+                    'Values': [
+                        Application,
+                    ]
+                },
+                {
+                    'Name': 'instance-state-name',
+                    'Values': [
+                        'terminated',
+                    ]
+                }
+            ]
+        )
+        try:
+            running_instance = peer['Reservations'][0]['Instances'][0]
+        except (ValueError,IndexError):
+
+        try:
+            terminated_instance = peer['Reservations'][0]['Instances'][0]
+        except(ValueError,IndexError):
+
+        if running_instance:
+            return dict(
+                Id=instance['InstanceId'],
+                State=instance['State'],
+                PrivateIpAddress=instance['PrivateIpAddress']
+            )
+         elif terminated_instance:
+         return dict(
+                Id=instance['InstanceId'],
+                State=instance['State'],
+                PrivateIpAddress=instance['PrivateIpAddress']
+            ) else None
 
     def instance_ip(self,InstanceId):
     	instance = self.ec2_resource.Instance(InstanceId)
