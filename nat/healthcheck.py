@@ -37,8 +37,9 @@ def state_check(host):
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
-PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
-PeerIp = aws.instance_ip(PeerId)
+Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
+PeerId = Peer.get('Id', None)
+PeerIp = Peer.get('PrivateIpAddress', None)
 
 while True:
     if "OK" not in state_check(PeerIp):
