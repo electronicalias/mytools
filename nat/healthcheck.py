@@ -37,6 +37,7 @@ def state_check(host):
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
+syslog.syslog(str('Getting Variables'))
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
 PeerId = Peer.get('Id', None)
 PeerIp = Peer.get('PrivateIpAddress', None)
