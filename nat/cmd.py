@@ -114,8 +114,8 @@ class aws:
                 State=instance['State'],
                 PrivateIpAddress=instance['PrivateIpAddress']
             )
-         elif terminated_instance:
-         return dict(
+        elif terminated_instance:
+            return dict(
                 Id=instance['InstanceId'],
                 State=instance['State'],
                 PrivateIpAddress=instance['PrivateIpAddress']
