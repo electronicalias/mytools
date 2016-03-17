@@ -25,11 +25,14 @@ if AvailabilityZone.endswith('a'):
 elif AvailabilityZone.endswith('b'):
     PeerAz = str(AvailabilityZone[:-1] + 'a')
 
+print PeerAz
+print arg.vpc_id
+
 def state_check(host):
     try:
         response = urllib2.urlopen(str('http://' + host + '/index.html', timeout=2)).read()
         if 'OK' in response:
-        	syslog.syslog(str('Response from host is OK'))
+            syslog.syslog(str('Response from host is OK'))
         return response
     except:
     	return str('FAIL')
