@@ -53,8 +53,8 @@ PeerState = state_check(PeerIp)
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
     table_id = aws.get_table_id(table)
     for route in table_id.routes:
-    	default = 'NoValue'
-    	if 'locked' in aws.get_tag(InstanceId):
+        default = 'NoValue'
+        if 'locked' in aws.get_tag(InstanceId):
             break
         elif '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
             if 'blackhole' in route.get('State'):
