@@ -49,7 +49,10 @@ PeerHcState = hc.check_ha(PeerIp)
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
 
-print aws.get_rt_tables(arg.vpc_id,'private')
+rt_ids = []
+for i in aws.get_rt_tables(arg.vpc_id,'private'):
+    rt_ids.append(i.get('RouteTableId'))
+    
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
     print("Getting the table")
@@ -77,18 +80,14 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 syslog.syslog(str('Moved NAT due to no Peer Available: ' + LocalInstanceId))    
                 break 
             DestBlock = route.get('DestinationCidrBlock')
-            print PeerId
-            print PeerIp
-            print route.get(LocalInstanceId)
-            print route.get(PeerId)
-            if PeerId in route.get('PeerId') and 'OK' in PeerHcState:
+            if PeerId in route.get('InstanceId') and 'OK' in PeerHcState:
                 print("Checking remote peer, if found will set standby")
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
                 aws.set_tag(LocalInstanceId,'standby')
-            elif LocalInstanceId in route.get('LocalInstanceId') and 'OK' in LocalHcState:
+            elif LocalInstanceId in route.get('InstanceId') and 'OK' in LocalHcState:
                 print("other server not active, I am active, I am route, I am router")
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + LocalInstanceId))
-            elif LocalInstanceId not in route.get('LocalInstanceId') and PeerId not in route.get('PeerId'):
+            elif LocalInstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
                 print("NoValue found for either myself or peer in the route table, something is wrong!")
                 if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
                     print("Active was in peer, standby was in myself")
