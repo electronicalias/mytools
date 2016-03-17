@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import boto3
+import urllib2
 from subprocess import call
 
 class aws:
@@ -153,3 +154,18 @@ class bash:
 
     def cmd(self,command):
         call(command,shell=True)
+
+class state:
+    '''
+    Usage: Check the status of the healthcheck function
+    '''
+
+    def __init__(self):
+        self.data = []
+
+    def check_ha(self,host):
+        try:
+            response = urllib2.urlopen(str('http://' + host + '/index.html')).read()
+            return response
+        except:
+    	    return str('FAIL')
