@@ -91,7 +91,9 @@ class aws:
             )
         else:
             return dict(
-                Id=instance['InstanceId']
+                Id=instance['InstanceId'],
+                State=instance['State'],
+                PrivateIpAddress=instance['PrivateIpAddress']
             )
 
     def instance_ip(self,InstanceId):
