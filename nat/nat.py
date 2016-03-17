@@ -55,6 +55,8 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     table_id = aws.get_table_id(table)
     for route in table_id.routes:
     	default = 'NoValue'
+    	if 'locked' in aws.get_tag(InstanceId):
+    		break
         if '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
             DestBlock = route.get('DestinationCidrBlock')
             if PeerId in route.get('InstanceId') and 'OK' in state_check(PeerIp):
@@ -62,10 +64,16 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             elif InstanceId in route.get('InstanceId') and 'OK' in state_check(LocalIp):
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + InstanceId))
             elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
-                syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + InstanceId))
-                aws.associate_eip(InstanceId,arg.allocation_id)
-                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
+            	if 'standby' in aws.get_tag(InstanceId):
+            		syslog.syslog('I am Standby, breaking process')
+            		break
+            	elif 'active' in aws.get_tag(InstanceId):
+            		aws.set_tag(PeerId,'locked')
+                    syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + InstanceId))
+                    aws.associate_eip(InstanceId,arg.allocation_id)
+                    shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
+                    syslog.syslog(str('Moved NAT to: ' + InstanceId))
+                    aws.set_tag(PeerId,'standby')
+                    syslog.syslog(str('Set standby to: ' + PeerId))
 
-print aws.get_tag(InstanceId)
-aws.set_tag(InstanceId,'plums')
 
