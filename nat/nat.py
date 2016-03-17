@@ -55,9 +55,9 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     for route in table_id.routes:
     	default = 'NoValue'
     	if 'locked' in aws.get_tag(InstanceId):
-    		break
+            break
         if '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
-        	if 'standby' in aws.get_tag(InstanceId) and 'BlackHole' in (route.get('Status')):
+            if 'standby' in aws.get_tag(InstanceId) and 'BlackHole' in (route.get('Status')):
                 aws.associate_eip(InstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(InstanceId,'active')
@@ -71,7 +71,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             elif InstanceId in route.get('InstanceId') and 'OK' in state_check(LocalIp):
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + InstanceId))
             elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('PeerId'):
-            	if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(InstanceId):
+                if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(InstanceId):
                     syslog.syslog('I am Standby, setting tag to Standby')
                     aws.set_tag(InstanceId,'standby')
                     aws.set_tag(PeerId,'active')
