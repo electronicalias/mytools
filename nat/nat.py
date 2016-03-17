@@ -67,12 +67,19 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
                 syslog.syslog(str('Moved NAT due to BlackHole in the route, to: ' + LocalInstanceId))    
-                break    
+                break 
+            elif None in PeerId:
+                print("No Peer Found!")
+                aws.associate_eip(LocalInstanceId,arg.allocation_id)
+                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
+                aws.set_tag(LocalInstanceId,'active')
+                syslog.syslog(str('Moved NAT due to no Peer Available: ' + LocalInstanceId))    
+                break 
             DestBlock = route.get('DestinationCidrBlock')
             print PeerId
             print PeerIp
             print route.get('LocalInstanceId')
-            if PeerId in route.get('LocalInstanceId') and 'OK' in PeerHcState:
+            if PeerId in route.get('PeerId') and 'OK' in PeerHcState:
                 print("Checking remote peer, if found will set standby")
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
                 aws.set_tag(LocalInstanceId,'standby')
