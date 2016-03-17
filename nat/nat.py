@@ -69,6 +69,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             print route.get('InstanceId')
             if PeerId in route.get('InstanceId') and 'OK' in state_check(PeerIp):
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
+                aws.set_tag(InstanceId,'standby')
             elif InstanceId in route.get('InstanceId') and 'OK' in state_check(LocalIp):
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + InstanceId))
             elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('PeerId'):
