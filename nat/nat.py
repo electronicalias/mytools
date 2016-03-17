@@ -66,6 +66,13 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('PeerId'):
             	if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(InstanceId):
                     syslog.syslog('I am Standby, setting tag to Standby')
+                    aws.set_tag(InstanceId,'standby')
+                    aws.set_tag(PeerId,'active')
+                elif 'active' not in aws.get_tag(PeerId) and 'new' in aws.get_tag(InstanceId):
+                    aws.set_tag(PeerId,'locked')
+                    aws.associate_eip(InstanceId,arg.allocation_id)
+                    shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
+                    aws.set_tag(InstanceId,'active')
                     aws.set_tag(PeerId,'standby')
             	elif 'active' not in aws.get_tag(InstanceId) and 'active' not in aws.get_tag(PeerId):
                     aws.set_tag(PeerId,'locked')
