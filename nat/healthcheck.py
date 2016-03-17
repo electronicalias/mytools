@@ -3,6 +3,7 @@ import cmd
 import argparse
 import urllib2
 import time
+import syslog
 
 ''' Setup the Command Line to accept the variables required '''
 parser = argparse.ArgumentParser(
@@ -39,5 +40,6 @@ PeerIp = aws.instance_ip(PeerId)
 
 while True:
     if "OK" not in state_check(PeerIp):
+        syslog.syslog(str('Peer has failed, running the nat.py function'))
         shell.cmd(str('/usr/local/bin/take_nat.sh'))
     time.sleep(10)
