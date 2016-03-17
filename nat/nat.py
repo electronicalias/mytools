@@ -51,18 +51,18 @@ LocalState = state_check(LocalIp)
 PeerState = state_check(PeerIp)
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
-	print("Getting the table")
+    print("Getting the table")
     table_id = aws.get_table_id(table)
     for route in table_id.routes:
-    	print("Going through the routes")
+        print("Going through the routes")
         default = 'NoValue'
         if 'locked' in aws.get_tag(InstanceId):
-        	print("I was locked so I broke out")
+            print("I was locked so I broke out")
             break
         elif '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
-        	print("Found a 0.0.0.0 route")
+            print("Found a 0.0.0.0 route")
             if 'blackhole' in route.get('State'):
-            	print("Has black hole, will set to myself then break")
+                print("Has black hole, will set to myself then break")
                 aws.associate_eip(InstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(InstanceId,'active')
@@ -74,16 +74,16 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             print state_check(PeerIp)
             print route.get('InstanceId')
             if PeerId in route.get('InstanceId') and 'OK' in state_check(PeerIp):
-            	print("Checking remote peer, if found will set standby")
+                print("Checking remote peer, if found will set standby")
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
                 aws.set_tag(InstanceId,'standby')
             elif InstanceId in route.get('InstanceId') and 'OK' in state_check(LocalIp):
-            	print("other server not active, I am active, I am route, I am router")
+                print("other server not active, I am active, I am route, I am router")
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + InstanceId))
             elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('PeerId'):
-            	print("NoValue found for either myself or peer in the route table, something is wrong!")
+                print("NoValue found for either myself or peer in the route table, something is wrong!")
                 if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(InstanceId):
-                	print("Active was in peer, standby was in myself")
+                    print("Active was in peer, standby was in myself")
                     syslog.syslog('I am Standby, setting tag to Standby')
                     aws.set_tag(InstanceId,'standby')
                     aws.set_tag(PeerId,'active')
