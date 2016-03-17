@@ -43,8 +43,7 @@ shell = cmd.bash()
 
 ''' First thing to do as an action is to set source/dest to False because this will be a NAT instance '''
 aws.source_dest(InstanceId)
-NoVal = 'NoValue'
-PeerId = (aws.get_peer(PeerAz,'nat',arg.vpc_id), NoVal)
+PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
 PeerIp = aws.instance_ip(PeerId)
 OtherInstance = aws.get_instance(PeerAz,'nat',arg.vpc_id)
 print OtherInstance.state
