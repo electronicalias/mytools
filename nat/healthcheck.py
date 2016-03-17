@@ -40,8 +40,9 @@ shell = cmd.bash()
 syslog.syslog(str('Getting Variables'))
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
 PeerId = Peer.get('Id', None)
-syslog.syslog(str('Getting PeerId: ',PeerId))
+syslog.syslog(PeerId)
 PeerIp = Peer.get('PrivateIpAddress', None)
+syslog.syslog(PeerIp)
 
 while True:
     if "OK" not in state_check(PeerIp):
