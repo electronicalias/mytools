@@ -42,7 +42,6 @@ aws.source_dest(LocalInstanceId)
 
 ''' Find out what we can about our NAT Peer '''
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
-syslog.syslog(str('Value of Peer: ' + Peer))
 PeerId = Peer.get('Id', None)
 syslog.syslog(str('Value of PeerId: ' + PeerId))
 PeerIp = Peer.get('PrivateIpAddress', None)
