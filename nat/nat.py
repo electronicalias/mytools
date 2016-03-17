@@ -56,11 +56,11 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     	default = 'NoValue'
         if '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
             DestBlock = route.get('DestinationCidrBlock')
-            if InstanceId not in route.get('InstanceId') and 'OK' in state_check(PeerIp):
-                print (str('Route owned by: ' + PeerId))
-            elif InstanceId not in route.get('InstanceId') and 'BlackHole' not in route.get('State') and PeerId in route.get('InstanceId'):
-                print (str('Healthcheck failed but no BlackHole, route owned by: ' + InstanceId))
-            elif InstanceId not in route.get('InstanceId') and 'FAIL' in state_check(PeerIp):
-                print(str('Healthcheck has failed, setting route to: ' + InstanceId))
+            if PeerId in route.get('InstanceId') and 'OK' in state_check(PeerIp):
+                print (str('Healthcheck OK and Route owned by: ' + PeerId))
+            elif InstanceId in route.get('InstanceId') and 'OK' in state_check(LocalIp):
+                print (str('Healthcheck OK and Route owned by: ' + InstanceId))
+            elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
+                print(str('Neither instance has the route, taking route and assigning to: ' + InstanceId))
                 aws.associate_eip(InstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))

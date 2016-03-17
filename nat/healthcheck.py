@@ -32,10 +32,12 @@ def state_check(host):
     	return str('FAIL')
 
 aws = cmd.aws(arg.region_name)
+shell = cmd.bash()
 
 PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
 PeerIp = aws.instance_ip(PeerId)
 
 while True:
-    print state_check(PeerIp)
+    if "OK" not in state_check(PeerIp):
+        shell.cmd(str('/usr/local/bin/take_nat.sh'))
     time.sleep(10)
