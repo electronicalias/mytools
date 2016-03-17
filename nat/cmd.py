@@ -84,14 +84,11 @@ class aws:
             ]
         )
         instance = peer['Reservations'][0]['Instances'][0]
-        return instance
-        '''
         return dict(
             Id=instance['InstanceId'],
             State=instance['State'],
             PrivateIpAddress=instance['PrivateIpAddress']
         ) if instance else None
-        '''
 
     def instance_ip(self,InstanceId):
     	instance = self.ec2_resource.Instance(InstanceId)
