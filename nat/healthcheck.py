@@ -25,6 +25,9 @@ if AvailabilityZone.endswith('a'):
 elif AvailabilityZone.endswith('b'):
     PeerAz = str(AvailabilityZone[:-1] + 'a')
 
+print InstanceId
+print AvailabilityZone
+print LocalIp
 print PeerAz
 print arg.vpc_id
 
