@@ -65,3 +65,5 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + InstanceId))
                 aws.associate_eip(InstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
+
+Tags = aws.get_tags(InstanceId)

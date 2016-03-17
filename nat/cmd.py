@@ -94,6 +94,21 @@ class aws:
     	for address in instance['Addresses']:
     		return address['InstanceId']
 
+    def get_tag(self,InstanceId):
+    	instance = self.ec2_resource.Instance(InstanceId)
+    	return(instance.tags)
+
+    def set_tag(self,InstanceId,State):
+    	instance = self.ec2_resource.Instance(InstanceId)
+    	tag = instance.create_tags(
+            Tags=[
+            {
+                'Key': 'HaState',
+                'Value': State
+            },
+        ]
+    )
+
 
 class bash:
     '''
