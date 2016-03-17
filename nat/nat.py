@@ -8,6 +8,7 @@ boto3 == 1.2.6
 import urllib2
 import argparse
 import cmd
+import syslog
 
 InstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
 AvailabilityZone = urllib2.urlopen('http://169.254.169.254/latest/meta-data/placement/availability-zone').read()
@@ -57,10 +58,10 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
         if '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
             DestBlock = route.get('DestinationCidrBlock')
             if PeerId in route.get('InstanceId') and 'OK' in state_check(PeerIp):
-                print (str('Healthcheck OK and Route owned by: ' + PeerId))
+                syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
             elif InstanceId in route.get('InstanceId') and 'OK' in state_check(LocalIp):
-                print (str('Healthcheck OK and Route owned by: ' + InstanceId))
+                syslog.syslog(str('Healthcheck OK and Route owned by: ' + InstanceId))
             elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
-                print(str('Neither instance has the route, taking route and assigning to: ' + InstanceId))
+                syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + InstanceId))
                 aws.associate_eip(InstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
