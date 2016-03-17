@@ -36,24 +36,26 @@ def state_check(host):
         response = urllib2.urlopen(str('http://' + host + '/index.html')).read()
         return response
     except:
-    	return str('FAIL')
+        return str('FAIL')
 
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
+hc = cmd.state()
 
 ''' First thing to do as an action is to set source/dest to False because this will be a NAT instance '''
 aws.source_dest(InstanceId)
-PeerId = aws.get_peer(PeerAz,'nat',arg.vpc_id)
-PeerIp = aws.instance_ip(PeerId)
-OtherInstance = aws.get_instance(PeerAz,'nat',arg.vpc_id)
-print OtherInstance
-print OtherInstance.get('State', {}).get('Name', None)
-print OtherInstance.get('Id', None)
-print OtherInstance.get('PrivateIpAddress', None)
+
+''' Find out what we can about our NAT Peer '''
+Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
+PeerId = Peer.get('Id', None)
+PeerIp = Peer.get('PrivateIpAddress', None)
+PeerAwsState = Peer.get('State', {}).get('Name', None)
+PeerHcState = state_check(PeerIp)
+print("got this from class {}".format(hc.check_ha(PeerIp))
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
-LocalState = state_check(LocalIp)
-PeerState = state_check(PeerIp)
+LocalHcState = state_check(LocalIp)
+
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
     print("Getting the table")
