@@ -96,7 +96,10 @@ class aws:
 
     def get_tag(self,InstanceId):
     	instance = self.ec2_resource.Instance(InstanceId)
-    	return(instance.tags)
+    	for tag in (instance.tags):
+    		if 'HaState' in tag['Key']:
+    			return tag['Value']
+
 
     def set_tag(self,InstanceId,State):
     	instance = self.ec2_resource.Instance(InstanceId)
