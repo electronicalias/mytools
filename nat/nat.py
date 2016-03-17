@@ -63,11 +63,11 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
             elif InstanceId in route.get('InstanceId') and 'OK' in state_check(LocalIp):
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + InstanceId))
-            elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
-            	if 'standby' in aws.get_tag(InstanceId):
-                    syslog.syslog('I am Standby, breaking process')
-                    break
-            	elif 'active' in aws.get_tag(InstanceId):
+            elif InstanceId not in route.get('InstanceId') and PeerId not in route.get('PeerId'):
+            	if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(InstanceId):
+                    syslog.syslog('I am Standby, setting tag to Standby')
+                    aws.set_tag(PeerId,'standby')
+            	elif 'active' not in aws.get_tag(InstanceId) and 'active' not in aws.get_tag(PeerId):
                     aws.set_tag(PeerId,'locked')
                     syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + InstanceId))
                     aws.associate_eip(InstanceId,arg.allocation_id)
