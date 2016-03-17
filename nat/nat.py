@@ -67,4 +67,5 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + InstanceId + ' --region ' + arg.region_name))
 
 for tag in aws.get_tag(InstanceId):
-	print tag
+	if "HaState" in tag['Key']:
+	    print tag['Value']
