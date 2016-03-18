@@ -39,7 +39,7 @@ if AvailabilityZone.endswith('a'):
 elif AvailabilityZone.endswith('b'):
     PeerAz = str(AvailabilityZone[:-1] + 'a')
 
-logging.debug(str('PeerAz is: ' + PeerAz), 'No value found for PeerAz')
+logging.info(str('PeerAz is: ' + PeerAz), 'No value found for PeerAz')
 
 ''' Setup the Command Line to accept the variables:
 
@@ -78,9 +78,6 @@ print PeerAwsState
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
-
-
-    
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
     print("Getting the table")
