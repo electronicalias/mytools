@@ -111,10 +111,6 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId)
                 break 
             DestBlock = route.get('DestinationCidrBlock')
-            if PeerId in route.get('InstanceId') and 'active' in aws.get_tag(LocalInstanceId):
-                print("Checking remote peer, if found will set standby")
-                syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
-                aws.set_tag(LocalInstanceId,'standby')
             elif LocalInstanceId in route.get('InstanceId') and 'OK' in LocalHcState:
                 print("other server not active, I am active, I am route, I am router")
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + LocalInstanceId))
@@ -141,7 +137,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     syslog.syslog(str('Moved NAT to: ' + LocalInstanceId))
                     aws.set_tag(PeerId,'standby')
                     syslog.syslog(str('Set standby to: ' + PeerId))
-            elif 'active' in PeerId and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
+            elif 'active' in aws.get_tag(PeerId) and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
                 logging.info('All tests passed, setting myself to standby') 
                 aws.set_tag(LocalInstanceId,'standby')
 logging.info('Completed nat.py functions\n')
