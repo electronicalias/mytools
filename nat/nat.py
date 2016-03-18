@@ -19,7 +19,6 @@ The solution uses 2 EC2 instances each provisioned by their own Auto-Scaling gro
 import urllib2 		# Used for testing URLs in the healthcheck
 import argparse 	# Used for collecitng command line params
 import cmd 			# Module created for interacting with AWS and the shell
-import syslog 		# Will be deprecated for logging instead
 import logging		# Used to save all log activity for NAT, logs are found at /var/log/nat.log
 
 logging.basicConfig(filename='/var/log/nat.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p')
@@ -115,27 +114,23 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             elif LocalInstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
                 logging.info('Neither Active/Standby instance-id discovered in the default route')
                 if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
-                    print("Active was in peer, standby was in myself")
-                    syslog.syslog('I am Standby, setting tag to Standby')
+                    logging.info('Active is in the Peer State and New is in my State')
                     aws.set_tag(LocalInstanceId,'standby')
                     aws.set_tag(PeerId,'active')
                 elif 'active' not in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
-                    print("Active not in Peer State, New in LocalState")
+                    logging.info('Active is not in the Peer State and New is in my State, setting Peer to locked while I take the routes')
                     aws.set_tag(PeerId,'locked')
                     aws.associate_eip(LocalInstanceId,arg.allocation_id)
                     shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                     aws.set_tag(LocalInstanceId,'active')
                     aws.set_tag(PeerId,'standby')
                 elif 'active' not in aws.get_tag(LocalInstanceId) and 'active' not in aws.get_tag(PeerId):
-                    print("Active not in LocalState, Active not in PeerState")
+                    logging.info('Active is not in the Local or Peer State, locking peer and setting myself to Active')
                     aws.set_tag(PeerId,'locked')
-                    syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + LocalInstanceId))
                     aws.associate_eip(LocalInstanceId,arg.allocation_id)
                     shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
-                    syslog.syslog(str('Moved NAT to: ' + LocalInstanceId))
                     aws.set_tag(PeerId,'standby')
-                    syslog.syslog(str('Set standby to: ' + PeerId))
-                    
+
             elif 'active' in aws.get_tag(PeerId) and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
                 logging.info('All tests passed, setting myself to standby') 
                 aws.set_tag(LocalInstanceId,'standby')
