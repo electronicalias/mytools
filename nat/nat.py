@@ -2,24 +2,48 @@
 ''' 
 This script only works with:
 boto3 == 1.2.6
+
+This dependency is deployed by the CloudFormation script that accompanies this program. The solution supports mulitple AZs and
+subnets provided they are tagged correctly as follows:
+
+Key				Value
+Application		[some app name]
+Zone 			[a zone name you choose]
+Type 			[private, or some other indicator]
+Location 		[used to differentiate between multiple VPCs running this stack - insert VPC Id]
+
+The solution uses 2 EC2 instances each provisioned by their own Auto-Scaling group. 
 '''
 
-''' Import Modules '''
+# Import Modules
 import urllib2
 import argparse
 import cmd
 import syslog
 import pprint
 
+# Get the AWS Instance ID from the local meta-data and set the variable (requires urllib2)
 LocalInstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
+# Get the AWS Availability Zone that this instance is provisioned into from the local meta-data
+# (requires urllib2)
 AvailabilityZone = urllib2.urlopen('http://169.254.169.254/latest/meta-data/placement/availability-zone').read()
+# Get the Local IP from the local metadata (requires urllib2)
 LocalIp = urllib2.urlopen('http://169.254.169.254/latest/meta-data/local-ipv4').read()
+
+''' This statement will work out the other AZ which is how we find our PeerId and PeerIp to know
+if we are running a fault tolerant NAT soltion. '''
 if AvailabilityZone.endswith('a'):
     PeerAz = str(AvailabilityZone[:-1] + 'b')
 elif AvailabilityZone.endswith('b'):
     PeerAz = str(AvailabilityZone[:-1] + 'a')
 
-''' Setup the Command Line to accept the variables required '''
+''' Setup the Command Line to accept the variables:
+
+Key				Value
+allocation_id   [The value of the EIP you wish to assign to this stack]
+region_name		[The region for which this is being provisioned into]
+vpc_id			[The VPC where this is being deployed]
+'''
 parser = argparse.ArgumentParser(
     prog='Nat Updater',
     formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -42,7 +66,6 @@ aws.source_dest(LocalInstanceId)
 
 ''' Find out what we can about our NAT Peer '''
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
-print Peer
 PeerId = Peer.get('Id', None)
 print PeerId
 PeerAwsState = Peer.get('State', {}).get('Name', None)
@@ -96,12 +119,14 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     aws.set_tag(LocalInstanceId,'standby')
                     aws.set_tag(PeerId,'active')
                 elif 'active' not in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
+                	print("Active not in Peer State, New in LocalState")
                     aws.set_tag(PeerId,'locked')
                     aws.associate_eip(LocalInstanceId,arg.allocation_id)
                     shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                     aws.set_tag(LocalInstanceId,'active')
                     aws.set_tag(PeerId,'standby')
             	elif 'active' not in aws.get_tag(LocalInstanceId) and 'active' not in aws.get_tag(PeerId):
+            		print("Active not in LocalState, Active not in PeerState")
                     aws.set_tag(PeerId,'locked')
                     syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + LocalInstanceId))
                     aws.associate_eip(LocalInstanceId,arg.allocation_id)
