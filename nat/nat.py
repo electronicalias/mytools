@@ -84,29 +84,31 @@ print PeerAwsState
 LocalHcState = hc.check_ha(LocalIp)
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
-    print("Getting the table")
+    logging.info('Table:\n%s', table)
     table_id = aws.get_table_id(table)
+    logging.info('table_id: %s', table_id)
     for route in table_id.routes:
+    	logging.info('route: \n%s', route)
         default = 'NoValue'
         if 'locked' in aws.get_tag(LocalInstanceId):
-            print("I was locked so I broke out")
+            logging.info('Checked my own tag:HaState and received: locked')
             break
         elif '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
-            print("Found a 0.0.0.0 route")
+            logging.info('Carrying out actions on default route in table: %s', table_id)
             if 'blackhole' in route.get('State'):
-                print("Has black hole, will set to myself then break")
+                logging.info('Discovered BlackHole')
                 aws.associate_eip(LocalInstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
-                syslog.syslog(str('Moved NAT due to BlackHole in the route, to: ' + LocalInstanceId))    
+                logging.info('Moved NAT due to BlackHole in the route, to: %s', LocalInstanceId))    
                 break 
             elif 'running' not in PeerAwsState and 'failed' not in aws.get_tag(LocalInstanceId):
-                print("Peer is currently failing, I should take routes!")
+                logging.info('Peer is not in a running state and the host has not been set to failed yet')
                 aws.set_tag(PeerId,'failed')
                 aws.associate_eip(LocalInstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
-                syslog.syslog(str('Moved NAT due to no Peer Available: ' + LocalInstanceId))    
+                logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId))    
                 break 
             DestBlock = route.get('DestinationCidrBlock')
             if PeerId in route.get('InstanceId') and 'active' in aws.get_tag(LocalInstanceId):
@@ -140,5 +142,4 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     aws.set_tag(PeerId,'standby')
                     syslog.syslog(str('Set standby to: ' + PeerId))
 
-logging.info('Completed nat.py functions')
-logging.info('\n')
+logging.info('Completed nat.py functions\n')
