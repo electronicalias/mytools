@@ -111,9 +111,6 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId)
                 break 
             DestBlock = route.get('DestinationCidrBlock')
-            elif LocalInstanceId in route.get('InstanceId') and 'OK' in LocalHcState:
-                print("other server not active, I am active, I am route, I am router")
-                syslog.syslog(str('Healthcheck OK and Route owned by: ' + LocalInstanceId))
             elif LocalInstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
                 print("NoValue found for either myself or peer in the route table, something is wrong!")
                 if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
@@ -128,8 +125,8 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                     aws.set_tag(LocalInstanceId,'active')
                     aws.set_tag(PeerId,'standby')
-            	elif 'active' not in aws.get_tag(LocalInstanceId) and 'active' not in aws.get_tag(PeerId):
-            	    print("Active not in LocalState, Active not in PeerState")
+                elif 'active' not in aws.get_tag(LocalInstanceId) and 'active' not in aws.get_tag(PeerId):
+                    print("Active not in LocalState, Active not in PeerState")
                     aws.set_tag(PeerId,'locked')
                     syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + LocalInstanceId))
                     aws.associate_eip(LocalInstanceId,arg.allocation_id)
@@ -140,4 +137,5 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             elif 'active' in aws.get_tag(PeerId) and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
                 logging.info('All tests passed, setting myself to standby') 
                 aws.set_tag(LocalInstanceId,'standby')
+
 logging.info('Completed nat.py functions\n')
