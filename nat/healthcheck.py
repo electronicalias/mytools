@@ -31,10 +31,15 @@ def state_check():
         print Peer
         print Peer.get('State', {}).get('Name', None)
         if 'running' not in Peer.get('State', {}).get('Name', None):
-        	return str('FAIL')
+            print "running was not in state"
+            return str('FAIL')
         elif 'running' in Peer.get('State', {}).get('Name', None):
-            PeerIp = Peer.get('Id', None)
+            PeerId = Peer.get('Id')
+            print PeerId
+            PeerIp = aws.instance_ip('PeerId')
+            print PeerIp
             response = urllib2.urlopen(str('http://' + PeerIp + '/index.html', timeout=2)).read()
+            print reponse
             if 'OK' in response:
                 syslog.syslog(str('Response from host is OK'))
                 return response
