@@ -36,7 +36,7 @@ def state_check():
         elif 'running' in Peer.get('State', {}).get('Name', None):
             PeerId = Peer.get('Id')
             print PeerId
-            PeerIp = aws.instance_ip('PeerId')
+            PeerIp = aws.instance_ip(PeerId)
             print PeerIp
             response = urllib2.urlopen(str('http://' + PeerIp + '/index.html', timeout=2)).read()
             print reponse
