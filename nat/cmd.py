@@ -83,7 +83,7 @@ class aws:
                 }
             ]
         )
-        instance in peer['Reservations'][0]['Instances'][0]
+        instance['Reservations'][0]['Instances'][0]
         return dict(
             Id=instance['InstanceId'],
             State=instance['State']
