@@ -46,6 +46,6 @@ shell = cmd.bash()
 
 while True:
     if "OK" not in state_check():
-        syslog.syslog(str('{} has failed, running the nat.py function'.format(PeerId)))
+        syslog.syslog("{} has failed, running the nat.py function".format(PeerId))
         shell.cmd(str('/usr/local/bin/take_nat.sh'))
     time.sleep(10)
