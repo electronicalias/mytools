@@ -141,5 +141,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     syslog.syslog(str('Moved NAT to: ' + LocalInstanceId))
                     aws.set_tag(PeerId,'standby')
                     syslog.syslog(str('Set standby to: ' + PeerId))
-
+            elif 'active' in PeerId and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
+                logging.info('All tests passed, setting myself to standby') 
+                aws.set_tag(LocalInstanceId,'standby')
 logging.info('Completed nat.py functions\n')
