@@ -31,8 +31,8 @@ def state_check():
         if 'running' not in Peer.get('State', {}).get('Name', None):
         	return str('FAIL')
         elif 'running' in Peer.get('State', {}).get('Name', None):
-        	PeerIp = Peer.get('Id', None)
-        	response = urllib2.urlopen(str('http://' + PeerIp + '/index.html', timeout=2)).read()
+            PeerIp = Peer.get('Id', None)
+            response = urllib2.urlopen(str('http://' + PeerIp + '/index.html', timeout=2)).read()
             if 'OK' in response:
                 syslog.syslog(str('Response from host is OK'))
                 return response
