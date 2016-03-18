@@ -22,9 +22,7 @@ import cmd 			# Module created for interacting with AWS and the shell
 import syslog 		# Will be deprecated for logging instead
 import logging		# Used to save all log activity for NAT
 
-logging.basicConfig(filename='example.log',level=logging.DEBUG)
-
-
+logging.basicConfig(filename='/var/log/nat.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p')
 
 # Get the AWS Instance ID from the local meta-data and set the variable (requires urllib2)
 LocalInstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
@@ -41,7 +39,7 @@ if AvailabilityZone.endswith('a'):
 elif AvailabilityZone.endswith('b'):
     PeerAz = str(AvailabilityZone[:-1] + 'a')
 
-logging.debug('PeerAZ is: ' + PeerAZ)
+logging.debug(str('PeerAz is: ' + PeerAZ), 'No value found for PeerAz')
 
 ''' Setup the Command Line to accept the variables:
 
