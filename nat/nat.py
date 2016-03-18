@@ -40,13 +40,14 @@ hc = cmd.state()
 ''' First thing to do as an action is to set source/dest to False because this will be a NAT instance '''
 aws.source_dest(LocalInstanceId)
 
-''' Find out what we can about our NAT Peer '''
+''' Find out what we can about our NAT Peer
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
 print Peer
 PeerId = Peer.get('Id', None)
 print PeerId
 PeerAwsState = Peer.get('State', {}).get('Name', None)
 print PeerAwsState
+'''
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
