@@ -119,14 +119,14 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     aws.set_tag(LocalInstanceId,'standby')
                     aws.set_tag(PeerId,'active')
                 elif 'active' not in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
-                	print("Active not in Peer State, New in LocalState")
+                    print("Active not in Peer State, New in LocalState")
                     aws.set_tag(PeerId,'locked')
                     aws.associate_eip(LocalInstanceId,arg.allocation_id)
                     shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                     aws.set_tag(LocalInstanceId,'active')
                     aws.set_tag(PeerId,'standby')
             	elif 'active' not in aws.get_tag(LocalInstanceId) and 'active' not in aws.get_tag(PeerId):
-            		print("Active not in LocalState, Active not in PeerState")
+            	    print("Active not in LocalState, Active not in PeerState")
                     aws.set_tag(PeerId,'locked')
                     syslog.syslog(str('Neither instance has the route, taking EIP/Route and assigning to: ' + LocalInstanceId))
                     aws.associate_eip(LocalInstanceId,arg.allocation_id)
