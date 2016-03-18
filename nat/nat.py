@@ -108,7 +108,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 NewPeerState = NewPeer.get('State', {}).get('Name', None)
                 if 'running' in NewPeerState:
                     logging.info('Found a new Peer, setting it to standby, then break')
-                    aws.set_tag(,'standby')
+                    aws.set_tag('standby')
                     break
                 logging.info('Peer is not in a running state and the host has not been set to failed yet')
                 aws.set_tag(PeerId,'failed')
