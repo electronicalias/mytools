@@ -60,7 +60,7 @@ parser.add_argument('-r','--region_name', required=True)
 parser.add_argument('-v','--vpc_id', required=True)
 arg = parser.parse_args()
 
-logging.info('Running NAT HA with the following: Allocation ID = %s, Region = %s, VpcId = %s', arg.allocation_id, arg.region_name, arg.vpc_id)
+logging.info('Running NAT HA with the following: Allocation ID = %s\n Region = %s, VpcId = %s', arg.allocation_id, arg.region_name, arg.vpc_id)
 
 ''' Setup Class Commands from the cmd class '''
 aws = cmd.aws(arg.region_name)
@@ -137,3 +137,5 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     syslog.syslog(str('Moved NAT to: ' + LocalInstanceId))
                     aws.set_tag(PeerId,'standby')
                     syslog.syslog(str('Set standby to: ' + PeerId))
+
+logging.info('\n')
