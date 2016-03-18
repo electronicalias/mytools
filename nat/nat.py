@@ -39,7 +39,7 @@ if AvailabilityZone.endswith('a'):
 elif AvailabilityZone.endswith('b'):
     PeerAz = str(AvailabilityZone[:-1] + 'a')
 
-logging.info('PeerAz is: ' + PeerAz, 'No value found for PeerAz')
+logging.info('PeerAz=%s', PeerAz)
 
 ''' Setup the Command Line to accept the variables:
 
