@@ -28,6 +28,8 @@ elif AvailabilityZone.endswith('b'):
 def state_check():
     try:
         Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
+        print Peer
+        print Peer.get('State', {}).get('Name', None)
         if 'running' not in Peer.get('State', {}).get('Name', None):
         	return str('FAIL')
         elif 'running' in Peer.get('State', {}).get('Name', None):
