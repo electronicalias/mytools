@@ -16,11 +16,15 @@ The solution uses 2 EC2 instances each provisioned by their own Auto-Scaling gro
 '''
 
 # Import Modules
-import urllib2
-import argparse
-import cmd
-import syslog
-import pprint
+import urllib2 		# Used for testing URLs in the healthcheck
+import argparse 	# Used for collecitng command line params
+import cmd 			# Module created for interacting with AWS and the shell
+import syslog 		# Will be deprecated for logging instead
+import logging		# Used to save all log activity for NAT
+
+logging.basicConfig(filename='example.log',level=logging.DEBUG)
+
+
 
 # Get the AWS Instance ID from the local meta-data and set the variable (requires urllib2)
 LocalInstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
@@ -36,6 +40,8 @@ if AvailabilityZone.endswith('a'):
     PeerAz = str(AvailabilityZone[:-1] + 'b')
 elif AvailabilityZone.endswith('b'):
     PeerAz = str(AvailabilityZone[:-1] + 'a')
+
+logging.debug('PeerAZ is: ' + PeerAZ)
 
 ''' Setup the Command Line to accept the variables:
 
@@ -134,5 +140,3 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     syslog.syslog(str('Moved NAT to: ' + LocalInstanceId))
                     aws.set_tag(PeerId,'standby')
                     syslog.syslog(str('Set standby to: ' + PeerId))
-
-
