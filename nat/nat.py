@@ -101,7 +101,8 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
                 logging.info('Moved NAT due to BlackHole in the route, to: %s', LocalInstanceId)
-                break 
+                break
+
             elif 'running' not in PeerAwsState and 'failed' not in aws.get_tag(LocalInstanceId):
                 logging.info('Peer is not in a running state and the host has not been set to failed yet')
                 aws.set_tag(PeerId,'failed')
@@ -109,10 +110,10 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
                 logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId)
-                break 
-            DestBlock = route.get('DestinationCidrBlock')
+                break
+
             elif LocalInstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
-                print("NoValue found for either myself or peer in the route table, something is wrong!")
+                logging.info('Neither Active/Standby instance-id discovered in the default route')
                 if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
                     print("Active was in peer, standby was in myself")
                     syslog.syslog('I am Standby, setting tag to Standby')
@@ -134,6 +135,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     syslog.syslog(str('Moved NAT to: ' + LocalInstanceId))
                     aws.set_tag(PeerId,'standby')
                     syslog.syslog(str('Set standby to: ' + PeerId))
+                    
             elif 'active' in aws.get_tag(PeerId) and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
                 logging.info('All tests passed, setting myself to standby') 
                 aws.set_tag(LocalInstanceId,'standby')
