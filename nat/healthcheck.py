@@ -28,21 +28,14 @@ elif AvailabilityZone.endswith('b'):
 def state_check():
     try:
         Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
-        print Peer
-        print Peer.get('State', {}).get('Name', None)
         if 'running' not in Peer.get('State', {}).get('Name', None):
-            print "running was not in state"
             return str('FAIL')
         elif 'running' in Peer.get('State', {}).get('Name', None):
             PeerId = Peer.get('Id')
-            print PeerId
             PeerIp = aws.instance_ip(PeerId)
-            print PeerIp
             request = urllib2.Request('http://' + PeerIp + '/index.html')
             response = urllib2.urlopen(request, timeout=4)
             content = response.read()
-            # response = urllib2.urlopen(str('http://' + PeerIp + '/index.html'), Timeout = 5).read()
-            print content
             if 'OK' in content:
                 syslog.syslog(str('Response from host is OK'))
                 return content
