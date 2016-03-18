@@ -52,7 +52,8 @@ print PeerAwsState
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
 
-syslog.syslog(str('I got this far ' + LocalInstanceId))    
+
+    
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
     print("Getting the table")
@@ -71,8 +72,9 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 aws.set_tag(LocalInstanceId,'active')
                 syslog.syslog(str('Moved NAT due to BlackHole in the route, to: ' + LocalInstanceId))    
                 break 
-            elif 'terminated' in PeerAwsState or 'shutting-down' in PeerAwsState or 'pending' in PeerAwsState:
+            elif ('terminated' in PeerAwsState or 'shutting-down' in PeerAwsState or 'pending' in PeerAwsState) and 'failed' not in aws.get_tag(LocalInstanceId):
                 print("Peer is currently failing, I should take routes!")
+                aws.set_tag(PeerId,'failed')
                 aws.associate_eip(LocalInstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
