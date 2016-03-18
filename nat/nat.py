@@ -100,7 +100,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 aws.associate_eip(LocalInstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
-                logging.info('Moved NAT due to BlackHole in the route, to: %s', LocalInstanceId))    
+                logging.info('Moved NAT due to BlackHole in the route, to: %s', LocalInstanceId)
                 break 
             elif 'running' not in PeerAwsState and 'failed' not in aws.get_tag(LocalInstanceId):
                 logging.info('Peer is not in a running state and the host has not been set to failed yet')
@@ -108,7 +108,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 aws.associate_eip(LocalInstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
-                logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId))    
+                logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId)
                 break 
             DestBlock = route.get('DestinationCidrBlock')
             if PeerId in route.get('InstanceId') and 'active' in aws.get_tag(LocalInstanceId):
