@@ -79,7 +79,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 syslog.syslog(str('Moved NAT due to no Peer Available: ' + LocalInstanceId))    
                 break 
             DestBlock = route.get('DestinationCidrBlock')
-            if PeerId in route.get('InstanceId') and 'OK' in PeerHcState:
+            if PeerId in route.get('InstanceId') and 'active' in aws.get_tag(LocalInstanceId):
                 print("Checking remote peer, if found will set standby")
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))
                 aws.set_tag(LocalInstanceId,'standby')
