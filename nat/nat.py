@@ -52,6 +52,8 @@ print PeerAwsState
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
 
+syslog.syslog(str('I got this far ' + LocalInstanceId))    
+
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
     print("Getting the table")
     table_id = aws.get_table_id(table)
