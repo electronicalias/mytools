@@ -60,7 +60,7 @@ class aws:
         	for id in instances['Instances']:
         		return id['InstanceId']
 
-    def get_instance(self,AvailabilityZone,Application,VpcId,State):
+    def get_instance(self,AvailabilityZone,Application,VpcId):
         peer = self.ec2_client.describe_instances(
             Filters=[
                 {
