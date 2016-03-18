@@ -44,12 +44,8 @@ aws.source_dest(LocalInstanceId)
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
 PeerId = Peer.get('Id', None)
 syslog.syslog(str('Value of PeerId: ' + PeerId))
-PeerIp = Peer.get('PrivateIpAddress', None)
-syslog.syslog(str('Value of PeerIp: ' + PeerIp))
 PeerAwsState = Peer.get('State', {}).get('Name', None)
 syslog.syslog(str('Value of PeerAwsState: ' + PeerAwsState))
-PeerHcState = hc.check_ha(PeerIp)
-syslog.syslog(str('Value of PeerHcState: ' + PeerHcState))
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
@@ -77,16 +73,13 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 syslog.syslog(str('Moved NAT due to BlackHole in the route, to: ' + LocalInstanceId))    
                 break 
             elif 'terminated' in PeerAwsState or 'shutting-down' in PeerAwsState or 'pending' in PeerAwsState:
-                print("No Peer Found!")
+                print("Peer is currently failing, I should take routes!")
                 aws.associate_eip(LocalInstanceId,arg.allocation_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
                 syslog.syslog(str('Moved NAT due to no Peer Available: ' + LocalInstanceId))    
                 break 
             DestBlock = route.get('DestinationCidrBlock')
-            print PeerId
-            print route.get('InstanceId')
-            print PeerHcState
             if PeerId in route.get('InstanceId') and 'OK' in PeerHcState:
                 print("Checking remote peer, if found will set standby")
                 syslog.syslog(str('Healthcheck OK and Route owned by: ' + PeerId))

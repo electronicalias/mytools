@@ -60,7 +60,7 @@ class aws:
         	for id in instances['Instances']:
         		return id['InstanceId']
 
-    def get_instance(self,AvailabilityZone,Application,VpcId):
+    def get_instance(self,AvailabilityZone,Application,VpcId,State):
         peer = self.ec2_client.describe_instances(
             Filters=[
                 {
@@ -83,18 +83,11 @@ class aws:
                 }
             ]
         )
-        instance = peer['Reservations'][0]['Instances'][0]
-        if 'running' not in instance['State']:
-            return dict(
-                Id=instance['InstanceId'],
-                State=instance['State']
-            )
-        else:
-            return dict(
-                Id=instance['InstanceId'],
-                State=instance['State'],
-                PrivateIpAddress=instance['PrivateIpAddress']
-            )
+        instance in peer['Reservations'][0]['Instances'][0]
+        return dict(
+            Id=instance['InstanceId']
+            State=instance['State']
+            ) if instance else None
 
     def instance_ip(self,InstanceId):
     	instance = self.ec2_resource.Instance(InstanceId)
