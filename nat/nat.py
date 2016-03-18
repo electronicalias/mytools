@@ -22,7 +22,7 @@ import cmd 			# Module created for interacting with AWS and the shell
 import syslog 		# Will be deprecated for logging instead
 import logging		# Used to save all log activity for NAT
 
-logging.basicConfig(filename='/var/log/nat.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p')
+logging.basicConfig(filename='/var/log/nat.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p')
 
 # Get the AWS Instance ID from the local meta-data and set the variable (requires urllib2)
 LocalInstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
@@ -59,6 +59,8 @@ parser.add_argument('-a','--allocation_id', required=True)
 parser.add_argument('-r','--region_name', required=True)
 parser.add_argument('-v','--vpc_id', required=True)
 arg = parser.parse_args()
+
+logging.info('Running NAT HA with the following: Allocation ID = %s, Region = %s, VpcId = %s', arg.allocation_id, arg.region_name, arg.vpc_id)
 
 ''' Setup Class Commands from the cmd class '''
 aws = cmd.aws(arg.region_name)
