@@ -28,10 +28,10 @@ elif AvailabilityZone.endswith('b'):
 def state_check():
     try:
         Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
-        if 'running' not in Peer.get('State'):
+        if 'running' not in Peer.get('State', {}).get('Name', None):
         	return str('FAIL')
-        elif 'running' in Peer.get('State'):
-        	PeerIp = aws.instance_ip(PeerIp)
+        elif 'running' in Peer.get('State', {}).get('Name', None):
+        	PeerIp = Peer.get('Id', None)
         	response = urllib2.urlopen(str('http://' + PeerIp + '/index.html', timeout=2)).read()
             if 'OK' in response:
                 syslog.syslog(str('Response from host is OK'))
@@ -46,6 +46,6 @@ shell = cmd.bash()
 
 while True:
     if "OK" not in state_check():
-        syslog.syslog("{} has failed, running the nat.py function".format(PeerId))
+        syslog.syslog(str('Peer has failed, running the nat.py function'))
         shell.cmd(str('/usr/local/bin/take_nat.sh'))
     time.sleep(10)
