@@ -38,7 +38,7 @@ def state_check():
             print PeerId
             PeerIp = aws.instance_ip(PeerId)
             print PeerIp
-            response = urllib2.urlopen(str('http://' + PeerIp + '/index.html', timeout=2)).read()
+            response = urllib2.urlopen(str('http://' + PeerIp + '/index.html'), Timeout = 1).read()
             print reponse
             if 'OK' in response:
                 syslog.syslog(str('Response from host is OK'))
