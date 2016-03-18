@@ -42,18 +42,14 @@ aws.source_dest(LocalInstanceId)
 
 ''' Find out what we can about our NAT Peer '''
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
+print Peer
 PeerId = Peer.get('Id', None)
-syslog.syslog(str('Value of PeerId: ' + PeerId))
+print PeerId
 PeerAwsState = Peer.get('State', {}).get('Name', None)
-syslog.syslog(str('Value of PeerAwsState: ' + PeerAwsState))
+print PeerAwsState
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
-
-rt_ids = []
-for i in aws.get_rt_tables(arg.vpc_id,'private'):
-    rt_ids.append(i.get('RouteTableId'))
-    
 
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
     print("Getting the table")
