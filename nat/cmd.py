@@ -33,7 +33,7 @@ class aws:
                 })
             return update
 
-    def get_peer(self,AvailabilityZone,Application,VpcId):
+    def get_live_peer(self,AvailabilityZone,Application,VpcId):
         peer = self.ec2_client.describe_instances(
             Filters=[
                 {
@@ -53,12 +53,20 @@ class aws:
                     'Values': [
                         VpcId,
                     ]
+                },
+                {
+                    'Name': 'instance-state-name',
+                    'Values': [
+                        'running',
+                    ]
                 }
             ]
         )
-        for instances in peer['Reservations']:
-        	for id in instances['Instances']:
-        		return id['InstanceId']
+        instance = peer['Reservations'][0]['Instances'][0]
+        return dict(
+            Id=instance['InstanceId'],
+            State=instance['State']
+            ) if instance else None
 
     def get_instance(self,AvailabilityZone,Application,VpcId):
         peer = self.ec2_client.describe_instances(

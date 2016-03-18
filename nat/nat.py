@@ -103,6 +103,13 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 break
 
             elif 'running' not in PeerAwsState and 'failed' not in aws.get_tag(LocalInstanceId):
+                NewPeer = aws.get_live_peer(PeerAz,'nat',arg.vpc_id)
+                NewPeerId = NewPeer.get('Id', None)
+                NewPeerState = NewPeer.get('State', {}).get('Name', None)
+                if 'running' in NewPeerState:
+                    logging.info('Found a new Peer, setting it to standby, then break')
+                    aws.set_tag(,'standby')
+                    break
                 logging.info('Peer is not in a running state and the host has not been set to failed yet')
                 aws.set_tag(PeerId,'failed')
                 aws.associate_eip(LocalInstanceId,arg.allocation_id)
