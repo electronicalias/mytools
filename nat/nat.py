@@ -20,9 +20,11 @@ import urllib2 		# Used for testing URLs in the healthcheck
 import argparse 	# Used for collecitng command line params
 import cmd 			# Module created for interacting with AWS and the shell
 import syslog 		# Will be deprecated for logging instead
-import logging		# Used to save all log activity for NAT
+import logging		# Used to save all log activity for NAT, logs are found at /var/log/nat.log
 
 logging.basicConfig(filename='/var/log/nat.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p')
+logging.info('\n')
+logging.info('Starting Logging for nat.py')
 
 # Get the AWS Instance ID from the local meta-data and set the variable (requires urllib2)
 LocalInstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
@@ -60,7 +62,7 @@ parser.add_argument('-r','--region_name', required=True)
 parser.add_argument('-v','--vpc_id', required=True)
 arg = parser.parse_args()
 
-logging.info('Running NAT HA with the following: Allocation ID = %s\n Region = %s, VpcId = %s', arg.allocation_id, arg.region_name, arg.vpc_id)
+logging.info('Running NAT HA with the following:\nAllocation ID = %s\nRegion = %s\nVpcId = %s', arg.allocation_id, arg.region_name, arg.vpc_id)
 
 ''' Setup Class Commands from the cmd class '''
 aws = cmd.aws(arg.region_name)
@@ -138,4 +140,5 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     aws.set_tag(PeerId,'standby')
                     syslog.syslog(str('Set standby to: ' + PeerId))
 
+logging.info('Completed nat.py functions')
 logging.info('\n')
