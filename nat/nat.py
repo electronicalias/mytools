@@ -119,20 +119,17 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 logging.info('Moved NAT due to BlackHole in the route, to: %s', LocalInstanceId)
                 break
 
-            elif LocalInstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
+            elif LocalInstanceId not in route.get('InstanceId') and get_peer_id() not in route.get('InstanceId'):
                 logging.info('Neither Active/Standby instance-id discovered in the default route')
-                if 'active' in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
-                    logging.info('Active is in the Peer State and New is in my State')
-                    aws.set_tag(LocalInstanceId,'standby')
-                    aws.set_tag(PeerId,'active')
-                elif 'active' not in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
+
+                if 'active' not in aws.get_tag(get_peer_id()) and 'new' in aws.get_tag(LocalInstanceId):
                     logging.info('Active is not in the Peer State and New is in my State, setting Peer to locked while I take the routes')
                     aws.set_tag(PeerId,'locked')
-                    aws.associate_eip(LocalInstanceId,arg.allocation_id)
-                    shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
+                    set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
                     aws.set_tag(LocalInstanceId,'active')
                     aws.set_tag(PeerId,'standby')
-                elif 'active' not in aws.get_tag(LocalInstanceId) and 'active' not in aws.get_tag(PeerId):
+
+                elif 'active' not in aws.get_tag(LocalInstanceId) and 'active' not in aws.get_tag(get_peer_id()):
                     logging.info('Active is not in the Local or Peer State, locking peer and setting myself to Active')
                     aws.set_tag(PeerId,'locked')
                     aws.associate_eip(LocalInstanceId,arg.allocation_id)
