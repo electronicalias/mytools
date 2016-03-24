@@ -96,6 +96,8 @@ def set_active(local_id,remote_id,table_id):
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
 
+logging.info(aws.get_rt_tables(arg.vpc_id,'private'))
+
 for table in aws.get_rt_tables(arg.vpc_id,'private'):
     logging.info('Table:\n%s', table)
     table_id = aws.get_table_id(table)
