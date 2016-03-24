@@ -20,10 +20,6 @@ arg = parser.parse_args()
 InstanceId = urllib2.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read()
 AvailabilityZone = urllib2.urlopen('http://169.254.169.254/latest/meta-data/placement/availability-zone').read()
 LocalIp = urllib2.urlopen('http://169.254.169.254/latest/meta-data/local-ipv4').read()
-if AvailabilityZone.endswith('a'):
-    PeerAz = str(AvailabilityZone[:-1] + 'b')
-elif AvailabilityZone.endswith('b'):
-    PeerAz = str(AvailabilityZone[:-1] + 'a')
 
 def state_check():
     try:
@@ -45,7 +41,7 @@ def state_check():
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
-
+PeerAz = aws.get_peer_az(arg.vpc_id,LocalInstanceId)
 
 while True:
     if "OK" not in state_check():
