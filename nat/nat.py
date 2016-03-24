@@ -137,6 +137,9 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
                     aws.set_tag(get_peer_id(),'standby')
 
+                elif 'active' in aws.get_tag(LocalInstanceId) and 'standby' in aws.get_tag(get_peer_id()):
+                    set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
+
             elif 'running' not in get_peer_state() and 'failed' not in aws.get_tag(LocalInstanceId):
                 NewPeer = aws.get_live_peer(get_peer_az(),'nat',arg.vpc_id)
                 NewPeerId = NewPeer.get('Id', None)
