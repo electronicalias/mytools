@@ -32,6 +32,41 @@ class aws:
                     'Value': False
                 })
             return update
+    
+    def get_nat_ids(self,vpcid):
+        nats = self.ec2_client.describe_instances(
+            Filters=[
+                {
+                    'Name': 'tag:Application',
+                    'Values': [
+                        'nat',
+                    ]
+                },
+                {
+                    'Name': 'tag:Location',
+                    'Values': [
+                        vpcid,
+                    ]
+                },
+                {
+                    'Name': 'instance-state-name',
+                    'Values': [
+                        'running',
+                    ]
+                }
+            ]
+        )
+        data = {}
+        for res in nats['Reservations']:
+            for i in res['Instances']:
+                data[i['InstanceId']] = i['Placement']['AvailabilityZone']
+        return data
+
+    def get_peer_az(self,vpcid,instance_id):
+        peer_az = self.get_nat_ids(vpcid)
+        for key, value in peer_az.iteritems():
+            if instance_id not in key:
+                return value
 
     def get_live_peer(self,AvailabilityZone,Application,VpcId):
         peer = self.ec2_client.describe_instances(

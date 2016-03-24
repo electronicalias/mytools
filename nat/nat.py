@@ -35,12 +35,12 @@ LocalIp = urllib2.urlopen('http://169.254.169.254/latest/meta-data/local-ipv4').
 
 ''' This statement will work out the other AZ which is how we find our PeerId and PeerIp to know
 if we are running a fault tolerant NAT soltion. '''
-if AvailabilityZone.endswith('a'):
-    PeerAz = str(AvailabilityZone[:-1] + 'b')
-elif AvailabilityZone.endswith('b'):
-    PeerAz = str(AvailabilityZone[:-1] + 'a')
+#if AvailabilityZone.endswith('a'):
+#    PeerAz = str(AvailabilityZone[:-1] + 'b')
+#elif AvailabilityZone.endswith('b'):
+#    PeerAz = str(AvailabilityZone[:-1] + 'a')
 
-logging.info('PeerAz=%s', PeerAz)
+#logging.info('PeerAz=%s', PeerAz)
 
 ''' Setup the Command Line to accept the variables:
 
@@ -68,16 +68,17 @@ aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 hc = cmd.state()
 
+
+PeerAz = aws.get_peer_az(arg.vpc_id,LocalInstanceId)
+
+logging.info('PeerAz=%s', PeerAz)
 ''' First thing to do as an action is to set source/dest to False because this will be a NAT instance '''
 aws.source_dest(LocalInstanceId)
 
 ''' Find out what we can about our NAT Peer '''
 Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
 PeerId = Peer.get('Id', None)
-print PeerId
 PeerAwsState = Peer.get('State', {}).get('Name', None)
-print PeerAwsState
-
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
