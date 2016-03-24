@@ -69,9 +69,6 @@ shell = cmd.bash()
 hc = cmd.state()
 
 
-
-
-logging.info('PeerAz=%s', PeerAz)
 ''' First thing to do as an action is to set source/dest to False because this will be a NAT instance '''
 aws.source_dest(LocalInstanceId)
 
@@ -89,6 +86,13 @@ def get_peer_state():
     PeerAwsState = Peer.get('State', {}).get('Name', None)
     return PeerAwsState
 
+def set_active(local_id,remote_id,table_id):
+    aws.set_tag(local_id,'locked')
+    aws.associate_eip(local_id,arg.allocation_id)
+    shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + local_id + ' --region ' + arg.region_name))
+    aws.set_tag(local_id,'active')
+    aws.set_tag(remote_id,'active') 
+
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
@@ -101,7 +105,9 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     	logging.info('route: \n%s', route)
         default = 'NoValue'
         if get_peer_az() not None:
-            logging.info('THIS IS WHERE I WANT TO DO STUFF')
+            logging.info('No Peer Discovered')
+            set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
+            logging.info('Moved NAT due to no Live Peer, to: %s', LocalInstanceId)
         if 'locked' in aws.get_tag(LocalInstanceId):
             logging.info('Checked my own tag:HaState and received: locked')
             break
@@ -109,9 +115,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             logging.info('Carrying out actions on default route in table: %s', table_id)
             if 'blackhole' in route.get('State'):
                 logging.info('Discovered BlackHole')
-                aws.associate_eip(LocalInstanceId,arg.allocation_id)
-                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
-                aws.set_tag(LocalInstanceId,'active')
+                set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
                 logging.info('Moved NAT due to BlackHole in the route, to: %s', LocalInstanceId)
                 break
 
