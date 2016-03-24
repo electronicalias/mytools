@@ -104,7 +104,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     for route in table_id.routes:
     	logging.info('route: \n%s', route)
         default = 'NoValue'
-        if get_peer_az() not None:
+        if get_peer_az() is None:
             logging.info('No Peer Discovered')
             set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
             logging.info('Moved NAT due to no Live Peer, to: %s', LocalInstanceId)
