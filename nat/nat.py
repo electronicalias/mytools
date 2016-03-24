@@ -80,10 +80,10 @@ def get_peer():
     Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
     return Peer
 def get_peer_id():
-    PeerId = Peer.get('Id', None)
+    PeerId = get_peer().get('Id', None)
     return PeerId
 def get_peer_state():
-    PeerAwsState = Peer.get('State', {}).get('Name', None)
+    PeerAwsState = get_peer().get('State', {}).get('Name', None)
     return PeerAwsState
 
 def set_active(local_id,remote_id,table_id):
