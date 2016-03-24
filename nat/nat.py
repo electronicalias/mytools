@@ -124,17 +124,16 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
 
                 if 'active' not in aws.get_tag(get_peer_id()) and 'new' in aws.get_tag(LocalInstanceId):
                     logging.info('Active is not in the Peer State and New is in my State, setting Peer to locked while I take the routes')
-                    aws.set_tag(PeerId,'locked')
+                    aws.set_tag(get_peer_id(),'locked')
                     set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
                     aws.set_tag(LocalInstanceId,'active')
-                    aws.set_tag(PeerId,'standby')
+                    aws.set_tag(get_peer_id(),'standby')
 
                 elif 'active' not in aws.get_tag(LocalInstanceId) and 'active' not in aws.get_tag(get_peer_id()):
                     logging.info('Active is not in the Local or Peer State, locking peer and setting myself to Active')
-                    aws.set_tag(PeerId,'locked')
-                    aws.associate_eip(LocalInstanceId,arg.allocation_id)
-                    shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
-                    aws.set_tag(PeerId,'standby')
+                    aws.set_tag(get_peer_id(),'locked')
+                    set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
+                    aws.set_tag(get_peer_id(),'standby')
 
             elif 'running' not in get_peer_state() and 'failed' not in aws.get_tag(LocalInstanceId):
                 NewPeer = aws.get_live_peer(get_peer_az(),'nat',arg.vpc_id)
@@ -150,21 +149,21 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     break
                     
                 logging.info('Peer is not in a running state and the host has not been set to failed yet')
-                aws.set_tag(PeerId,'failed')
-                aws.associate_eip(LocalInstanceId,arg.allocation_id)
+                aws.set_tag(get_peer_id(),'failed')
+                set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
                 logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId)
                 break
 
-            elif 'active' in aws.get_tag(PeerId) and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
+            elif 'active' in aws.get_tag(get_peer_id()) and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
                 logging.info('All tests passed, setting myself to standby') 
                 aws.set_tag(LocalInstanceId,'standby')
 
-            elif 'new' in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
+            elif 'new' in aws.get_tag(get_peer_id()) and 'new' in aws.get_tag(LocalInstanceId):
                 logging.info('Found new state, need to promote a host')
                 aws.set_tag(LocalInstanceId,'locked')
-                aws.set_tag(PeerId,'standby')
+                aws.set_tag(get_peer_id(),'standby')
                 shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                 aws.set_tag(LocalInstanceId,'active')
                 logging.info('Completed promotion from new state')
