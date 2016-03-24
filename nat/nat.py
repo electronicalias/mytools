@@ -112,29 +112,11 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
             break
         elif '0.0.0.0' in (route.get('DestinationCidrBlock', default)):
             logging.info('Carrying out actions on default route in table: %s', table_id)
+
             if 'blackhole' in route.get('State'):
                 logging.info('Discovered BlackHole')
                 set_active(LocalInstanceId,get_peer_id(),table_id.route_table_id)
                 logging.info('Moved NAT due to BlackHole in the route, to: %s', LocalInstanceId)
-                break
-
-            elif 'running' not in get_peer_state() and 'failed' not in aws.get_tag(LocalInstanceId):
-                NewPeer = aws.get_live_peer(get_peer_az(),'nat',arg.vpc_id)
-                NewPeerId = NewPeer.get('Id', None)
-                NewPeerState = NewPeer.get('State', {}).get('Name', None)
-                if 'running' in NewPeerState and 'new' in aws.get_tag(NewPeerId):
-                    logging.info('Found a new Peer, setting it to standby, then break')
-                    aws.set_tag(NewPeerId,'standby')
-                    break
-                elif 'running' in NewPeerState and 'standby' in aws.get_tag(NewPeerId):
-                	logging.info('Breaking from the process - we are all healthy')
-                	break
-                logging.info('Peer is not in a running state and the host has not been set to failed yet')
-                aws.set_tag(PeerId,'failed')
-                aws.associate_eip(LocalInstanceId,arg.allocation_id)
-                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
-                aws.set_tag(LocalInstanceId,'active')
-                logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId)
                 break
 
             elif LocalInstanceId not in route.get('InstanceId') and PeerId not in route.get('InstanceId'):
@@ -156,6 +138,27 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                     aws.associate_eip(LocalInstanceId,arg.allocation_id)
                     shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
                     aws.set_tag(PeerId,'standby')
+
+            elif 'running' not in get_peer_state() and 'failed' not in aws.get_tag(LocalInstanceId):
+                NewPeer = aws.get_live_peer(get_peer_az(),'nat',arg.vpc_id)
+                NewPeerId = NewPeer.get('Id', None)
+                NewPeerState = NewPeer.get('State', {}).get('Name', None)
+                if 'running' in NewPeerState and 'new' in aws.get_tag(NewPeerId):
+                    logging.info('Found a new Peer, setting it to standby, then break')
+                    aws.set_tag(NewPeerId,'standby')
+                    break
+
+                elif 'running' in NewPeerState and 'standby' in aws.get_tag(NewPeerId):
+                    logging.info('Breaking from the process - we are all healthy')
+                    break
+                    
+                logging.info('Peer is not in a running state and the host has not been set to failed yet')
+                aws.set_tag(PeerId,'failed')
+                aws.associate_eip(LocalInstanceId,arg.allocation_id)
+                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
+                aws.set_tag(LocalInstanceId,'active')
+                logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId)
+                break
 
             elif 'active' in aws.get_tag(PeerId) and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
                 logging.info('All tests passed, setting myself to standby') 
