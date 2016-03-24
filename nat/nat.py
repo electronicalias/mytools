@@ -69,16 +69,26 @@ shell = cmd.bash()
 hc = cmd.state()
 
 
-PeerAz = aws.get_peer_az(arg.vpc_id,LocalInstanceId)
+
 
 logging.info('PeerAz=%s', PeerAz)
 ''' First thing to do as an action is to set source/dest to False because this will be a NAT instance '''
 aws.source_dest(LocalInstanceId)
 
 ''' Find out what we can about our NAT Peer '''
-Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
-PeerId = Peer.get('Id', None)
-PeerAwsState = Peer.get('State', {}).get('Name', None)
+def get_peer_az():
+    PeerAz = aws.get_peer_az(arg.vpc_id,LocalInstanceId)
+    return PeerAz
+def get_peer():
+    Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
+    return Peer
+def get_peer_id():
+    PeerId = Peer.get('Id', None)
+    return PeerId
+def get_peer_state():
+    PeerAwsState = Peer.get('State', {}).get('Name', None)
+    return PeerAwsState
+
 
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
@@ -90,6 +100,8 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
     for route in table_id.routes:
     	logging.info('route: \n%s', route)
         default = 'NoValue'
+        if get_peer_az() not None:
+            logging.info('THIS IS WHERE I WANT TO DO STUFF')
         if 'locked' in aws.get_tag(LocalInstanceId):
             logging.info('Checked my own tag:HaState and received: locked')
             break
