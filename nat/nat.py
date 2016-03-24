@@ -146,4 +146,12 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 logging.info('All tests passed, setting myself to standby') 
                 aws.set_tag(LocalInstanceId,'standby')
 
+            elif 'new' in aws.get_tag(PeerId) and 'new' in aws.get_tag(LocalInstanceId):
+                logging.info('Found new state, need to promote a host')
+                aws.set_tag(LocalInstanceId,'locked')
+                aws.set_tag(PeerId,'standby')
+                shell.cmd(str('/usr/bin/aws ec2 replace-route --route-table-id ' + table_id.route_table_id + ' --destination-cidr-block 0.0.0.0/0 --instance-id ' + LocalInstanceId + ' --region ' + arg.region_name))
+                aws.set_tag(LocalInstanceId,'active')
+                logging.info('Completed promotion from new state')
+
 logging.info('Completed nat.py functions\n')
