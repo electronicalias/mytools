@@ -93,7 +93,7 @@ def set_active(local_id,remote_id,table_id):
     aws.set_tag(local_id,'active')
     aws.set_tag(remote_id,'active') 
 
-
+logging.info(aws.get_rt_tables(arg.vpc_id,'private'))
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
 

@@ -142,13 +142,13 @@ class aws:
                 {
                     'Name': 'vpc-id',
                     'Values': [
-                        'vpc-ca681faf',
+                        VpcId,
                     ]
                 },
                 {
                     'Name': 'tag:Zone',
                     'Values': [
-                        'private'
+                        Zone,
                     ]
                 }
             ]
