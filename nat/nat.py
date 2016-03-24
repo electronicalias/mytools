@@ -161,7 +161,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 logging.info('Moved NAT due to no Peer Available: %s', LocalInstanceId)
                 break
 
-            elif 'active' in aws.get_tag(get_peer_id()) and 'running' in PeerAwsState and 'new' in aws.get_tag(LocalInstanceId):
+            elif 'active' in aws.get_tag(get_peer_id()) and 'running' in get_peer_state() and 'new' in aws.get_tag(LocalInstanceId):
                 logging.info('All tests passed, setting myself to standby') 
                 aws.set_tag(LocalInstanceId,'standby')
 
