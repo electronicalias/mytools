@@ -77,7 +77,7 @@ def get_peer_az():
     PeerAz = aws.get_peer_az(arg.vpc_id,LocalInstanceId)
     return PeerAz
 def get_peer():
-    Peer = aws.get_instance(PeerAz,'nat',arg.vpc_id)
+    Peer = aws.get_instance(get_peer_az(),'nat',arg.vpc_id)
     return Peer
 def get_peer_id():
     PeerId = get_peer().get('Id', None)
@@ -119,7 +119,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 break
 
             elif 'running' not in get_peer_state() and 'failed' not in aws.get_tag(LocalInstanceId):
-                NewPeer = aws.get_live_peer(PeerAz,'nat',arg.vpc_id)
+                NewPeer = aws.get_live_peer(get_peer_az(),'nat',arg.vpc_id)
                 NewPeerId = NewPeer.get('Id', None)
                 NewPeerState = NewPeer.get('State', {}).get('Name', None)
                 if 'running' in NewPeerState and 'new' in aws.get_tag(NewPeerId):
