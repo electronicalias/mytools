@@ -93,7 +93,6 @@ def set_active(local_id,remote_id,table_id):
     aws.set_tag(local_id,'active')
     aws.set_tag(remote_id,'active') 
 
-logging.info(aws.get_rt_tables(arg.vpc_id,'private'))
 ''' Get the status of our health (the ability to get to 3 public URLs) using the status.py script '''
 LocalHcState = hc.check_ha(LocalIp)
 
@@ -119,7 +118,7 @@ for table in aws.get_rt_tables(arg.vpc_id,'private'):
                 logging.info('Moved NAT due to BlackHole in the route, to: %s', LocalInstanceId)
                 break
 
-            elif 'running' not in PeerAwsState and 'failed' not in aws.get_tag(LocalInstanceId):
+            elif 'running' not in get_peer_state() and 'failed' not in aws.get_tag(LocalInstanceId):
                 NewPeer = aws.get_live_peer(PeerAz,'nat',arg.vpc_id)
                 NewPeerId = NewPeer.get('Id', None)
                 NewPeerState = NewPeer.get('State', {}).get('Name', None)
