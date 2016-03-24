@@ -41,7 +41,7 @@ def state_check():
 aws = cmd.aws(arg.region_name)
 shell = cmd.bash()
 
-PeerAz = aws.get_peer_az(arg.vpc_id,LocalInstanceId)
+PeerAz = aws.get_peer_az(arg.vpc_id,InstanceId)
 
 while True:
     if "OK" not in state_check():
