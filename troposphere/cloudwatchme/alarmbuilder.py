@@ -6,6 +6,9 @@ from troposphere.cloudwatch import Alarm, MetricDimension
 import troposphere.autoscaling as asc
 import troposphere.ec2 as ec2
 import boto3
+from subprocess import call
+from subprocess import Popen, PIPE
+import json
 
 ec2 = boto3.client('elb','us-east-1')
 sns = boto3.client('sns','us-east-1')
@@ -66,6 +69,25 @@ def elb(name, metric_type):
         )
     )
 
+def create_change_set(set_name, stack_name):
+    change_set = cmd(str('/usr/bin/aws cloudformation create-change-set ' \
+    '--change-set-name ' + set_name + '--stack-name ' + stack_name + \
+    '--capabilities CAPABILITY_IAM --region ' + arg.region_name + ' '\
+    '--template-body file://test.json'))
+
+def get_change_set(set_name, stack_name):
+    '''
+    change_set = cmd(str('/usr/bin/aws cloudformation describe-change-set \
+    --change-set-name ' + set_name + ' --stack-name ' + stack_name + ' '\
+    '--region ' + arg.region_name)) 
+    '''
+    p = Popen(str('/usr/bin/aws cloudformation describe-change-set \
+    --change-set-name ' + set_name + ' \
+    --stack-name ' + stack_name + ' \
+    --region ' + arg.region_name), shell=True, stdout=PIPE, stderr=PIPE)
+    out, err = p.communicate() 
+    return out
+
 topic = topic_arn()
 
 t = Template()
@@ -88,6 +110,22 @@ for i in elbs['LoadBalancerDescriptions']:
 
 cfn_body = t.to_json()
 
+def cmd(command):
+    call(command,shell=True)
+
+
+data = json.loads(get_change_set('alarms-test','CloudWatch-Alarms'))
+
+for i in data['Changes']:
+    print i['ResourceChange']['ResourceType']
+    print i['ResourceChange']['PhysicalResourceId']
+    print i['ResourceChange']['Action']
+    print i['ResourceChange']['Replacement']
+
+'''
+change_set = cmd(str('/usr/bin/aws cloudformation create-change-set --change-set-name alarms-test --stack-name CloudWatch-Alarms --capabilities CAPABILITY_IAM --region ' + arg.region_name + ' --template-body file://test.json'))
+print change_set
+
 response = cfn.create_stack(
     StackName='CloudWatch-Alarms',
     TemplateBody=cfn_body,
@@ -107,3 +145,4 @@ response = cfn.create_stack(
 )
 
 print response
+'''
