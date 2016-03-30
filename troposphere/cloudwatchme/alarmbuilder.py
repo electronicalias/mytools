@@ -9,6 +9,7 @@ import boto3
 from subprocess import call
 from subprocess import Popen, PIPE
 import json
+import time
 
 ec2 = boto3.client('elb','us-east-1')
 sns = boto3.client('sns','us-east-1')
@@ -63,24 +64,22 @@ def elb(name, metric_type):
             Statistic=stat_type,
             Period="60",
             EvaluationPeriods="5",
-            Threshold="0.6",
+            Threshold="0.8",
             ComparisonOperator="GreaterThanOrEqualToThreshold",
             AlarmActions=[Ref(sns_topic_name)],
         )
     )
 
 def create_change_set(set_name, stack_name):
-    change_set = cmd(str('/usr/bin/aws cloudformation create-change-set ' \
-    '--change-set-name ' + set_name + '--stack-name ' + stack_name + \
-    '--capabilities CAPABILITY_IAM --region ' + arg.region_name + ' '\
-    '--template-body file://test.json'))
+    p = Popen(str('/usr/bin/aws cloudformation create-change-set \
+    --change-set-name ' + set_name + '\
+    --stack-name ' + stack_name + '\
+    --capabilities CAPABILITY_IAM \
+    --region ' + arg.region_name + ' \
+    --template-body file://cfn_body.json'), shell=True)
+    return p
 
 def get_change_set(set_name, stack_name):
-    '''
-    change_set = cmd(str('/usr/bin/aws cloudformation describe-change-set \
-    --change-set-name ' + set_name + ' --stack-name ' + stack_name + ' '\
-    '--region ' + arg.region_name)) 
-    '''
     p = Popen(str('/usr/bin/aws cloudformation describe-change-set \
     --change-set-name ' + set_name + ' \
     --stack-name ' + stack_name + ' \
@@ -109,23 +108,33 @@ for i in elbs['LoadBalancerDescriptions']:
 # print(t.to_json())
 
 cfn_body = t.to_json()
+cfn_file = open("cfn_body.json", "w")
+cfn_file.write(cfn_body)
+cfn_file.close()
 
-def cmd(command):
-    call(command,shell=True)
+set_name = 'tweet-tweet'
+stack_name = 'CloudWatch-Alarms'
 
+create_change_set(set_name, stack_name)
+time.sleep(10)
 
-data = json.loads(get_change_set('alarms-test','CloudWatch-Alarms'))
+data = json.loads(get_change_set(set_name, stack_name))
 
+print("{0:35} {1:65} {2:25} {3:25}".format("ResourceType", "PhysicalResourceId", "Action", "Replacement"))
 for i in data['Changes']:
-    print i['ResourceChange']['ResourceType']
-    print i['ResourceChange']['PhysicalResourceId']
-    print i['ResourceChange']['Action']
-    print i['ResourceChange']['Replacement']
+    print("{0:35} {1:65} {2:25} {3:25}".format(
+    i['ResourceChange']['ResourceType'],
+    i['ResourceChange']['PhysicalResourceId'],
+    i['ResourceChange']['Action'],
+    i['ResourceChange']['Replacement']))
+
+user_input = raw_input("Please enter Yes if you wish to continue this change, please note anywhere that it says replace. This program will log \
+the request and the user that creates the request. Enter No if you do not wish to continue: ")
+
+if 'Y' not in user_input or 'y' not in user_input or 'Yes' not in user_input or 'yes' not in user_input:
+    exit
 
 '''
-change_set = cmd(str('/usr/bin/aws cloudformation create-change-set --change-set-name alarms-test --stack-name CloudWatch-Alarms --capabilities CAPABILITY_IAM --region ' + arg.region_name + ' --template-body file://test.json'))
-print change_set
-
 response = cfn.create_stack(
     StackName='CloudWatch-Alarms',
     TemplateBody=cfn_body,
