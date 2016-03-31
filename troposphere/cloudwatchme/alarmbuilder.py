@@ -6,14 +6,10 @@ from troposphere.cloudwatch import Alarm, MetricDimension
 import troposphere.autoscaling as asc
 import troposphere.ec2 as ec2
 import boto3
-from subprocess import call
-from subprocess import Popen, PIPE
-import json
 import time
-
-ec2 = boto3.client('elb','us-east-1')
-sns = boto3.client('sns','us-east-1')
-elbs = ec2.describe_load_balancers()
+import cmd
+import string
+import random
 
 
 ''' Collect all of the command line variables '''
@@ -29,6 +25,12 @@ ec2 = boto3.client('elb',arg.region_name)
 sns = boto3.client('sns',arg.region_name)
 cfn = boto3.client('cloudformation',arg.region_name)
 elbs = ec2.describe_load_balancers()
+awscmd = cmd.aws(arg.region_name)
+
+
+''' Define all functions here '''
+def id_gen(size=8, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 def topic_arn():
     arn = sns.list_topics()
@@ -63,32 +65,26 @@ def elb(name, metric_type):
             ],
             Statistic=stat_type,
             Period="60",
-            EvaluationPeriods="5",
-            Threshold="0.8",
+            EvaluationPeriods="3",
+            Threshold="0.7",
             ComparisonOperator="GreaterThanOrEqualToThreshold",
             AlarmActions=[Ref(sns_topic_name)],
         )
     )
 
-def create_change_set(set_name, stack_name):
-    p = Popen(str('/usr/bin/aws cloudformation create-change-set \
-    --change-set-name ' + set_name + '\
-    --stack-name ' + stack_name + '\
-    --capabilities CAPABILITY_IAM \
-    --region ' + arg.region_name + ' \
-    --template-body file://cfn_body.json'), shell=True)
-    return p
-
-def get_change_set(set_name, stack_name):
-    p = Popen(str('/usr/bin/aws cloudformation describe-change-set \
-    --change-set-name ' + set_name + ' \
-    --stack-name ' + stack_name + ' \
-    --region ' + arg.region_name), shell=True, stdout=PIPE, stderr=PIPE)
-    out, err = p.communicate() 
-    return out
+def cfn(stack_name, template):
+    status = awscmd.get_stack_status(stack_name)
+    if 'CREATE_COMPLETE' in status or 'UPDATE_COMPLETE' in status:
+        print("Updating: {}".format(stack_name))
+        awscmd.update_stack(stack_name,template)
+    elif 'No stacks found' in status:
+        print("Creating: {}".format(stack_name))
+        awscmd.create_stack(stack_name,template)
 
 topic = topic_arn()
 
+
+''' Creating the Template here '''
 t = Template()
 
 t.add_description("""\
@@ -105,20 +101,16 @@ for i in elbs['LoadBalancerDescriptions']:
     param(str(i['LoadBalancerName']), 'ELB')
     elb(str(i['LoadBalancerName']), 'Latency')
 
-# print(t.to_json())
-
 cfn_body = t.to_json()
-cfn_file = open("cfn_body.json", "w")
-cfn_file.write(cfn_body)
-cfn_file.close()
+''' Finish Creating the Template Here, the JSON can now be accessed from cfn_body '''
 
-set_name = 'tweet-tweet'
+set_name = 'change-set-' + id_gen()
 stack_name = 'CloudWatch-Alarms'
 
-create_change_set(set_name, stack_name)
+awscmd.create_change_set(stack_name, set_name, cfn_body)
 time.sleep(10)
 
-data = json.loads(get_change_set(set_name, stack_name))
+data = awscmd.describe_change_set(stack_name, set_name)
 
 print("{0:35} {1:65} {2:25} {3:25}".format("ResourceType", "PhysicalResourceId", "Action", "Replacement"))
 for i in data['Changes']:
@@ -131,27 +123,10 @@ for i in data['Changes']:
 user_input = raw_input("Please enter Yes if you wish to continue this change, please note anywhere that it says replace. This program will log \
 the request and the user that creates the request. Enter No if you do not wish to continue: ")
 
-if 'Y' not in user_input or 'y' not in user_input or 'Yes' not in user_input or 'yes' not in user_input:
+if 'Y' not in user_input and 'y' not in user_input and 'Yes' not in user_input and 'yes' not in user_input:
+    print user_input
+    print("This program will now exit")
     exit
-
-'''
-response = cfn.create_stack(
-    StackName='CloudWatch-Alarms',
-    TemplateBody=cfn_body,
-    Capabilities=[
-        'CAPABILITY_IAM',
-    ],
-    Tags=[
-        {
-            'Key': 'Name',
-            'Value': 'CloudWatch-Test'
-        },
-        {
-            'Key': 'RequestedBy',
-            'Value': 'Philip Smith'
-        }
-    ],
-)
-
-print response
-'''
+else:
+    print("Running CloudFormation Update for : {}".format(stack_name))
+    cfn(stack_name,cfn_body)
