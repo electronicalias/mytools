@@ -14,7 +14,7 @@ parser.add_argument('-stp','--sg_type', required=True)
 arg = parser.parse_args()
 
 ec2 = boto3.client('ec2', arg.region_name)
-ec2sg = boto3.resource('ec2')
+ec2sg = boto3.resource('ec2', arg.region_name)
 
 def get_sg():
     result = ec2.describe_security_groups(
