@@ -37,4 +37,6 @@ def get_sg():
         return sg['GroupId']
 print get_sg()
 
-print ec2sg.SecurityGroup(get_sg())
+sgobject = ec2sg.SecurityGroup(get_sg())
+
+print sgobject.get('ip_permissions')
