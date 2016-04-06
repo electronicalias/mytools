@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-rgn','--region_name', required=True)
 parser.add_argument('-zne','--zone_name', required=True)
 parser.add_argument('-num','--net_selection', required=True)
+parser.add_argument('-are','--area_name', required=True)
 arg = parser.parse_args()
 
 ec2 = boto3.client('ec2', arg.region_name)
@@ -23,6 +24,12 @@ def get_subnet():
                 'Name': 'tag:Zone',
                 'Values': [
                     arg.zone_name,
+                ]
+            },
+            {
+                'Name': 'tag:Project',
+                'Values': [
+                    arg.area_name,
                 ]
             }
         ]
