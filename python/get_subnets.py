@@ -27,7 +27,7 @@ def get_subnet():
                 ]
             },
             {
-                'Name': 'tag:Project',
+                'Name': 'tag:Area',
                 'Values': [
                     arg.area_name,
                 ]
