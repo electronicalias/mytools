@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-iid','--instance_id', required=True)
 parser.add_argument('-tak','--tag_key', required=True)
 parser.add_argument('-tav','--tag_value', required=True)
+parser.add_argument('-rgn','--region_name', required=True)
 arg = parser.parse_args()
 
 ec2 = boto3.client('ec2',arg.region_name)
