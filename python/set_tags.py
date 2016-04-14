@@ -16,7 +16,7 @@ arg = parser.parse_args()
 ec2 = boto3.client('ec2',arg.region_name)
 
 def set_tags(instance_id):
-    tags = client.create_tags(
+    tags = ec2.create_tags(
         Resources=[
             instance_id,
         ],
@@ -28,3 +28,5 @@ def set_tags(instance_id):
         ]
     )
     return tags
+
+print set_tags(arg.instance_id)
