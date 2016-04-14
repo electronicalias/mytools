@@ -43,4 +43,23 @@ def run_instance():
     )
     return data['Instances'][0]['InstanceId']
 
-print run_instance()
+def set_tags(instance_id):
+    tags = client.create_tags(
+        Resources=[
+            instance_id,
+        ],
+        Tags=[
+            {
+                'Key': 'Name',
+                'Value': 'test'
+            },
+            {
+                'Key': 'Customer',
+                'Value': 'test-dave'
+            }
+        ]
+    )
+    return tags
+
+instance_id = run_instance()
+print set_tags(instance_id)
