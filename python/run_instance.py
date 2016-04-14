@@ -41,6 +41,6 @@ def run_instance():
         }
        
     )
-    return data
+    return data['Instances'][0]['InstanceId']
 
 print run_instance()
