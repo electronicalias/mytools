@@ -66,7 +66,7 @@ def elb(name, metric_type):
             Statistic=stat_type,
             Period="60",
             EvaluationPeriods="3",
-            Threshold="0.7",
+            Threshold="0.8",
             ComparisonOperator="GreaterThanOrEqualToThreshold",
             AlarmActions=[Ref(sns_topic_name)],
         )
@@ -98,15 +98,17 @@ sns_topic_name = t.add_parameter(Parameter(
 ))
 
 for i in elbs['LoadBalancerDescriptions']:
-    param(str(i['LoadBalancerName']), 'ELB')
-    elb(str(i['LoadBalancerName']), 'Latency')
+    print i['LoadBalancerName']
+    if 'ETWeb-SGTest-110' not in i['LoadBalancerName'] and 'ETWeb-BPMS-111' not in i['LoadBalancerName']:
+        param(str(i['LoadBalancerName']), 'ELB')
+        elb(str(i['LoadBalancerName']), 'Latency')
 
 cfn_body = t.to_json()
 ''' Finish Creating the Template Here, the JSON can now be accessed from cfn_body '''
 
-set_name = 'change-set-' + id_gen()
+# set_name = 'change-set-' + id_gen()
 stack_name = 'CloudWatch-Alarms'
-
+'''
 awscmd.create_change_set(stack_name, set_name, cfn_body)
 time.sleep(10)
 
@@ -119,7 +121,7 @@ for i in data['Changes']:
     i['ResourceChange']['PhysicalResourceId'],
     i['ResourceChange']['Action'],
     i['ResourceChange']['Replacement']))
-
+'''
 user_input = raw_input("Please enter Yes if you wish to continue this change, please note anywhere that it says replace. This program will log \
 the request and the user that creates the request. Enter No if you do not wish to continue: ")
 
