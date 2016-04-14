@@ -1,5 +1,6 @@
 import boto3
 import argparse
+from datetime import date, timedelta
 
 parser = argparse.ArgumentParser(
     prog='Get the ID of a security group',
@@ -11,6 +12,9 @@ parser.add_argument('-rgn','--region_name', required=True)
 parser.add_argument('-cst','--customer_name', required=True)
 arg = parser.parse_args()
 
+
+yesterday = date.today() - timedelta(1)
+yday = yesterday.strftime('%Y%m%d')
 
 ec2 = boto3.client('ec2',arg.region_name)
 
@@ -25,6 +29,12 @@ def get_image():
                 'Name': 'tag:Customer',
                 'Values': [
                     arg.customer_name
+                ]
+            },
+            {
+                'Name': 'tag:Date',
+                'Values': [
+                    yday
                 ]
             }
         ]
