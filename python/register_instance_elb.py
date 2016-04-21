@@ -17,7 +17,7 @@ def register_instance():
         LoadBalancerName=arg.elb_name,
         Instances=[
             {
-                'InstanceId': arg.instanceid
+                'InstanceId': arg.instance_id
             }
         ])
     return data
