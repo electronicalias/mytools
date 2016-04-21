@@ -20,6 +20,6 @@ def register_instance():
                 'InstanceId': arg.instanceid
             }
         ])
-        return data
+    return data
 
 register_instance()
