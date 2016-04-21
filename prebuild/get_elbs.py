@@ -6,16 +6,27 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description='''This tool will require the region and the application name''')
 parser.add_argument('-rgn','--region_name', required=True)
-parser.add_argument('-app','--application_name', required=True)
 arg = parser.parse_args()
 
-
-
-ec2 = boto3.client('elb',arg.region_name)
+elb = boto3.client('elb',arg.region_name)
 
 def get_elb_names():
-    data = ec2.describe_load_balancers()
-    for elb in data['LoadBalancerDescriptions']:
-        print elb['LoadBalancerName']
+    data = elb.describe_load_balancers()
+    return data
 
-get_elb_names()
+def get_elb_tags(elbname):
+    tags = elb.describe_tags(
+        LoadBalancerNames=[
+            elbname,
+        ]
+    )
+    return tags
+
+elbs = get_elb_names()
+
+for result in elbs['LoadBalancerDescriptions']:
+    elbtags = get_elb_tags(result['LoadBalancerName'])
+    for eachtag in elbtags['TagDescriptions']:
+        for atag in eachtag['Tags']:
+            if 'Customer' in atag['Key']:
+                print atag['Value']
