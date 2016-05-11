@@ -35,13 +35,14 @@
                   "name": "FrontEndSubnet",
                   "properties": {
                   "addressPrefix": "[variables('FrontendPrefix')]"
+                  }
                 },
                 {
                   "name": "BackEndSubnet",
                   "properties": {
                   "addressPrefix": "[variables('BackendPrefix')]"
+                  }
                 }
-            }
           ]
         }
       }
