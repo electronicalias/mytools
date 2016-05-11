@@ -7,6 +7,30 @@
 	    "metadata": {
 		"description": "The main CIDR for the network layer"
 	    }
+	},
+	"FrontEndNet1": {
+	    "type": "string",
+	    "metadata": {
+		"description": "A Front End Subnet"
+	    }
+	},
+	"FrontEndNet2": {
+	    "type": "string",
+	    "metadata": {
+		"description": "A Front End Subnet"
+	    }
+	},
+	"BackEndNet1": {
+	    "type": "string",
+	    "metadata": {
+		"description": "A Back End Subnet"
+	    }
+	},
+	"BackEndNet2": {
+	    "type": "string",
+	    "metadata": {
+		"description": "A Back End Subnet"
+	    }
 	}
   },
   "variables": {
@@ -37,15 +61,27 @@
           },
           "subnets": [
                 {
-                  "name": "FrontEndSubnet",
+                  "name": "FrontEndSubnet1",
                   "properties": {
-                    "addressPrefix": "[variables('FrontendPrefix')]"
+                    "addressPrefix": "[parameters('FrontEndNet1')]"
                   }
                 },
                 {
-                  "name": "BackEndSubnet",
+                  "name": "FrontEndSubnet2",
                   "properties": {
-                    "addressPrefix": "[variables('BackendPrefix')]"
+                    "addressPrefix": "[parameters('FrontEndNet2')]"
+                  }
+                },
+                {
+                  "name": "BackEndSubnet1",
+                  "properties": {
+                    "addressPrefix": "[parameters('BackEndNet1')]"
+                  }
+                },
+                {
+                  "name": "BackEndSubnet2",
+                  "properties": {
+                    "addressPrefix": "[parameters('BackEndNet2')]"
                   }
                 }
           ]
