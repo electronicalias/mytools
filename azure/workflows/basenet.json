@@ -27,11 +27,6 @@
         "type": "Microsoft.Network/virtualNetworks",
         "name": "[variables('VNetName')]",
         "location": "[resourceGroup().location]",
-        "dependsOn": [
-          "[concat('Microsoft.Network/networkSecurityGroups/', variables('FeNsgname'))]",
-          "[concat('Microsoft.Network/networkSecurityGroups/', variables('AppNsgname'))]",
-          "[concat('Microsoft.Network/networkSecurityGroups/', variables('BeNsgname'))]"
-        ],
         "properties": {
           "addressSpace": {
             "addressPrefixes": [
