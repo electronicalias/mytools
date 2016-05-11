@@ -12,10 +12,10 @@
 	"FESubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('FESubnetName'))]",
 	"AppSubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('AppSubnetName'))]",
 	"BESubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('BESubnetName'))]",
-	"VNetAddressPrefix": "10.1.0.0/16",
-	"FrontendPrefix": "10.1.0.0/24",
-	"AppPrefix": "10.1.1.0/24",
-	"BackendPrefix": "10.1.2.0/24",
+	"VNetAddressPrefix": "10.23.0.0/16",
+	"FrontendPrefix": "10.23.0.0/24",
+	"AppPrefix": "10.23.1.0/24",
+	"BackendPrefix": "10.23.2.0/24",
 	"apiVer": "2015-06-15"
   },
   "resources": [
@@ -31,11 +31,16 @@
             ]
           },
           "subnets": [
-          	{
-              "name": "FrontEndSubnet",
-              "properties": {
-                "addressPrefix": "[variables('FrontendPrefix')]"
-              }
+                {
+                  "name": "FrontEndSubnet",
+                  "properties": {
+                  "addressPrefix": "[variables('FrontendPrefix')]"
+                },
+                {
+                  "name": "BackEndSubnet",
+                  "properties": {
+                  "addressPrefix": "[variables('BackendPrefix')]"
+                }
             }
           ]
         }
