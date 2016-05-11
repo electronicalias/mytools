@@ -16,9 +16,6 @@
 	"FrontendPrefix": "10.1.0.0/24",
 	"AppPrefix": "10.1.1.0/24",
 	"BackendPrefix": "10.1.2.0/24",
-	"FeNsgname": "FrontendNSG",
-	"AppNsgname": "AppNSG",
-	"BeNsgname": "BackendNSG",
 	"apiVer": "2015-06-15"
   },
   "resources": [
