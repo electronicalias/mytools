@@ -1,0 +1,72 @@
+chema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+  "variables": {
+	"VNetName": "multiTierVNet",
+	"FESubnetName": "FrontendSubnet",
+	"AppSubnetName": "AppSubnet",
+	"BESubnetName": "BackendSubnet",
+	"vnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('VNetName'))]",
+	"FESubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('FESubnetName'))]",
+	"AppSubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('AppSubnetName'))]",
+	"BESubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('BESubnetName'))]",
+	"VNetAddressPrefix": "10.1.0.0/16",
+	"FrontendPrefix": "10.1.0.0/24",
+	"AppPrefix": "10.1.1.0/24",
+	"BackendPrefix": "10.1.2.0/24",
+	"FeNsgname": "FrontendNSG",
+	"AppNsgname": "AppNSG",
+	"BeNsgname": "BackendNSG",
+	"apiVer": "2015-06-15"
+  },
+  "resources": [
+	  {
+        "apiVersion": "[variables('apiVer')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "name": "[variables('VNetName')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[concat('Microsoft.Network/networkSecurityGroups/', variables('FeNsgname'))]",
+          "[concat('Microsoft.Network/networkSecurityGroups/', variables('AppNsgname'))]",
+          "[concat('Microsoft.Network/networkSecurityGroups/', variables('BeNsgname'))]"
+        ],
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "[variables('VNetAddressPrefix')]"
+            ]
+          },
+          "subnets": [
+            {
+              "name": "[variables('FESubnetName')]",
+              "properties": {
+                "addressPrefix": "[variables('FrontendPrefix')]",
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('FeNsgname'))]"
+                }
+              }
+            },
+            {
+              "name": "[variables('AppSubnetName')]",
+              "properties": {
+                "addressPrefix": "[variables('AppPrefix')]",
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('AppNsgname'))]"
+                }
+              }
+            },
+            {
+              "name": "[variables('BESubnetName')]",
+              "properties": {
+                "addressPrefix": "[variables('BackendPrefix')]",
+                "networkSecurityGroup": {
+                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('BeNsgname'))]"
+                }
+              }
+            }
+          ]
+        }
+      }
+  ]
+}
