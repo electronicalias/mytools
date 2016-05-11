@@ -2,6 +2,12 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+	"NetworkCidr": {
+	    "type": "string",
+	    "metadata": {
+		"description": "The main CIDR for the network layer"
+	    }
+	}
   },
   "variables": {
 	"VNetName": "multiTierVNet",
@@ -12,7 +18,6 @@
 	"FESubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('FESubnetName'))]",
 	"AppSubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('AppSubnetName'))]",
 	"BESubnetRef": "[concat(variables('vnetID'),'/subnets/', variables('BESubnetName'))]",
-	"VNetAddressPrefix": "10.23.0.0/16",
 	"FrontendPrefix": "10.23.0.0/24",
 	"AppPrefix": "10.23.1.0/24",
 	"BackendPrefix": "10.23.2.0/24",
@@ -27,20 +32,20 @@
         "properties": {
           "addressSpace": {
             "addressPrefixes": [
-              "[variables('VNetAddressPrefix')]"
+              "[parameters('NetworkCidr')]"
             ]
           },
           "subnets": [
                 {
                   "name": "FrontEndSubnet",
                   "properties": {
-                  "addressPrefix": "[variables('FrontendPrefix')]"
+                    "addressPrefix": "[variables('FrontendPrefix')]"
                   }
                 },
                 {
                   "name": "BackEndSubnet",
                   "properties": {
-                  "addressPrefix": "[variables('BackendPrefix')]"
+                    "addressPrefix": "[variables('BackendPrefix')]"
                   }
                 }
           ]
