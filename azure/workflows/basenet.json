@@ -26,7 +26,7 @@
         "apiVersion": "[variables('apiVer')]",
         "type": "Microsoft.Network/virtualNetworks",
         "name": "[variables('VNetName')]",
-        "location": "[westeurope]",
+        "location": "westeurope",
         "properties": {
           "addressSpace": {
             "addressPrefixes": [
