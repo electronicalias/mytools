@@ -77,12 +77,6 @@
                   "properties": {
                     "addressPrefix": "[parameters('BackEndNet1')]"
                   }
-                },
-                {
-                  "name": "BackEndSubnet2",
-                  "properties": {
-                    "addressPrefix": "[parameters('BackEndNet2')]"
-                  }
                 }
           ]
         }
