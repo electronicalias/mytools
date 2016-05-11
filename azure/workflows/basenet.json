@@ -31,6 +31,12 @@
             ]
           },
           "subnets": [
+          	{
+              "name": "FrontEndSubnet",
+              "properties": {
+                "addressPrefix": "[variables('FrontendPrefix')]"
+              }
+            }
           ]
         }
       }
