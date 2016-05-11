@@ -26,7 +26,7 @@
         "apiVersion": "[variables('apiVer')]",
         "type": "Microsoft.Network/virtualNetworks",
         "name": "[variables('VNetName')]",
-        "location": "[resourceGroup().location]",
+        "location": "[westeurope]",
         "properties": {
           "addressSpace": {
             "addressPrefixes": [
@@ -34,33 +34,6 @@
             ]
           },
           "subnets": [
-            {
-              "name": "[variables('FESubnetName')]",
-              "properties": {
-                "addressPrefix": "[variables('FrontendPrefix')]",
-                "networkSecurityGroup": {
-                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('FeNsgname'))]"
-                }
-              }
-            },
-            {
-              "name": "[variables('AppSubnetName')]",
-              "properties": {
-                "addressPrefix": "[variables('AppPrefix')]",
-                "networkSecurityGroup": {
-                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('AppNsgname'))]"
-                }
-              }
-            },
-            {
-              "name": "[variables('BESubnetName')]",
-              "properties": {
-                "addressPrefix": "[variables('BackendPrefix')]",
-                "networkSecurityGroup": {
-                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('BeNsgname'))]"
-                }
-              }
-            }
           ]
         }
       }
