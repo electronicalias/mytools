@@ -1,8 +1,6 @@
 param (
     [string]$username = $(throw "-username is required"),
-    [string]$password = $(throw "-password is required"),
-    [string]$domainname = $(throw "-domainname is required"),
-    [string]$oustring = $(throw "-oustring is required")
+    [string]$password = $(throw "-password is required")
     )
 
 $passString = $password | ConvertTo-SecureString -asPlainText -Force
