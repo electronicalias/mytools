@@ -1,0 +1,10 @@
+MANIFEST.in
+README.rst
+cfnlambda.py
+setup.cfg
+setup.py
+cfnlambda.egg-info/PKG-INFO
+cfnlambda.egg-info/SOURCES.txt
+cfnlambda.egg-info/dependency_links.txt
+cfnlambda.egg-info/requires.txt
+cfnlambda.egg-info/top_level.txt
