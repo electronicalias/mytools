@@ -1,0 +1,178 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+
+	"Description" : "Networking Template for Siemens Digitial Grid Services with dynamic subnets",
+
+	"Metadata" : {
+		"Client" : "Siemens",
+		"Author" : "Nordcloud",
+		"Project" : "Digitial Grid Services"
+	},
+
+	"Parameters": {
+		"VpcIdentification" : {
+			"Description" : "VpcId used to create subnets",
+			"Type": "String",
+			"Default": "vpc-350ade51"
+		}
+	},
+
+	"Mappings": {
+
+	},
+
+	"Conditions": {
+
+	},
+
+	"Resources": {
+
+		"LambdaExecutionRole": {
+
+  			"Type": "AWS::IAM::Role",
+  			"Properties": {
+    			"AssumeRolePolicyDocument": {
+      				"Version": "2012-10-17",
+      				"Statement": [{
+        				"Effect": "Allow",
+        				"Principal": {"Service": ["lambda.amazonaws.com"]},
+        				"Action": ["sts:AssumeRole"]
+      				}]
+    			},
+    			"Path": "/",
+    			"Policies": [{
+      				"PolicyName": "root",
+      				"PolicyDocument": {
+        				"Version": "2012-10-17",
+        				"Statement": [
+							{
+          						"Effect": "Allow",
+          						"Action": ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents"],
+          						"Resource": "arn:aws:logs:*:*:*"
+        					},
+        				    {
+          						"Effect": "Allow",
+          						"Action": [ "ec2:Describe*" ],
+          						"Resource": "*"
+        				    },
+        				    {
+          						"Effect": "Allow",
+          						"Action": [ "sdb:*" ],
+          						"Resource": "*"
+        				    }
+        				]
+      				}
+    			}]
+  			}
+		},
+
+		"SubnetCidrFunction": {
+        	"Type": "AWS::Lambda::Function",
+  			"Properties": {
+    			"Code": {
+      				"S3Bucket": "siemens-dgs-deployment",
+      				"S3Key": "lambdas/subnetter.zip"
+    			},
+    			"Handler": "subnetter.lambda_handler",
+    			"Runtime": "python2.7",
+    			"Timeout": "30",
+    			"Role": { "Fn::GetAtt" : ["LambdaExecutionRole", "Arn"] }
+  			}
+		},
+
+		"Subnet1Cidr": {
+  			"Type": "Custom::SubnetInfo",
+  			"Properties": {
+    			"ServiceToken": { "Fn::GetAtt" : ["SubnetCidrFunction", "Arn"] },
+    			"Region" : { "Ref": "AWS::Region" },
+    			"VpcCidr" : "10.0.0.0/16",
+    			"VpcId" : { "Ref": "VpcIdentification" },
+    			"Mask" : "24"
+  			}
+		},
+
+		"Subnet2Cidr": {
+  			"Type": "Custom::SubnetInfo",
+  			"Properties": {
+    			"ServiceToken": { "Fn::GetAtt" : ["SubnetCidrFunction", "Arn"] },
+    			"Region" : { "Ref": "AWS::Region" },
+    			"VpcCidr" : "10.0.0.0/16",
+    			"VpcId" : { "Ref": "VpcIdentification" },
+    			"Mask" : "24"
+  			}
+		},
+
+		"Subnet3Cidr": {
+  			"Type": "Custom::SubnetInfo",
+  			"Properties": {
+    			"ServiceToken": { "Fn::GetAtt" : ["SubnetCidrFunction", "Arn"] },
+    			"Region" : { "Ref": "AWS::Region" },
+    			"VpcCidr" : "10.0.0.0/16",
+    			"VpcId" : { "Ref": "VpcIdentification" },
+    			"Mask" : "24"
+  			}
+		},
+
+		"PublicSubnet1": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": { "Fn::Select": [ "0", { "Fn::GetAZs" : "" } ] },
+				"CidrBlock": { "Fn::GetAtt": [ "Subnet1Cidr", "SubnetCidrBlock" ] },
+				"Tags": [
+					{
+						"Key": "Name",
+						"Value": "Test-Lambda-Subnet-1"
+					}
+				],
+				"VpcId": { "Ref": "VpcIdentification" }
+			}
+		},
+
+		"PublicSubnet2": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": { "Fn::Select": [ "1", { "Fn::GetAZs" : "" } ] },
+				"CidrBlock": { "Fn::GetAtt": [ "Subnet2Cidr", "SubnetCidrBlock" ] },
+				"Tags": [
+					{
+						"Key": "Name",
+						"Value": "Test-Lambda-Subnet-2"
+					}
+				],
+				"VpcId": { "Ref": "VpcIdentification" }
+			}
+		},
+
+		"PublicSubnet3": {
+			"Type": "AWS::EC2::Subnet",
+			"Properties": {
+				"AvailabilityZone": { "Fn::Select": [ "2", { "Fn::GetAZs" : "" } ] },
+				"CidrBlock": { "Fn::GetAtt": [ "Subnet3Cidr", "SubnetCidrBlock" ] },
+				"Tags": [
+					{
+						"Key": "Name",
+						"Value": "Test-Lambda-Subnet-3"
+					}
+				],
+				"VpcId": { "Ref": "VpcIdentification" }
+			}
+		}
+	},
+
+	"Outputs": {
+
+		"PublicSubnet1" : {
+			"Value" : { "Ref": "PublicSubnet1" }
+		},
+
+		"PublicSubnet2" : {
+			"Value" : { "Ref": "PublicSubnet2" }
+		},
+
+		"PublicSubnet3" : {
+			"Value" : { "Ref": "PublicSubnet3" }
+		}
+
+
+	}
+}
