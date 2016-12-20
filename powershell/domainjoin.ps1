@@ -15,5 +15,3 @@ Add-Computer -NewName $hostname -domainname $domainname -OUPath $oustring -Crede
 $GroupObj = [ADSI]"WinNT://./Administrators,group"
 $GroupObj.Add("WinNT://$domainname/$groupname")
 $GroupObj.Add("WinNT://$domainname/Operation Teams")
-
-Restart-Computer -Force
